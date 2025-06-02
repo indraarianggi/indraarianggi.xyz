@@ -44,74 +44,58 @@
 }
 
 :root {
+  --background: hsl(0 0% 100%);
+  --foreground: hsl(222.2 84% 4.9%);
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(222.2 84% 4.9%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(222.2 84% 4.9%);
+  --primary: hsl(173 80% 25%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(160 84% 39%);
+  --secondary-foreground: hsl(0 0% 100%);
+  --accent: hsl(24 95% 53%);
+  --accent-foreground: hsl(0 0% 100%);
+  --muted: hsl(210 40% 98%);
+  --muted-foreground: hsl(215.4 16.3% 46.9%);
+  --destructive: hsl(0 84.2% 60.2%);
+  --destructive-foreground: hsl(210 40% 98%);
+  --border: hsl(214.3 31.8% 91.4%);
+  --input: hsl(214.3 31.8% 91.4%);
+  --ring: hsl(173 80% 25%);
   --radius: 0.5rem;
-  --background: oklch(100% 0 0);
-  --foreground: oklch(5% 0 0);
-  --card: oklch(100% 0 0);
-  --card-foreground: oklch(5% 0 0);
-  --popover: oklch(100% 0 0);
-  --popover-foreground: oklch(5% 0 0);
-  --primary: oklch(45% 0.12 195);
-  --primary-foreground: oklch(100% 0 0);
-  --secondary: oklch(45% 0.14 160);
-  --secondary-foreground: oklch(100% 0 0);
-  --muted: oklch(98% 0.02 240);
-  --muted-foreground: oklch(47% 0 0);
-  --accent: oklch(65% 0.15 30);
-  --accent-foreground: oklch(100% 0 0);
-  --destructive: oklch(60% 0.2 30);
-  --destructive-foreground: oklch(98% 0.02 240);
-  --border: oklch(91% 0 0);
-  --input: oklch(91% 0 0);
-  --ring: oklch(45% 0.12 195);
-  --chart-1: oklch(45% 0.12 195);
-  --chart-2: oklch(45% 0.14 160);
-  --chart-3: oklch(65% 0.15 30);
-  --chart-4: oklch(55% 0.12 195);
-  --chart-5: oklch(55% 0.14 160);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --chart-1: hsl(173 80% 25%);
+  --chart-2: hsl(160 84% 39%);
+  --chart-3: hsl(24 95% 53%);
+  --chart-4: hsl(173 60% 45%);
+  --chart-5: hsl(160 70% 55%);
 }
 
 .dark {
-  --background: oklch(5% 0 0);
-  --foreground: oklch(98% 0.02 240);
-  --card: oklch(5% 0 0);
-  --card-foreground: oklch(98% 0.02 240);
-  --popover: oklch(5% 0 0);
-  --popover-foreground: oklch(98% 0.02 240);
-  --primary: oklch(65% 0.12 195);
-  --primary-foreground: oklch(5% 0 0);
-  --secondary: oklch(65% 0.12 160);
-  --secondary-foreground: oklch(5% 0 0);
-  --muted: oklch(17% 0 0);
-  --muted-foreground: oklch(65% 0 0);
-  --accent: oklch(75% 0.12 30);
-  --accent-foreground: oklch(5% 0 0);
-  --destructive: oklch(31% 0.15 30);
-  --destructive-foreground: oklch(98% 0.02 240);
-  --border: oklch(17% 0 0);
-  --input: oklch(17% 0 0);
-  --ring: oklch(65% 0.12 195);
-  --chart-1: oklch(65% 0.12 195);
-  --chart-2: oklch(65% 0.12 160);
-  --chart-3: oklch(75% 0.12 30);
-  --chart-4: oklch(55% 0.12 195);
-  --chart-5: oklch(60% 0.12 160);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: hsl(222.2 84% 4.9%);
+  --foreground: hsl(210 40% 98%);
+  --card: hsl(222.2 84% 4.9%);
+  --card-foreground: hsl(210 40% 98%);
+  --popover: hsl(222.2 84% 4.9%);
+  --popover-foreground: hsl(210 40% 98%);
+  --primary: hsl(173 60% 45%);
+  --primary-foreground: hsl(222.2 84% 4.9%);
+  --secondary: hsl(160 70% 55%);
+  --secondary-foreground: hsl(222.2 84% 4.9%);
+  --accent: hsl(24 85% 63%);
+  --accent-foreground: hsl(222.2 84% 4.9%);
+  --muted: hsl(217.2 32.6% 17.5%);
+  --muted-foreground: hsl(215 20.2% 65.1%);
+  --destructive: hsl(0 62.8% 30.6%);
+  --destructive-foreground: hsl(210 40% 98%);
+  --border: hsl(217.2 32.6% 17.5%);
+  --input: hsl(217.2 32.6% 17.5%);
+  --ring: hsl(173 60% 45%);
+  --chart-1: hsl(173 60% 45%);
+  --chart-2: hsl(160 70% 55%);
+  --chart-3: hsl(24 85% 63%);
+  --chart-4: hsl(173 50% 55%);
+  --chart-5: hsl(160 60% 65%);
 }
 
 @layer base {
@@ -200,9 +184,11 @@
   }
 }
 
-/* Smooth transitions for theme switching */
-* {
-  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+@layer theme {
+  /* Smooth transitions for theme switching */
+  * {
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+  }
 }
 
 /* Dark mode specific styles */
