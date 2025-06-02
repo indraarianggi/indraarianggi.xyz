@@ -1,0 +1,7 @@
+.next
+.cache
+bun.lock
+public
+node_modules
+next-env.d.ts
+next.config.mjs
