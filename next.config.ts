@@ -6,6 +6,8 @@ const nextConfig: NextConfig = {
   // It exports all pages as static HTML/CSS/JS files that can be deployed anywhere
   // without requiring a Node.js server
   output: "export",
+  trailingSlash: true,
+  skipTrailingSlashRedirect: true,
 };
 
 export default nextConfig;
