@@ -1,9 +1,7 @@
-import { ReactElement } from "react";
-
 export type Post = {
   title: string;
   slug: string;
-  content: ReactElement;
+  content: string;
   readingTime: {
     minutes: number;
     text: string;
@@ -12,10 +10,10 @@ export type Post = {
     created: string;
     updated: string;
   };
-  author: {
+  author?: {
     name: string;
     avatar: string;
-    title: string;
+    occupation: string;
   };
   coverImage?: string;
   excerpt?: string;

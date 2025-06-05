@@ -3,10 +3,6 @@ title: "Basic Writing and Formatting Syntax"
 time:
   created: "2024-09-18T19:24:46.167Z"
   updated: "2024-10-17T09:56:06.854Z"
-author:
-  name: "Indra Arianggi"
-  avatar: "/images/profile-avatar.png"
-  title: "Full Stack Developer"
 coverImage: "/placeholder.svg?height=600&width=1200"
 excerpt: "Practical techniques for improving React application performance and user experience through optimization strategies."
 tags:
@@ -14,96 +10,202 @@ tags:
   - Performance
   - Optimization
   - Web Development
-published: true
 ---
 
-# Heading 1
+# Introduction
 
-## Heading 2
+Markdown and Mdx parsing is supported via `unified`, and other remark and rehype packages. `next-mdx-remote` allows us to parse `.mdx` and `.md` files in a more flexible manner without touching webpack.
 
-### Heading 3
+GitHub flavored markdown is used. `mdx-prism` provides syntax highlighting capabilities for code blocks. Here's a demo of how everything looks.
 
-#### Heading 4
+The following markdown cheatsheet is adapted from: https://guides.github.com/features/mastering-markdown/
 
-##### Heading 5
+# What is Markdown?
 
-###### Heading 6
+Markdown is a way to style text on the web. You control the display of the document; formatting words as bold or italic, adding images, and creating lists are just a few of the things we can do with Markdown. Mostly, Markdown is just regular text with a few non-alphabetic characters thrown in, like `#` or `*`.
 
----
+# Syntax guide
 
-**Bold text**  
-*Italic text*  
-~~Strikethrough text~~
+Here’s an overview of Markdown syntax that you can use anywhere on GitHub.com or in your own text files.
 
-A [link to OpenAI](https://openai.com)
+## Headers
 
-> This is a blockquote.  
-> It can span multiple lines.
+```
+# This is a h1 tag
 
----
+## This is a h2 tag
+
+#### This is a h4 tag
+```
+
+# This is a h1 tag
+
+## This is a h2 tag
+
+#### This is a h4 tag
+
+## Emphasis
+
+```
+_This text will be italic_
+
+**This text will be bold**
+
+_You **can** combine them_
+```
+
+_This text will be italic_
+
+**This text will be bold**
+
+_You **can** combine them_
 
 ## Lists
 
-### Unordered List
+### Unordered
 
-- Item One
-  - Nested Item One
-  - Nested Item Two
-- Item Two
-
-### Ordered List
-
-1. First item
-2. Second item
-   1. Sub-item one
-   2. Sub-item two
-
----
-
-## Code
-
-Inline code: `console.log("Hello, world!")`
-
-### Block code
-
-```javascript
-function greet(name) {
-  console.log(`Hello, ${name}!`);
-}
-greet("World");
+```
+- Item 1
+- Item 2
+  - Item 2a
+  - Item 2b
 ```
 
----
+- Item 1
+- Item 2
+  - Item 2a
+  - Item 2b
+
+### Ordered
+
+```
+1. Item 1
+1. Item 2
+1. Item 3
+   1. Item 3a
+   1. Item 3b
+```
+
+1. Item 1
+1. Item 2
+1. Item 3
+   1. Item 3a
+   1. Item 3b
 
 ## Images
 
-![MDX Logo](/images/mdx-logo.png)
+```
+![GitHub Logo](https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png)
+Format: ![Alt Text](url)
+```
 
----
+![GitHub Logo](https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png)
+
+## Links
+
+```
+http://github.com - automatic!
+[GitHub](http://github.com)
+```
+
+http://github.com - automatic!
+[GitHub](http://github.com)
+
+## Blockquotes
+
+```
+As Kanye West said:
+
+> We're living the future so
+> the present is our past.
+```
+
+As Kanye West said:
+
+> We're living the future so
+> the present is our past.
+
+## Inline code
+
+```
+I think you should use an
+`<addr>` element here instead.
+```
+
+I think you should use an
+`<addr>` element here instead.
+
+## Syntax highlighting
+
+Here’s an example of how you can use syntax highlighting with [GitHub Flavored Markdown](https://help.github.com/articles/basic-writing-and-formatting-syntax/):
+
+````
+```js:fancyAlert.js
+function fancyAlert(arg) {
+  if (arg) {
+    $.facebox({ div: '#foo' })
+  }
+}
+```
+````
+
+And here's how it looks - nicely colored with styled code titles!
+
+```js:fancyAlert.js
+function fancyAlert(arg) {
+  if (arg) {
+    $.facebox({ div: '#foo' })
+  }
+}
+```
+
+## Footnotes
+
+```
+Here is a simple footnote[^1]. With some additional text after it.
+
+[^1]: My reference.
+```
+
+Here is a simple footnote[^1]. With some additional text after it.
+
+[^1]: My reference.
+
+## Task Lists
+
+```
+- [x] list syntax required (any unordered or ordered list supported)
+- [x] this is a complete item
+- [ ] this is an incomplete item
+```
+
+- [x] list syntax required (any unordered or ordered list supported)
+- [x] this is a complete item
+- [ ] this is an incomplete item
 
 ## Tables
 
-| Syntax | Description |
-|--------|-------------|
-| Header | Title       |
-| Cell   | Content     |
+You can create tables by assembling a list of words and dividing them with hyphens `-` (for the first row), and then separating each column with a pipe `|`:
 
----
+```
+| First Header                | Second Header                |
+| --------------------------- | ---------------------------- |
+| Content from cell 1         | Content from cell 2          |
+| Content in the first column | Content in the second column |
+```
 
-## Horizontal Rule
+| First Header                | Second Header                |
+| --------------------------- | ---------------------------- |
+| Content from cell 1         | Content from cell 2          |
+| Content in the first column | Content in the second column |
 
----
+## Strikethrough
+
+Any word wrapped with two tildes (like `~~this~~`) will appear ~~crossed out~~.
 
 ## MDX Component Usage Example
-
-import MyComponent from "@/components/MyComponent"
+Without import, will be converted by mdx-component.tsx
 
 <Image src='https://www.uisnippet.dev/gyoza-shop.jpg' alt='Placeholder' caption='Gyoza Shop from uisnippet.dev'/>
 
 ---
-
-## HTML in MDX
-
-<div style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '5px' }}>
-  <strong>This is raw HTML inside MDX.</strong>
-</div>
