@@ -1,4 +1,16 @@
-export default function BlogPage() {
+import { NoPosts } from "@/components/no-posts";
+import { PostCard } from "@/components/post-card";
+import { getAllPosts } from "@/lib/mdx";
+
+export default async function BlogPage() {
+  const posts = await getAllPosts().sort((a, b) => {
+    return (
+      new Date(b.time.created).getTime() - new Date(a.time.created).getTime()
+    );
+  });
+
+  console.log({ posts });
+
   return (
     <div className="min-h-screen">
       {/* Hero Section with Gradient Background */}
@@ -35,6 +47,36 @@ export default function BlogPage() {
           </div>
         </div>
       </section>
+
+      {/* Blog Posts Section */}
+      <div className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto max-w-6xl">
+            {/* TODO: Search and Filter */}
+
+            {/* TODO: Featured Posts */}
+
+            {/* Posts Grid */}
+            <div className="grid gap-6 md:grid-cols-2">
+              {posts.length === 0 ? (
+                <NoPosts className="md:col-span-2" />
+              ) : null}
+
+              {posts.map((post) => (
+                <PostCard
+                  key={post.slug}
+                  title={post.title}
+                  date={post.time.created}
+                  readingTime={post.readingTime}
+                  slug={post.slug}
+                  excerpt={post.excerpt}
+                  tags={post.tags}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
