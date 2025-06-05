@@ -13,6 +13,10 @@ import { MDX } from "@/components/mdx-component";
 const posts = getAllPosts();
 
 export async function generateStaticParams() {
+  if (!posts || posts.length === 0) {
+    return [{ slug: "not-found" }];
+  }
+
   return posts.map((post) => ({
     slug: `${post.slug}`,
   }));
