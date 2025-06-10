@@ -81,10 +81,10 @@ export function TableOfContents() {
             key={heading.id}
             href={`#${heading.id}`}
             className={cn(
-              "hover:text-primary block py-1 transition-colors",
+              "hover:text-secondary block py-1 transition-colors",
               heading.level === 3 && "pl-4",
               activeId === heading.id
-                ? "text-primary font-medium"
+                ? "text-secondary font-medium"
                 : "text-muted-foreground"
             )}
             onClick={(e) => {

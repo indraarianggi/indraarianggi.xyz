@@ -20,14 +20,14 @@ const components: MDXComponents = {
       target="_blank"
       rel="noopener noreferrer nofollow"
       href={href}
-      className="text-muted decoration-gray-a4 inline-flex items-center gap-1 underline decoration-1 underline-offset-2"
+      className="text-secondary inline-flex items-center gap-1 underline decoration-1 underline-offset-2"
     >
       {children}
     </Link>
   ),
   blockquote: ({ className, ...props }: React.HTMLAttributes<HTMLElement>) => (
     <blockquote
-      className={cn("border-gray-4 text-muted mt-6 border-l-2 pl-6", className)}
+      className={cn("mt-6 border-l-4 border-gray-200 pl-6", className)}
       {...props}
     />
   ),
@@ -55,17 +55,17 @@ const components: MDXComponents = {
     />
   ),
   ol: ({ className, ...props }: React.HTMLAttributes<HTMLOListElement>) => (
-    <ol className={cn("mt-2 ml-2 list-decimal", className)} {...props} />
+    <ol className={cn("mt-2 ml-2", className)} {...props} />
   ),
   ul: ({ className, ...props }: React.HTMLAttributes<HTMLUListElement>) => (
-    <ul className={cn("mt-2 ml-2 list-disc", className)} {...props} />
+    <ul className={cn("mt-2 ml-2", className)} {...props} />
   ),
   li: ({
     className,
     children,
     ...props
   }: React.HTMLAttributes<HTMLLIElement>) => (
-    <li className={cn("mt-2 ml-2 list-item", className)} {...props}>
+    <li className={cn("mt-2 ml-2", className)} {...props}>
       {children}
     </li>
   ),
@@ -90,12 +90,9 @@ export function MDX(props: JSX.IntrinsicAttributes & MDXRemoteProps) {
             [
               rehypePrettyCode,
               {
-                theme: {
-                  dark: "github-dark",
-                  light: "github-light",
-                },
+                theme: "aurora-x",
                 keepBackground: false,
-                defaultLang: "tsx",
+                defaultLang: "plaintext",
               },
             ],
           ] as PluggableList,

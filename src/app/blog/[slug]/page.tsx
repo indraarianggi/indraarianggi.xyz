@@ -4,11 +4,11 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Calendar, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { MDX } from "@/components/mdx-component";
 import { ShareButtons } from "@/components/share-buttons";
 import { TableOfContents } from "@/components/table-of-contents";
 import { author } from "@/contents/author";
 import { getAllPosts } from "@/lib/mdx";
-import { MDX } from "@/components/mdx-component";
 
 const posts = getAllPosts();
 
