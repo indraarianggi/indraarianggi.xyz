@@ -1,5 +1,13 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Astro Migration Documentation
+
+Comprehensive documentation for migrating this project from Next.js to Astro:
+
+- **[MIGRATION_OVERVIEW.md](./MIGRATION_OVERVIEW.md)** - High-level migration overview and current state
+- **[ASTRO_ARCHITECTURE.md](./ASTRO_ARCHITECTURE.md)** - Target Astro architecture and technical decisions
+- **[MIGRATION_PLAN.md](./MIGRATION_PLAN.md)** - 20-phase step-by-step migration plan with verification gates
+
 ## Getting Started
 
 First, run the development server:
