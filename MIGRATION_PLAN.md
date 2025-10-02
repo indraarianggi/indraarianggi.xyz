@@ -1112,44 +1112,131 @@ Fix regressions; revert last commits if necessary
 
 ---
 
-## Phase 20 — Deployment preparation
+## Phase 20 — Deployment preparation (VPS via GitHub Actions)
 
 ### Objective
 
-Prepare and document deployment to static hosting.
+Update GitHub Actions workflow for Astro deployment to VPS.
+
+### Key Changes
+
+- **Build output**: Change from `out/` (Next.js) to `dist/` (Astro)
+- **Build command**: Already using `bun run build` ✓
+- **Package manager**: Already using Bun ✓
+
+### Files to modify
+
+- `.github/workflows/deploy.yml`
 
 ### Actions
 
-1. Choose hosting (Netlify, Cloudflare Pages, GitHub Pages, Vercel)
-2. Document CI steps:
-   - `bun install`
-   - `bun run build`
-   - Publish `./dist`
+1. **Update the SCP action source path** (line 36 in deploy.yml):
 
-### Example Netlify config (`netlify.toml`)
+```yaml
+# Before (Next.js)
+source: "out/*"
 
-```toml
-[build]
-  command = "bun install && bun run build"
-  publish = "dist"
-
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+# After (Astro)
+source: "dist/*"
 ```
+
+2. **Optional: Add cache for faster builds**:
+
+```yaml
+- name: Cache Bun dependencies
+  uses: actions/cache@v3
+  with:
+    path: ~/.bun/install/cache
+    key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+    restore-keys: |
+      ${{ runner.os }}-bun-
+```
+
+3. **Optional: Add Astro check before build**:
+
+```yaml
+- name: Type Check
+  run: |
+    bunx astro check
+```
+
+### Complete updated workflow
+
+See [DEPLOYMENT_VPS.md](./DEPLOYMENT_VPS.md) for the complete updated workflow file.
+
+### VPS Setup Notes
+
+**Nginx/Apache configuration remains the same** since Astro generates static HTML/CSS/JS just like Next.js static export.
+
+Example Nginx config (should already be configured):
+
+```nginx
+server {
+    listen 80;
+    server_name your-domain.com;
+    root /var/www/indraarianggi-site;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
+```
+
+### GitHub Secrets Required
+
+Ensure these secrets are configured in your GitHub repository:
+
+- `VPS_HOST` - Your VPS IP or hostname
+- `VPS_USERNAME` - SSH username
+- `VPS_SSH_KEY` - Private SSH key for authentication
 
 ### Verification
 
-Deployed site is accessible and matches local
+1. **Local test**:
+
+   ```bash
+   bun run build
+   bun run preview
+   # Verify site works at http://localhost:4321
+   ```
+
+2. **After pushing to main**:
+   - Check GitHub Actions tab for successful workflow
+   - Visit your domain to verify deployment
+   - Test all pages: home, about, experience, blog, blog posts
+   - Verify dark mode toggle works
+   - Check that MDX posts render correctly
 
 ### Expected output
 
-Site live with parity features
+- GitHub Actions workflow completes successfully
+- Site deployed to `/var/www/indraarianggi-site` on VPS
+- Site accessible via your domain with all features working
 
 ### Rollback
 
-Roll back to previous deployment
+1. **Via GitHub**: Revert the commit that broke deployment
+2. **Manual VPS**: Keep a backup of the previous deployment:
+
+   ```bash
+   # On VPS before deployment
+   sudo cp -r /var/www/indraarianggi-site /var/www/indraarianggi-site.backup
+
+   # To rollback
+   sudo rm -rf /var/www/indraarianggi-site
+   sudo mv /var/www/indraarianggi-site.backup /var/www/indraarianggi-site
+   ```
+
+### Deployment Checklist
+
+- [ ] Update `.github/workflows/deploy.yml` (change `out/*` to `dist/*`)
+- [ ] Test build locally (`bun run build` produces `dist/` folder)
+- [ ] Commit workflow changes to a feature branch first
+- [ ] Test deployment on a test branch if possible
+- [ ] Merge to main when ready
+- [ ] Monitor GitHub Actions for successful deployment
+- [ ] Verify site functionality on production domain
 
 ---
 
