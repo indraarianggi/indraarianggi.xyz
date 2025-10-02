@@ -25,7 +25,7 @@ This plan migrates the Next.js 15 static-export site to Astro (SSG) with React i
 
 ---
 
-## Phase 1 — Environment setup and backup
+## Phase 1 — Environment setup and backup ✅ COMPLETED
 
 ### Objective
 
@@ -58,7 +58,7 @@ git reset --hard pre-astro-migration
 
 ---
 
-## Phase 2 — Initialize Astro project with React integration
+## Phase 2 — Initialize Astro project with React integration ✅ COMPLETED
 
 ### Objective
 
@@ -106,7 +106,7 @@ rm -rf astro-temp
 
 ---
 
-## Phase 3 — Configure Bun as package manager
+## Phase 3 — Configure Bun as package manager ✅ COMPLETED
 
 ### Objective
 
@@ -155,7 +155,7 @@ Revert `package.json` changes
 
 ---
 
-## Phase 4 — Migrate Tailwind CSS v4 with PostCSS
+## Phase 4 — Migrate Tailwind CSS v4 with PostCSS ✅ COMPLETED
 
 ### Objective
 
