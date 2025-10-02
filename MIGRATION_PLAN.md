@@ -382,7 +382,7 @@ Remove or revert utils files
 
 ---
 
-## Phase 8 — Migrate content (author, menu, blog posts) via content collections
+## Phase 8 — Migrate content (author, menu, blog posts) via content collections ✅ COMPLETED
 
 ### Objective
 
