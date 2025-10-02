@@ -1,0 +1,164 @@
+<!DOCTYPE html><html lang="en"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="icon" type="image/svg+xml" href="/avatar.svg"><title>Basic Writing and Formatting Syntax | Indra Arianggi</title><meta name="description" content="Practical techniques for improving React application performance and user experience through optimization strategies."><link rel="canonical" href="https://indraarianggi.xyz/blog/basic-formatting-and-syntax/"><!-- Open Graph --><meta property="og:title" content="Basic Writing and Formatting Syntax | Indra Arianggi"><meta property="og:description" content="Practical techniques for improving React application performance and user experience through optimization strategies."><meta property="og:image" content="/placeholder.svg?height=600&#38;width=1200"><meta property="og:url" content="https://indraarianggi.xyz/blog/basic-formatting-and-syntax/"><meta property="og:type" content="website"><meta property="og:site_name" content="Indra Arianggi"><!-- Twitter Card --><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Basic Writing and Formatting Syntax | Indra Arianggi"><meta name="twitter:description" content="Practical techniques for improving React application performance and user experience through optimization strategies."><meta name="twitter:image" content="/placeholder.svg?height=600&#38;width=1200"><meta name="twitter:creator" content="@indraarianggi"><script>
+      // Theme initialization script
+      try {
+        const stored = localStorage.getItem("theme");
+        const preferred =
+          stored ||
+          (matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light");
+        document.documentElement.classList.toggle("dark", preferred === "dark");
+      } catch {}
+    </script><link rel="stylesheet" href="/_astro/_slug_.tRTbmnPX.css"></head> <body> <div class="flex min-h-screen flex-col"> <!-- TODO: Add Navigation component here (Phase 10) --> <nav class="border-b"> <div class="container mx-auto px-4 py-4"> <div class="flex items-center justify-between"> <a href="/" class="text-xl font-bold">Indra Arianggi</a> <div class="flex gap-6"> <a href="/" class="hover:text-primary transition-colors">Home</a> <a href="/about" class="hover:text-primary transition-colors">About</a> <a href="/blog" class="hover:text-primary transition-colors">Blog</a> </div> </div> </div> </nav> <main class="flex-1">  <article class="py-12"> <div class="container mx-auto px-4"> <div class="mx-auto max-w-4xl"> <!-- Back Button --> <a href="/blog" class="text-muted-foreground hover:text-primary mb-8 inline-flex items-center gap-2 text-sm transition-colors"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left h-4 w-4" aria-hidden="true"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg>
+Back to Blog
+</a> <!-- Post Header --> <header class="mb-12"> <h1 class="mb-6 text-4xl font-bold leading-tight md:text-5xl"> Basic Writing and Formatting Syntax </h1> <!-- Meta Info --> <div class="text-muted-foreground flex flex-wrap items-center gap-4 text-sm"> <div class="flex items-center gap-2"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar h-4 w-4" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg> <time datetime="2024-09-18T19:24:46.167Z"> September 19, 2024 </time> </div> <span>•</span> <div class="flex items-center gap-2"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clock h-4 w-4" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> <span>5 min read</span> </div> </div> <!-- Tags --> <div class="mt-6 flex flex-wrap gap-2"> <span class="bg-primary/10 text-primary border-primary/20 inline-flex items-center justify-center rounded-full border px-3 py-1 text-xs font-medium"> React </span><span class="bg-primary/10 text-primary border-primary/20 inline-flex items-center justify-center rounded-full border px-3 py-1 text-xs font-medium"> Performance </span><span class="bg-primary/10 text-primary border-primary/20 inline-flex items-center justify-center rounded-full border px-3 py-1 text-xs font-medium"> Optimization </span><span class="bg-primary/10 text-primary border-primary/20 inline-flex items-center justify-center rounded-full border px-3 py-1 text-xs font-medium"> Web Development </span> </div> <!-- Cover Image --> <div class="mt-8"> <img src="/placeholder.svg?height=600&#38;width=1200" alt="Basic Writing and Formatting Syntax" class="w-full rounded-lg border shadow-lg"> </div> </header> <!-- Post Content --> <div class="prose prose-neutral dark:prose-invert prose-lg max-w-none prose-headings:scroll-mt-24 prose-headings:font-bold prose-h1:text-4xl prose-h2:text-3xl prose-h3:text-2xl prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-code:rounded prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:font-mono prose-code:text-sm prose-code:before:content-none prose-code:after:content-none prose-pre:border prose-pre:bg-muted/50"> <h1 id="introduction">Introduction</h1>
+<p>Markdown and Mdx parsing is supported via <span data-rehype-pretty-code-figure><code data-language="plaintext" data-theme="github-dark-dimmed github-light"><span data-line><span>unified</span></span></code></span>, and other remark and rehype packages. <span data-rehype-pretty-code-figure><code data-language="plaintext" data-theme="github-dark-dimmed github-light"><span data-line><span>next-mdx-remote</span></span></code></span> allows us to parse <span data-rehype-pretty-code-figure><code data-language="plaintext" data-theme="github-dark-dimmed github-light"><span data-line><span>.mdx</span></span></code></span> and <span data-rehype-pretty-code-figure><code data-language="plaintext" data-theme="github-dark-dimmed github-light"><span data-line><span>.md</span></span></code></span> files in a more flexible manner without touching webpack.</p>
+<p>GitHub flavored markdown is used. <span data-rehype-pretty-code-figure><code data-language="plaintext" data-theme="github-dark-dimmed github-light"><span data-line><span>mdx-prism</span></span></code></span> provides syntax highlighting capabilities for code blocks. Here’s a demo of how everything looks.</p>
+<p>The following markdown cheatsheet is adapted from: <a href="https://guides.github.com/features/mastering-markdown/">https://guides.github.com/features/mastering-markdown/</a></p>
+<h1 id="what-is-markdown">What is Markdown?</h1>
+<p>Markdown is a way to style text on the web. You control the display of the document; formatting words as bold or italic, adding images, and creating lists are just a few of the things we can do with Markdown. Mostly, Markdown is just regular text with a few non-alphabetic characters thrown in, like <span data-rehype-pretty-code-figure><code data-language="plaintext" data-theme="github-dark-dimmed github-light"><span data-line><span>#</span></span></code></span> or <span data-rehype-pretty-code-figure><code data-language="plaintext" data-theme="github-dark-dimmed github-light"><span data-line><span>*</span></span></code></span>.</p>
+<h1 id="syntax-guide">Syntax guide</h1>
+<p>Here’s an overview of Markdown syntax that you can use anywhere on GitHub.com or in your own text files.</p>
+<h2 id="headers">Headers</h2>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="plaintext" data-theme="github-dark-dimmed github-light"><code data-language="plaintext" data-theme="github-dark-dimmed github-light" style="display:grid"><span data-line><span># This is a h1 tag</span></span>
+<span data-line> </span>
+<span data-line><span>## This is a h2 tag</span></span>
+<span data-line> </span>
+<span data-line><span>#### This is a h4 tag</span></span></code></pre></figure>
+<h1 id="this-is-a-h1-tag">This is a h1 tag</h1>
+<h2 id="this-is-a-h2-tag">This is a h2 tag</h2>
+<h4 id="this-is-a-h4-tag">This is a h4 tag</h4>
+<h2 id="emphasis">Emphasis</h2>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="plaintext" data-theme="github-dark-dimmed github-light"><code data-language="plaintext" data-theme="github-dark-dimmed github-light" style="display:grid"><span data-line><span>_This text will be italic_</span></span>
+<span data-line> </span>
+<span data-line><span>**This text will be bold**</span></span>
+<span data-line> </span>
+<span data-line><span>_You **can** combine them_</span></span></code></pre></figure>
+<p><em>This text will be italic</em></p>
+<p><strong>This text will be bold</strong></p>
+<p><em>You <strong>can</strong> combine them</em></p>
+<h2 id="lists">Lists</h2>
+<h3 id="unordered">Unordered</h3>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="plaintext" data-theme="github-dark-dimmed github-light"><code data-language="plaintext" data-theme="github-dark-dimmed github-light" style="display:grid"><span data-line><span>- Item 1</span></span>
+<span data-line><span>- Item 2</span></span>
+<span data-line><span>  - Item 2a</span></span>
+<span data-line><span>  - Item 2b</span></span></code></pre></figure>
+<ul>
+<li>Item 1</li>
+<li>Item 2
+<ul>
+<li>Item 2a</li>
+<li>Item 2b</li>
+</ul>
+</li>
+</ul>
+<h3 id="ordered">Ordered</h3>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="plaintext" data-theme="github-dark-dimmed github-light"><code data-language="plaintext" data-theme="github-dark-dimmed github-light" style="display:grid"><span data-line><span>1. Item 1</span></span>
+<span data-line><span>1. Item 2</span></span>
+<span data-line><span>1. Item 3</span></span>
+<span data-line><span>   1. Item 3a</span></span>
+<span data-line><span>   1. Item 3b</span></span></code></pre></figure>
+<ol>
+<li>Item 1</li>
+<li>Item 2</li>
+<li>Item 3
+<ol>
+<li>Item 3a</li>
+<li>Item 3b</li>
+</ol>
+</li>
+</ol>
+<h2 id="images">Images</h2>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="plaintext" data-theme="github-dark-dimmed github-light"><code data-language="plaintext" data-theme="github-dark-dimmed github-light" style="display:grid"><span data-line><span>![GitHub Logo](https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png)</span></span>
+<span data-line><span>Format: ![Alt Text](url)</span></span></code></pre></figure>
+<p><img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub Logo"/></p>
+<h2 id="links">Links</h2>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="plaintext" data-theme="github-dark-dimmed github-light"><code data-language="plaintext" data-theme="github-dark-dimmed github-light" style="display:grid"><span data-line><span>http://github.com - automatic!</span></span>
+<span data-line><span>[GitHub](http://github.com)</span></span></code></pre></figure>
+<p><a href="http://github.com">http://github.com</a> - automatic!
+<a href="http://github.com">GitHub</a></p>
+<h2 id="blockquotes">Blockquotes</h2>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="plaintext" data-theme="github-dark-dimmed github-light"><code data-language="plaintext" data-theme="github-dark-dimmed github-light" style="display:grid"><span data-line><span>As Kanye West said:</span></span>
+<span data-line> </span>
+<span data-line><span>&gt; We&#39;re living the future so</span></span>
+<span data-line><span>&gt; the present is our past.</span></span></code></pre></figure>
+<p>As Kanye West said:</p>
+<blockquote>
+<p>We’re living the future so
+the present is our past.</p>
+</blockquote>
+<h2 id="inline-code">Inline code</h2>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="plaintext" data-theme="github-dark-dimmed github-light"><code data-language="plaintext" data-theme="github-dark-dimmed github-light" style="display:grid"><span data-line><span>I think you should use an</span></span>
+<span data-line><span>`&lt;addr&gt;` element here instead.</span></span></code></pre></figure>
+<p>I think you should use an
+<span data-rehype-pretty-code-figure><code data-language="plaintext" data-theme="github-dark-dimmed github-light"><span data-line><span>&lt;addr&gt;</span></span></code></span> element here instead.</p>
+<h2 id="syntax-highlighting">Syntax highlighting</h2>
+<p>Here’s an example of how you can use syntax highlighting with <a href="https://help.github.com/articles/basic-writing-and-formatting-syntax/">GitHub Flavored Markdown</a>:</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="plaintext" data-theme="github-dark-dimmed github-light"><code data-language="plaintext" data-theme="github-dark-dimmed github-light" style="display:grid"><span data-line><span>```js:fancyAlert.js</span></span>
+<span data-line><span>function fancyAlert(arg) {</span></span>
+<span data-line><span>  if (arg) {</span></span>
+<span data-line><span>    $.facebox({ div: &#39;#foo&#39; })</span></span>
+<span data-line><span>  }</span></span>
+<span data-line><span>}</span></span>
+<span data-line><span>```</span></span></code></pre></figure>
+<p>And here’s how it looks - nicely colored with styled code titles!</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="js" data-theme="github-dark-dimmed github-light"><code data-language="js" data-theme="github-dark-dimmed github-light" style="display:grid"><span data-line><span style="--shiki-dark:#F47067;--shiki-light:#D73A49">function</span><span style="--shiki-dark:#DCBDFB;--shiki-light:#6F42C1"> fancyAlert</span><span style="--shiki-dark:#ADBAC7;--shiki-light:#24292E">(</span><span style="--shiki-dark:#F69D50;--shiki-light:#E36209">arg</span><span style="--shiki-dark:#ADBAC7;--shiki-light:#24292E">) {</span></span>
+<span data-line><span style="--shiki-dark:#F47067;--shiki-light:#D73A49">  if</span><span style="--shiki-dark:#ADBAC7;--shiki-light:#24292E"> (arg) {</span></span>
+<span data-line><span style="--shiki-dark:#ADBAC7;--shiki-light:#24292E">    $.</span><mark data-highlighted-chars><span style="--shiki-dark:#DCBDFB;--shiki-light:#6F42C1">facebox</span></mark><span style="--shiki-dark:#ADBAC7;--shiki-light:#24292E">({ div: </span><span style="--shiki-dark:#96D0FF;--shiki-light:#032F62">&#39;#foo&#39;</span><span style="--shiki-dark:#ADBAC7;--shiki-light:#24292E"> })</span></span>
+<span data-line><span style="--shiki-dark:#ADBAC7;--shiki-light:#24292E">  }</span></span>
+<span data-line><span style="--shiki-dark:#ADBAC7;--shiki-light:#24292E">}</span></span></code></pre></figure>
+<h2 id="footnotes">Footnotes</h2>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="plaintext" data-theme="github-dark-dimmed github-light"><code data-language="plaintext" data-theme="github-dark-dimmed github-light" style="display:grid"><span data-line><span>Here is a simple footnote[^1]. With some additional text after it.</span></span>
+<span data-line> </span>
+<span data-line><span>[^1]: My reference.</span></span></code></pre></figure>
+<p>Here is a simple footnote<sup><a href="#user-content-fn-1" id="user-content-fnref-1" data-footnote-ref aria-describedby="footnote-label">1</a></sup>. With some additional text after it.</p>
+<h2 id="task-lists">Task Lists</h2>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="plaintext" data-theme="github-dark-dimmed github-light"><code data-language="plaintext" data-theme="github-dark-dimmed github-light" style="display:grid"><span data-line><span>- [x] list syntax required (any unordered or ordered list supported)</span></span>
+<span data-line><span>- [x] this is a complete item</span></span>
+<span data-line><span>- [ ] this is an incomplete item</span></span></code></pre></figure>
+<ul class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" checked disabled/> list syntax required (any unordered or ordered list supported)</li>
+<li class="task-list-item"><input type="checkbox" checked disabled/> this is a complete item</li>
+<li class="task-list-item"><input type="checkbox" disabled/> this is an incomplete item</li>
+</ul>
+<h2 id="tables">Tables</h2>
+<p>You can create tables by assembling a list of words and dividing them with hyphens <span data-rehype-pretty-code-figure><code data-language="plaintext" data-theme="github-dark-dimmed github-light"><span data-line><span>-</span></span></code></span> (for the first row), and then separating each column with a pipe <span data-rehype-pretty-code-figure><code data-language="plaintext" data-theme="github-dark-dimmed github-light"><span data-line><span>|</span></span></code></span>:</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="plaintext" data-theme="github-dark-dimmed github-light"><code data-language="plaintext" data-theme="github-dark-dimmed github-light" style="display:grid"><span data-line><span>| First Header                | Second Header                |</span></span>
+<span data-line><span>| --------------------------- | ---------------------------- |</span></span>
+<span data-line><span>| Content from cell 1         | Content from cell 2          |</span></span>
+<span data-line><span>| Content in the first column | Content in the second column |</span></span></code></pre></figure>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>First Header</th><th>Second Header</th></tr></thead><tbody><tr><td>Content from cell 1</td><td>Content from cell 2</td></tr><tr><td>Content in the first column</td><td>Content in the second column</td></tr></tbody></table>
+<h2 id="strikethrough">Strikethrough</h2>
+<p>Any word wrapped with two tildes (like <span data-rehype-pretty-code-figure><code data-language="plaintext" data-theme="github-dark-dimmed github-light"><span data-line><span>~~this~~</span></span></code></span>) will appear <del>crossed out</del>.</p>
+<h2 id="mdx-component-usage-example">MDX Component Usage Example</h2>
+<p>Without import, will be converted by mdx-component.tsx</p>
+<figure class="my-8"> <img src="https://www.uisnippet.dev/gyoza-shop.jpg" alt="Placeholder" class="w-full rounded-lg border shadow-md" loading="lazy"> <figcaption class="text-muted-foreground mt-2 text-center text-sm">Gyoza Shop from uisnippet.dev</figcaption> </figure>
+<hr/>
+<section data-footnotes class="footnotes"><h2 class="sr-only" id="footnote-label">Footnotes</h2>
+<ol>
+<li id="user-content-fn-1">
+<p>My reference. <a href="#user-content-fnref-1" data-footnote-backref aria-label="Back to reference 1" class="data-footnote-backref">↩</a></p>
+</li>
+</ol>
+</section> </div> <!-- Table of Contents (if headings exist) --> <aside class="mt-12 rounded-lg border bg-muted/30 p-6"> <h2 class="mb-4 text-lg font-semibold">Table of Contents</h2> <nav> <ul class="space-y-2 text-sm"> <li style="margin-left:0rem"> <a href="#introduction" class="text-muted-foreground hover:text-primary transition-colors"> Introduction </a> </li><li style="margin-left:0rem"> <a href="#what-is-markdown" class="text-muted-foreground hover:text-primary transition-colors"> What is Markdown? </a> </li><li style="margin-left:0rem"> <a href="#syntax-guide" class="text-muted-foreground hover:text-primary transition-colors"> Syntax guide </a> </li><li style="margin-left:1rem"> <a href="#headers" class="text-muted-foreground hover:text-primary transition-colors"> Headers </a> </li><li style="margin-left:0rem"> <a href="#this-is-a-h1-tag" class="text-muted-foreground hover:text-primary transition-colors"> This is a h1 tag </a> </li><li style="margin-left:1rem"> <a href="#this-is-a-h2-tag" class="text-muted-foreground hover:text-primary transition-colors"> This is a h2 tag </a> </li><li style="margin-left:3rem"> <a href="#this-is-a-h4-tag" class="text-muted-foreground hover:text-primary transition-colors"> This is a h4 tag </a> </li><li style="margin-left:1rem"> <a href="#emphasis" class="text-muted-foreground hover:text-primary transition-colors"> Emphasis </a> </li><li style="margin-left:1rem"> <a href="#lists" class="text-muted-foreground hover:text-primary transition-colors"> Lists </a> </li><li style="margin-left:2rem"> <a href="#unordered" class="text-muted-foreground hover:text-primary transition-colors"> Unordered </a> </li><li style="margin-left:2rem"> <a href="#ordered" class="text-muted-foreground hover:text-primary transition-colors"> Ordered </a> </li><li style="margin-left:1rem"> <a href="#images" class="text-muted-foreground hover:text-primary transition-colors"> Images </a> </li><li style="margin-left:1rem"> <a href="#links" class="text-muted-foreground hover:text-primary transition-colors"> Links </a> </li><li style="margin-left:1rem"> <a href="#blockquotes" class="text-muted-foreground hover:text-primary transition-colors"> Blockquotes </a> </li><li style="margin-left:1rem"> <a href="#inline-code" class="text-muted-foreground hover:text-primary transition-colors"> Inline code </a> </li><li style="margin-left:1rem"> <a href="#syntax-highlighting" class="text-muted-foreground hover:text-primary transition-colors"> Syntax highlighting </a> </li><li style="margin-left:1rem"> <a href="#footnotes" class="text-muted-foreground hover:text-primary transition-colors"> Footnotes </a> </li><li style="margin-left:1rem"> <a href="#task-lists" class="text-muted-foreground hover:text-primary transition-colors"> Task Lists </a> </li><li style="margin-left:1rem"> <a href="#tables" class="text-muted-foreground hover:text-primary transition-colors"> Tables </a> </li><li style="margin-left:1rem"> <a href="#strikethrough" class="text-muted-foreground hover:text-primary transition-colors"> Strikethrough </a> </li><li style="margin-left:1rem"> <a href="#mdx-component-usage-example" class="text-muted-foreground hover:text-primary transition-colors"> MDX Component Usage Example </a> </li><li style="margin-left:1rem"> <a href="#footnote-label" class="text-muted-foreground hover:text-primary transition-colors"> Footnotes </a> </li> </ul> </nav> </aside> <!-- Author Info -->  <!-- Navigation to Other Posts --> <div class="mt-12 border-t pt-8"> <a href="/blog" class="hover:bg-primary hover:text-white inline-flex items-center gap-2 rounded-md border px-4 py-2 text-sm transition-all"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left h-4 w-4" aria-hidden="true"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg>
+View All Posts
+</a> </div> </div> </div> </article>  </main> <footer class="border-t bg-muted/50"> <div class="container mx-auto px-4 py-12"> <div class="grid grid-cols-1 gap-8 md:grid-cols-4"> <!-- Brand --> <div class="md:col-span-2"> <a href="/" class="mb-4 flex items-center space-x-2"> <div class="bg-gradient-teal-emerald flex h-8 w-8 items-center justify-center rounded-full"> <span class="text-primary-foreground text-sm font-bold"> IA </span> </div> <span class="text-lg font-bold">Indra Arianggi</span> </a> <p class="text-muted-foreground max-w-md"> Frontend Engineer passionate about creating exceptional user experiences through modern web technologies, responsive design, and performance optimization. </p> </div> <!-- Quick Links --> <div> <h3 class="mb-4 font-semibold">Quick Links</h3> <div class="space-y-2"> <a href="/" class="text-muted-foreground hover:text-primary block transition-colors"> Home </a><a href="/about" class="text-muted-foreground hover:text-primary block transition-colors"> About </a><a href="/blog" class="text-muted-foreground hover:text-primary block transition-colors"> Blog </a> </div> </div> <!-- Connect --> <div> <h3 class="mb-4 font-semibold">Connect</h3> <div class="flex space-x-2"> <a href="https://github.com/indraarianggi" target="_blank" rel="noopener noreferrer" class="hover:bg-accent hover:text-accent-foreground inline-flex h-9 w-9 items-center justify-center rounded-md transition-colors"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-github h-4 w-4" aria-hidden="true"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path><path d="M9 18c-4.51 2-5-2-7-2"></path></svg> <span class="sr-only">GitHub</span> </a> <a href="https://www.linkedin.com/in/indraarianggi/" target="_blank" rel="noopener noreferrer" class="hover:bg-accent hover:text-accent-foreground inline-flex h-9 w-9 items-center justify-center rounded-md transition-colors"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-linkedin h-4 w-4" aria-hidden="true"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect width="4" height="12" x="2" y="9"></rect><circle cx="4" cy="4" r="2"></circle></svg> <span class="sr-only">LinkedIn</span> </a> <a href="https://x.com/indraarianggi" target="_blank" rel="noopener noreferrer" class="hover:bg-accent hover:text-accent-foreground inline-flex h-9 w-9 items-center justify-center rounded-md transition-colors"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-twitter h-4 w-4" aria-hidden="true"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path></svg> <span class="sr-only">Twitter</span> </a> <a href="mailto:indraarianggi@gmail.com" class="hover:bg-accent hover:text-accent-foreground inline-flex h-9 w-9 items-center justify-center rounded-md transition-colors"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mail h-4 w-4" aria-hidden="true"><path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"></path><rect x="2" y="4" width="20" height="16" rx="2"></rect></svg> <span class="sr-only">Email</span> </a> </div> </div> </div> <div class="text-muted-foreground mt-8 border-t pt-8 text-center"> <p>
+&copy; 2025 Indra Arianggi. All rights reserved.
+</p> </div> </div> </footer> </div> </body></html>

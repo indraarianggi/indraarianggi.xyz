@@ -753,7 +753,7 @@ Remove route
 
 ---
 
-## Phase 15 — Migrate blog listing page
+## Phase 15 — Migrate blog listing page ✅ COMPLETED
 
 ### Objective
 
@@ -812,7 +812,7 @@ Temporarily hide unpublished posts
 
 ---
 
-## Phase 16 — Migrate blog post dynamic route
+## Phase 16 — Migrate blog post dynamic route ✅ COMPLETED
 
 ### Objective
 

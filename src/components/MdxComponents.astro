@@ -1,0 +1,19 @@
+---
+interface ImageProps {
+  src: string;
+  alt: string;
+  caption?: string;
+}
+
+const { src, alt, caption } = Astro.props as ImageProps;
+---
+
+<figure class="my-8">
+  <img
+    src={src}
+    alt={alt}
+    class="w-full rounded-lg border shadow-md"
+    loading="lazy"
+  />
+  {caption && <figcaption class="text-muted-foreground mt-2 text-center text-sm">{caption}</figcaption>}
+</figure>
