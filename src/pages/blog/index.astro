@@ -46,7 +46,7 @@ const posts = allPosts
                 <PostCard
                   title={post.data.title}
                   excerpt={post.data.excerpt}
-                  date={post.data.time.created}
+                  date={typeof post.data.time.created === 'string' ? post.data.time.created : post.data.time.created.toISOString()}
                   readingTime={rt.text}
                   slug={post.slug}
                   tags={post.data.tags}

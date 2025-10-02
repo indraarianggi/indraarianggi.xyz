@@ -58,7 +58,7 @@ const formattedDate = new Date(post.data.time.created).toLocaleDateString(
           <div class="text-muted-foreground flex flex-wrap items-center gap-4 text-sm">
             <div class="flex items-center gap-2">
               <Calendar className="h-4 w-4" />
-              <time datetime={post.data.time.created}>
+              <time datetime={typeof post.data.time.created === 'string' ? post.data.time.created : post.data.time.created.toISOString()}>
                 {formattedDate}
               </time>
             </div>
