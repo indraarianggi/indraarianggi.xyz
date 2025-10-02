@@ -1,0 +1,15 @@
+# Build output
+dist/
+.astro/
+
+# Dependencies
+node_modules/
+
+# Next.js (legacy - can be removed later)
+.next/
+out/
+
+# Environment files
+.env
+.env.*
+!.env.example
