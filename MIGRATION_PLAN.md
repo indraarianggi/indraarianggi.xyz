@@ -315,7 +315,7 @@ Remove MDX integration from `astro.config.mjs`
 
 ---
 
-## Phase 7 — Migrate utility functions and types
+## Phase 7 — Migrate utility functions and types ✅ COMPLETED
 
 ### Objective
 
