@@ -5,6 +5,8 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import { calculateReadingTime } from "@/lib/reading-time";
 import { Calendar, Clock, ArrowLeft } from "lucide-react";
 import MdxImage from "@/components/MdxComponents.astro";
+import { TableOfContents } from "@/components/react/TableOfContents";
+import { ShareButtons } from "@/components/react/ShareButtons";
 
 export const getStaticPaths = (async () => {
   const posts = await getCollection("posts");
@@ -96,39 +98,39 @@ const formattedDate = new Date(post.data.time.created).toLocaleDateString(
           }
         </header>
 
-        <!-- Post Content -->
-        <div
-          class="prose prose-neutral dark:prose-invert prose-lg max-w-none prose-headings:scroll-mt-24 prose-headings:font-bold prose-h1:text-4xl prose-h2:text-3xl prose-h3:text-2xl prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-code:rounded prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:font-mono prose-code:text-sm prose-code:before:content-none prose-code:after:content-none prose-pre:border prose-pre:bg-muted/50"
-        >
-          <Content components={{ Image: MdxImage }} />
+        <!-- Two Column Layout: Content + Sidebar -->
+        <div class="lg:grid lg:grid-cols-[1fr_300px] lg:gap-8">
+          <!-- Post Content -->
+          <div
+            class="prose prose-neutral dark:prose-invert prose-lg max-w-none prose-headings:scroll-mt-24 prose-headings:font-bold prose-h1:text-4xl prose-h2:text-3xl prose-h3:text-2xl prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-code:rounded prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:font-mono prose-code:text-sm prose-code:before:content-none prose-code:after:content-none prose-pre:border prose-pre:bg-muted/50"
+          >
+            <Content components={{ Image: MdxImage }} />
+          </div>
+
+          <!-- Sidebar: Table of Contents (Desktop) -->
+          <aside class="hidden lg:block">
+            <div class="sticky top-24 space-y-6">
+              <!-- Table of Contents -->
+              <div class="rounded-lg border bg-muted/30 p-6">
+                <TableOfContents client:visible />
+              </div>
+
+              <!-- Share Buttons -->
+              <div class="rounded-lg border bg-muted/30 p-6">
+                <p class="mb-3 font-medium">Share this post</p>
+                <ShareButtons client:visible title={post.data.title} />
+              </div>
+            </div>
+          </aside>
         </div>
 
-        <!-- Table of Contents (if headings exist) -->
-        {
-          headings.length > 0 && (
-            <aside class="mt-12 rounded-lg border bg-muted/30 p-6">
-              <h2 class="mb-4 text-lg font-semibold">Table of Contents</h2>
-              <nav>
-                <ul class="space-y-2 text-sm">
-                  {headings.map((heading) => (
-                    <li
-                      style={{
-                        marginLeft: `${(heading.depth - 1) * 1}rem`,
-                      }}
-                    >
-                      <a
-                        href={`#${heading.slug}`}
-                        class="text-muted-foreground hover:text-primary transition-colors"
-                      >
-                        {heading.text}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </nav>
-            </aside>
-          )
-        }
+        <!-- Share Buttons (Mobile) -->
+        <div class="mt-12 lg:hidden">
+          <div class="rounded-lg border bg-muted/30 p-6">
+            <p class="mb-3 font-medium">Share this post</p>
+            <ShareButtons client:visible title={post.data.title} />
+          </div>
+        </div>
 
         <!-- Author Info -->
         {

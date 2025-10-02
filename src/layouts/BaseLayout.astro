@@ -1,6 +1,9 @@
 ---
 import Seo from "@/components/astro/Seo.astro";
 import Footer from "@/components/astro/Footer.astro";
+import { Navigation } from "@/components/react/Navigation";
+import { ThemeProvider } from "@/components/react/ThemeProvider";
+import { Toaster } from "@/components/react/Toaster";
 import "@/styles/globals.css";
 
 interface Props {
@@ -33,28 +36,15 @@ const { title, description, image } = Astro.props;
     </script>
   </head>
   <body>
-    <div class="flex min-h-screen flex-col">
-      <!-- TODO: Add Navigation component here (Phase 10) -->
-      <nav class="border-b">
-        <div class="container mx-auto px-4 py-4">
-          <div class="flex items-center justify-between">
-            <a href="/" class="text-xl font-bold">Indra Arianggi</a>
-            <div class="flex gap-6">
-              <a href="/" class="hover:text-primary transition-colors">Home</a>
-              <a href="/about" class="hover:text-primary transition-colors"
-                >About</a
-              >
-              <a href="/blog" class="hover:text-primary transition-colors"
-                >Blog</a
-              >
-            </div>
-          </div>
-        </div>
-      </nav>
-      <main class="flex-1">
-        <slot />
-      </main>
-      <Footer />
-    </div>
+    <ThemeProvider client:load attribute="class" defaultTheme="system" enableSystem>
+      <div class="flex min-h-screen flex-col">
+        <Navigation client:load />
+        <main class="flex-1">
+          <slot />
+        </main>
+        <Footer />
+      </div>
+      <Toaster client:load />
+    </ThemeProvider>
   </body>
 </html>
