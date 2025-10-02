@@ -1,0 +1,257 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { author } from "@/data/author";
+import { Download, MapPin, Calendar } from "lucide-react";
+---
+
+<BaseLayout
+  title="About"
+  description="Frontend Engineer with over 6 years of experience in creating responsive, accessible, and performant user interfaces"
+>
+  <div class="min-h-screen">
+    <!-- Hero Section with Gradient Background -->
+    <section class="relative overflow-hidden py-20 md:py-32">
+      <!-- Background decoration -->
+      <div
+        class="from-secondary/5 via-primary/5 to-accent/5 absolute inset-0 bg-gradient-to-br"
+      >
+      </div>
+      <div
+        class="bg-accent/10 absolute right-20 top-20 h-72 w-72 rounded-full blur-3xl"
+      >
+      </div>
+      <div
+        class="bg-primary/10 absolute bottom-20 left-20 h-96 w-96 rounded-full blur-3xl"
+      >
+      </div>
+
+      <div class="container relative mx-auto px-4">
+        <div class="mx-auto max-w-6xl">
+          <div class="space-y-8">
+            <div class="space-y-6">
+              <div class="flex items-center gap-2">
+                <div class="bg-gradient-emerald-coral h-1 w-12 rounded-full"></div>
+                <span class="text-primary font-medium">About Me</span>
+              </div>
+              <h1
+                class="text-4xl font-bold leading-tight md:text-5xl md:leading-[1] lg:text-6xl"
+              >
+                Frontend Engineer <span
+                  class="text-gradient-teal-emerald block"
+                >
+                  Creative Problem Solver
+                </span>
+              </h1>
+              <p class="text-muted-foreground text-xl">
+                With over 6 years of experience in frontend development, I
+                specialize in creating responsive, accessible, and performant
+                user interfaces using modern web technologies and best
+                practices.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="py-20">
+      <div class="container mx-auto px-4">
+        <div class="mx-auto max-w-6xl">
+          <div class="grid gap-12 lg:grid-cols-3">
+            <!-- Left Column - Quick Info -->
+            <div class="lg:col-span-1">
+              <div
+                class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-lg"
+              >
+                <div class="px-6">
+                  <div class="mb-6 text-center">
+                    <img
+                      src={author.avatar}
+                      alt={`${author.name} Profile`}
+                      width="120"
+                      height="120"
+                      class="border-primary/20 mx-auto mb-4 rounded-full border-4"
+                    />
+                    <h2 class="mb-2 text-2xl font-bold">{author.name}</h2>
+                    <p class="text-primary font-medium">
+                      {author.occupation}
+                    </p>
+                  </div>
+
+                  <div class="space-y-4">
+                    <div class="flex items-center gap-3">
+                      <MapPin className="text-primary h-4 w-4" />
+                      <span>{author.address}</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                      <Calendar className="text-primary h-4 w-4" />
+                      <span>6+ years experience</span>
+                    </div>
+                  </div>
+
+                  <a
+                    href="/resume.pdf"
+                    target="_blank"
+                    class="bg-primary hover:bg-primary/90 mt-6 inline-flex h-10 w-full items-center justify-center gap-2 rounded-md px-4 py-2 text-white shadow-xs transition-all"
+                  >
+                    <Download className="h-4 w-4" />
+                    Download Resume
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column - Story and Details -->
+            <div class="space-y-8 lg:col-span-2">
+              <div
+                class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-lg"
+              >
+                <div class="px-6">
+                  <div class="mb-4 flex items-center gap-2">
+                    <div
+                      class="from-primary to-secondary h-1 w-8 rounded-full bg-gradient-to-r"
+                    >
+                    </div>
+                    <h3 class="text-2xl font-bold">My Journey</h3>
+                  </div>
+                  <div class="prose prose-neutral dark:prose-invert max-w-none">
+                    <p class="text-muted-foreground mb-4 leading-relaxed">
+                      I started my journey in frontend development over 6 years
+                      ago, driven by a passion for creating beautiful and
+                      functional user interfaces. What began as curiosity about
+                      how websites work evolved into a career focused on
+                      crafting exceptional user experiences.
+                    </p>
+                    <p class="text-muted-foreground mb-4 leading-relaxed">
+                      Throughout my career, I've specialized in modern frontend
+                      frameworks, responsive design, and performance
+                      optimization. I've worked with startups and established
+                      companies, helping them build user-centric applications
+                      that scale and perform beautifully across all devices.
+                    </p>
+                    <p class="text-muted-foreground leading-relaxed">
+                      When I'm not coding, you can find me exploring new
+                      frontend technologies or sharing my knowledge about modern
+                      web development and design systems.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-lg"
+              >
+                <div class="px-6">
+                  <div class="mb-4 flex items-center gap-2">
+                    <div
+                      class="from-secondary to-accent h-1 w-8 rounded-full bg-gradient-to-r"
+                    >
+                    </div>
+                    <h3 class="text-2xl font-bold">What I Do</h3>
+                  </div>
+                  <div class="grid gap-6 md:grid-cols-2">
+                    <div
+                      class="bg-primary/5 border-primary/20 rounded-lg border p-4"
+                    >
+                      <h4 class="text-primary mb-2 font-semibold">
+                        Frontend Development
+                      </h4>
+                      <p class="text-muted-foreground mb-3 text-sm">
+                        Building responsive, accessible, and performant user
+                        interfaces using modern frameworks and libraries.
+                      </p>
+                      <div class="flex flex-wrap gap-1">
+                        {
+                          ["React", "Next.js", "TypeScript", "Tailwind CSS"].map(
+                            (tech) => (
+                              <span class="bg-primary/10 text-primary inline-flex items-center justify-center rounded-full border border-transparent px-2 py-0.5 text-xs font-medium">
+                                {tech}
+                              </span>
+                            )
+                          )
+                        }
+                      </div>
+                    </div>
+
+                    <div
+                      class="bg-primary/5 border-primary/20 rounded-lg border p-4"
+                    >
+                      <h4 class="text-primary mb-2 font-semibold">
+                        UI/UX Implementation
+                      </h4>
+                      <p class="text-muted-foreground mb-3 text-sm">
+                        Translating designs into pixel-perfect, interactive
+                        interfaces with attention to user experience.
+                      </p>
+                      <div class="flex flex-wrap gap-1">
+                        {
+                          [
+                            "Figma",
+                            "CSS-In-JS",
+                            "Animations",
+                            "Responsive Design",
+                          ].map((tech) => (
+                            <span class="bg-primary/10 text-primary inline-flex items-center justify-center rounded-full border border-transparent px-2 py-0.5 text-xs font-medium">
+                              {tech}
+                            </span>
+                          ))
+                        }
+                      </div>
+                    </div>
+
+                    <div
+                      class="bg-primary/5 border-primary/20 rounded-lg border p-4"
+                    >
+                      <h4 class="text-primary mb-2 font-semibold">
+                        Performance Optimization
+                      </h4>
+                      <p class="text-muted-foreground mb-3 text-sm">
+                        Optimizing applications for speed, accessibility, and
+                        SEO using modern build tools and techniques.
+                      </p>
+                      <div class="flex flex-wrap gap-1">
+                        {
+                          ["Webpack", "Vite", "Lighthouse", "Core Web Vitals"].map(
+                            (tech) => (
+                              <span class="bg-primary/10 text-primary inline-flex items-center justify-center rounded-full border border-transparent px-2 py-0.5 text-xs font-medium">
+                                {tech}
+                              </span>
+                            )
+                          )
+                        }
+                      </div>
+                    </div>
+
+                    <div
+                      class="bg-primary/5 border-primary/20 rounded-lg border p-4"
+                    >
+                      <h4 class="text-primary mb-2 font-semibold">
+                        Testing & Quality
+                      </h4>
+                      <p class="text-muted-foreground mb-3 text-sm">
+                        Ensuring code quality and reliability through
+                        comprehensive testing strategies and best practices.
+                      </p>
+                      <div class="flex flex-wrap gap-1">
+                        {
+                          ["Jest", "Cypress", "Testing Library", "Storybook"].map(
+                            (tech) => (
+                              <span class="bg-primary/10 text-primary inline-flex items-center justify-center rounded-full border border-transparent px-2 py-0.5 text-xs font-medium">
+                                {tech}
+                              </span>
+                            )
+                          )
+                        }
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
