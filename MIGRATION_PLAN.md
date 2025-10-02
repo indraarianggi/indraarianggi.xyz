@@ -221,11 +221,13 @@ Remove Tailwind-related files and deps
 
 ---
 
-## Phase 5 — Port global styles and custom CSS
+## Phase 5 — Port global styles and custom CSS ✅ COMPLETED
 
 ### Objective
 
 Migrate `src/app/globals.css` and custom CSS to Astro.
+
+Note: This was combined with Phase 4 Tailwind setup.
 
 ### Files
 
@@ -249,7 +251,7 @@ Restore previous `globals.css`
 
 ---
 
-## Phase 6 — Setup MDX integration with rehype/remark plugins
+## Phase 6 — Setup MDX integration with rehype/remark plugins ✅ COMPLETED
 
 ### Objective
 
