@@ -1,0 +1,76 @@
+---
+import { Calendar, Clock, ArrowRight } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+interface Props {
+  title: string;
+  date: string;
+  readingTime?: string;
+  slug: string;
+  excerpt?: string;
+  tags?: string[];
+  class?: string;
+}
+
+const {
+  title,
+  date,
+  readingTime,
+  slug,
+  excerpt,
+  tags = [],
+  class: className,
+} = Astro.props;
+---
+
+<div
+  class={cn(
+    "group cursor-pointer border-0 shadow-lg transition-all duration-300 hover:shadow-xl",
+    "bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6",
+    className
+  )}
+>
+  <!-- Card Header -->
+  <div class="px-6">
+    <div class="text-muted-foreground mb-2 flex items-center gap-4 text-sm">
+      <div class="flex items-center gap-1">
+        <Calendar className="h-4 w-4" />
+        {
+          new Date(date).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          })
+        }
+      </div>
+      <div class="flex items-center gap-1">
+        <Clock className="h-4 w-4" />
+        {readingTime || "Quick read"}
+      </div>
+    </div>
+    <h3 class="group-hover:text-primary font-semibold transition-colors">
+      <a href={`/blog/${slug}`}>{title}</a>
+    </h3>
+  </div>
+
+  <!-- Card Content -->
+  <div class="px-6">
+    {excerpt && <p class="text-muted-foreground mb-4">{excerpt}</p>}
+    <div class="mb-4 flex flex-wrap gap-2">
+      {
+        tags.map((tag) => (
+          <span class="bg-primary/10 text-primary border-primary/20 inline-flex items-center justify-center rounded-full border px-2 py-0.5 text-xs font-medium">
+            {tag}
+          </span>
+        ))
+      }
+    </div>
+    <a
+      href={`/blog/${slug}`}
+      class="text-primary hover:bg-primary hover:text-white inline-flex h-8 items-center gap-2 rounded-md px-3 transition-all"
+    >
+      Read More
+      <ArrowRight className="h-3 w-3" />
+    </a>
+  </div>
+</div>

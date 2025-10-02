@@ -1,7 +1,10 @@
 .next
 .cache
+.astro
+dist
 bun.lock
 public
 node_modules
 next-env.d.ts
 next.config.mjs
+astro.config.mjs

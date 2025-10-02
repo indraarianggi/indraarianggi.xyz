@@ -1,0 +1,99 @@
+---
+import { Github, Linkedin, Mail, Twitter } from "lucide-react";
+import { author } from "@/data/author";
+import { menu } from "@/data/menu";
+---
+
+<footer class="border-t bg-muted/50">
+  <div class="container mx-auto px-4 py-12">
+    <div class="grid grid-cols-1 gap-8 md:grid-cols-4">
+      <!-- Brand -->
+      <div class="md:col-span-2">
+        <a href="/" class="mb-4 flex items-center space-x-2">
+          <div
+            class="bg-gradient-teal-emerald flex h-8 w-8 items-center justify-center rounded-full"
+          >
+            <span class="text-primary-foreground text-sm font-bold">
+              {
+                author.name
+                  .split(" ")
+                  .map((word) => word[0])
+                  .slice(0, 2)
+                  .join("")
+              }
+            </span>
+          </div>
+          <span class="text-lg font-bold">{author.name}</span>
+        </a>
+        <p class="text-muted-foreground max-w-md">
+          {author.description}
+        </p>
+      </div>
+
+      <!-- Quick Links -->
+      <div>
+        <h3 class="mb-4 font-semibold">Quick Links</h3>
+        <div class="space-y-2">
+          {
+            menu.map((link) => (
+              <a
+                href={link.href}
+                class="text-muted-foreground hover:text-primary block transition-colors"
+              >
+                {link.name}
+              </a>
+            ))
+          }
+        </div>
+      </div>
+
+      <!-- Connect -->
+      <div>
+        <h3 class="mb-4 font-semibold">Connect</h3>
+        <div class="flex space-x-2">
+          <a
+            href={author.socials.github}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:bg-accent hover:text-accent-foreground inline-flex h-9 w-9 items-center justify-center rounded-md transition-colors"
+          >
+            <Github className="h-4 w-4" />
+            <span class="sr-only">GitHub</span>
+          </a>
+          <a
+            href={author.socials.linkedin}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:bg-accent hover:text-accent-foreground inline-flex h-9 w-9 items-center justify-center rounded-md transition-colors"
+          >
+            <Linkedin className="h-4 w-4" />
+            <span class="sr-only">LinkedIn</span>
+          </a>
+          <a
+            href={author.socials.twitter}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:bg-accent hover:text-accent-foreground inline-flex h-9 w-9 items-center justify-center rounded-md transition-colors"
+          >
+            <Twitter className="h-4 w-4" />
+            <span class="sr-only">Twitter</span>
+          </a>
+          <a
+            href={`mailto:${author.socials.email}`}
+            class="hover:bg-accent hover:text-accent-foreground inline-flex h-9 w-9 items-center justify-center rounded-md transition-colors"
+          >
+            <Mail className="h-4 w-4" />
+            <span class="sr-only">Email</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="text-muted-foreground mt-8 border-t pt-8 text-center">
+      <p>
+        &copy; {new Date().getFullYear()}
+        {author.name}. All rights reserved.
+      </p>
+    </div>
+  </div>
+</footer>
