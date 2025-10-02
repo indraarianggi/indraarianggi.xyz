@@ -668,7 +668,7 @@ Revert to simple page-level structure
 
 ---
 
-## Phase 12 — Migrate homepage
+## Phase 12 — Migrate homepage ✅ COMPLETED
 
 ### Objective
 
@@ -1114,7 +1114,7 @@ Fix regressions; revert last commits if necessary
 
 ---
 
-## Phase 20 — Deployment preparation (VPS via GitHub Actions)
+## Phase 20 — Deployment preparation (VPS via GitHub Actions) ✅ COMPLETED
 
 ### Objective
 

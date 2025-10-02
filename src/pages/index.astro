@@ -1,32 +1,183 @@
 ---
-// Temporary homepage for Phase 2-4 verification
-import "../styles/globals.css";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { author } from "@/data/author";
+import {
+  ArrowRight,
+  Code,
+  Github,
+  Linkedin,
+  Palette,
+  Sparkles,
+  Twitter,
+} from "lucide-react";
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Astro Migration - Phase 4</title>
-  </head>
-  <body class="min-h-screen flex items-center justify-center">
-    <div class="text-center space-y-4">
-      <h1 class="text-4xl font-bold text-gradient-smooth">🚀 Astro Migration</h1>
-      <div class="space-y-2">
-        <p class="text-lg text-muted-foreground">✅ Phase 1: Environment Setup</p>
-        <p class="text-lg text-muted-foreground">✅ Phase 2: Astro + React Integration</p>
-        <p class="text-lg text-muted-foreground">✅ Phase 3: Bun Configuration</p>
-        <p class="text-lg font-semibold text-primary">🎨 Phase 4: Tailwind CSS v4 Working!</p>
+<BaseLayout title="Home" description={author.description}>
+  <div class="min-h-screen">
+    <!-- Hero Section -->
+    <section class="relative overflow-hidden py-20 md:py-32">
+      <!-- Background decoration -->
+      <div
+        class="from-primary/5 via-secondary/5 to-accent/5 absolute inset-0 bg-gradient-to-br"
+      >
       </div>
-      <div class="mt-8 p-6 bg-card border border-border rounded-lg shadow-lg max-w-md mx-auto">
-        <p class="text-sm text-muted-foreground">Testing custom gradients and theme tokens</p>
-        <div class="mt-4 flex gap-2 justify-center">
-          <div class="w-16 h-16 rounded-lg bg-gradient-teal-emerald"></div>
-          <div class="w-16 h-16 rounded-lg bg-gradient-emerald-coral"></div>
-          <div class="w-16 h-16 rounded-lg bg-gradient-smooth"></div>
+      <div
+        class="bg-accent/10 absolute right-20 top-20 h-72 w-72 rounded-full blur-3xl"
+      >
+      </div>
+      <div
+        class="bg-primary/10 absolute bottom-20 left-20 h-96 w-96 rounded-full blur-3xl"
+      >
+      </div>
+
+      <div class="container relative mx-auto px-4">
+        <div class="mx-auto max-w-6xl">
+          <div class="grid items-center gap-12 lg:grid-cols-2">
+            <!-- Left Column - Content -->
+            <div class="space-y-8">
+              <div class="space-y-6">
+                <div class="flex items-center gap-2">
+                  <div
+                    class="bg-gradient-teal-emerald h-1 w-12 rounded-full"
+                  >
+                  </div>
+                  <span class="text-primary font-medium">
+                    {author.occupation}
+                  </span>
+                </div>
+                <h1
+                  class="text-4xl font-bold leading-tight md:text-5xl md:leading-[1] lg:text-6xl"
+                >
+                  Building Modern <span class="text-gradient-smooth block">
+                    User Interfaces
+                  </span> with Precision
+                </h1>
+                <p class="text-muted-foreground max-w-xl text-xl">
+                  I craft exceptional user experiences through modern frontend
+                  technologies, responsive design, and performance optimization.
+                  Passionate about creating intuitive interfaces that users
+                  love.
+                </p>
+              </div>
+
+              <!-- Call to Action -->
+              <div class="flex flex-col gap-4 sm:flex-row">
+                <a
+                  href="/about"
+                  class="bg-primary hover:bg-primary/90 inline-flex h-10 items-center justify-center gap-2 rounded-md px-6 text-white shadow-xs transition-all"
+                >
+                  Discover My Story
+                  <ArrowRight className="h-4 w-4" />
+                </a>
+                <a
+                  href="/blog"
+                  class="border-primary text-primary hover:bg-primary hover:text-white inline-flex h-10 items-center justify-center gap-2 rounded-md border bg-background px-6 shadow-xs transition-all"
+                >
+                  Read My Blog
+                </a>
+              </div>
+
+              <!-- Social Links -->
+              <div class="flex items-center gap-6 pt-4">
+                <span class="text-muted-foreground text-sm">
+                  Connect with me:
+                </span>
+                <div class="flex gap-3">
+                  <a
+                    href={author.socials.github}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="hover:text-primary hover:bg-primary/10 inline-flex h-9 w-9 items-center justify-center rounded-md transition-colors"
+                  >
+                    <Github className="h-5 w-5" />
+                    <span class="sr-only">GitHub</span>
+                  </a>
+                  <a
+                    href={author.socials.linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="hover:text-primary hover:bg-primary/10 inline-flex h-9 w-9 items-center justify-center rounded-md transition-colors"
+                  >
+                    <Linkedin className="h-5 w-5" />
+                    <span class="sr-only">LinkedIn</span>
+                  </a>
+                  <a
+                    href={author.socials.twitter}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="hover:text-primary hover:bg-primary/10 inline-flex h-9 w-9 items-center justify-center rounded-md transition-colors"
+                  >
+                    <Twitter className="h-4 w-4" />
+                    <span class="sr-only">Twitter</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column - Visual -->
+            <div class="relative">
+              <div class="relative z-10">
+                <img
+                  src={author.avatar}
+                  alt={`${author.name} - ${author.occupation}`}
+                  width="400"
+                  height="400"
+                  class="mx-auto rounded-2xl border-4 border-white shadow-2xl dark:border-gray-800"
+                />
+              </div>
+              <!-- Floating elements -->
+              <div
+                class="bg-primary absolute -right-4 -top-4 rounded-xl p-3 text-white shadow-lg"
+              >
+                <Code className="h-6 w-6" />
+              </div>
+              <div
+                class="bg-secondary absolute -bottom-4 -left-4 rounded-xl p-3 text-white shadow-lg"
+              >
+                <Palette className="h-6 w-6" />
+              </div>
+              <div
+                class="bg-accent absolute -right-8 top-1/2 rounded-lg p-2 text-white shadow-lg"
+              >
+                <Sparkles className="h-4 w-4" />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  </body>
-</html>
+    </section>
+
+    <!-- Skills -->
+    <section class="py-20">
+      <div class="container mx-auto px-4">
+        <div class="mx-auto max-w-6xl">
+          <div class="mb-12 text-left">
+            <div class="mb-4 flex items-center gap-2">
+              <div class="bg-gradient-teal-emerald h-1 w-12 rounded-full"></div>
+              <span class="text-primary font-medium">Expertise</span>
+            </div>
+            <h2 class="mb-4 text-3xl font-bold md:text-4xl">
+              Technologies I Work With
+            </h2>
+            <p class="text-muted-foreground max-w-2xl">
+              A comprehensive toolkit of modern frontend technologies,
+              frameworks, and tools that I use to build user interfaces and
+              experiences.
+            </p>
+          </div>
+          <div class="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-6">
+            {
+              author.skills.map((skill) => (
+                <div class="bg-card hover:bg-primary/5 hover:border-primary/30 group rounded-lg border p-4 text-center transition-all duration-300">
+                  <span class="group-hover:text-primary font-medium transition-colors">
+                    {skill}
+                  </span>
+                </div>
+              ))
+            }
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</BaseLayout>
