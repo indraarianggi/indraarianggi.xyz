@@ -1,8 +1,8 @@
 @import "tailwindcss";
-@import "tw-animate-css";
 @plugin "@tailwindcss/typography";
 
-@custom-variant dark (&:is(.dark *));
+/* Dark mode variant that checks for .dark class on html element */
+@custom-variant dark (:where(.dark) &);
 
 @theme inline {
   --color-background: var(--background);

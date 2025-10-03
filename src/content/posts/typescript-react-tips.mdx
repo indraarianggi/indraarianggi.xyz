@@ -5,7 +5,7 @@ time:
   updated: "2023-12-25T10:00:00Z"
 author:
   name: "Indra Arianggi"
-  avatar: "/images/profile-avatar.png"
+  avatar: "/avatar.svg"
   title: "Full Stack Developer"
 coverImage: "/placeholder.svg?height=600&width=1200"
 excerpt: "Essential TypeScript patterns and techniques that every React developer should know for building type-safe applications."
@@ -34,7 +34,12 @@ interface UserCardProps {
   onProfileClick: (userId: string) => void;
 }
 
-const UserCard: React.FC<UserCardProps> = ({ name, email, age, onProfileClick }) => {
+const UserCard: React.FC<UserCardProps> = ({
+  name,
+  email,
+  age,
+  onProfileClick,
+}) => {
   return (
     <div onClick={() => onProfileClick(name)}>
       <h2>{name}</h2>
@@ -84,9 +89,9 @@ const [user, setUser] = useState<User | null>(null);
 
 ```tsx
 type Action =
-  | { type: 'SET_LOADING' }
-  | { type: 'SET_DATA'; payload: string[] }
-  | { type: 'SET_ERROR'; payload: string };
+  | { type: "SET_LOADING" }
+  | { type: "SET_DATA"; payload: string[] }
+  | { type: "SET_ERROR"; payload: string };
 
 interface State {
   loading: boolean;
@@ -96,11 +101,11 @@ interface State {
 
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
-    case 'SET_LOADING':
+    case "SET_LOADING":
       return { ...state, loading: true };
-    case 'SET_DATA':
+    case "SET_DATA":
       return { ...state, loading: false, data: action.payload };
-    case 'SET_ERROR':
+    case "SET_ERROR":
       return { ...state, loading: false, error: action.payload };
   }
 };
@@ -165,11 +170,11 @@ Only use type assertions when you know more about the type than TypeScript does:
 
 ```tsx
 // Avoid
-const element = document.getElementById('root') as HTMLElement;
+const element = document.getElementById("root") as HTMLElement;
 
 // Better
-const element = document.getElementById('root');
-if (element === null) throw new Error('Root element not found');
+const element = document.getElementById("root");
+if (element === null) throw new Error("Root element not found");
 ```
 
 ### Leverage Utility Types
@@ -184,12 +189,12 @@ type PartialUser = Partial<User>;
 type RequiredUser = Required<User>;
 
 // Pick specific properties
-type UserNameAndEmail = Pick<User, 'name' | 'email'>;
+type UserNameAndEmail = Pick<User, "name" | "email">;
 
 // Omit specific properties
-type UserWithoutId = Omit<User, 'id'>;
+type UserWithoutId = Omit<User, "id">;
 ```
 
 ## Conclusion
 
-Using TypeScript with React not only provides better type safety but also improves the development experience through better tooling and documentation. By following these patterns and best practices, you can write more maintainable and robust React applications. 
+Using TypeScript with React not only provides better type safety but also improves the development experience through better tooling and documentation. By following these patterns and best practices, you can write more maintainable and robust React applications.

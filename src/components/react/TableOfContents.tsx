@@ -14,7 +14,11 @@ export function TableOfContents() {
   const [activeId, setActiveId] = useState<string>("");
 
   const getHeadings = useCallback((): Heading[] => {
-    return Array.from(document.querySelectorAll("h1, h2, h3"))
+    // Query headings within the article content
+    const articleElement = document.querySelector("article .prose");
+    if (!articleElement) return [];
+
+    return Array.from(articleElement.querySelectorAll("h2, h3"))
       .filter((heading) => heading.id)
       .map((heading) => ({
         id: heading.id,
@@ -24,8 +28,17 @@ export function TableOfContents() {
   }, []);
 
   useEffect(() => {
-    const collectedHeadings = getHeadings();
-    setHeadings(collectedHeadings);
+    // Wait a bit for MDX content to render
+    const timer = setTimeout(() => {
+      const collectedHeadings = getHeadings();
+      setHeadings(collectedHeadings);
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [getHeadings]);
+
+  useEffect(() => {
+    if (headings.length === 0) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -42,7 +55,7 @@ export function TableOfContents() {
     );
 
     // Observe all section headings
-    collectedHeadings.forEach((heading) => {
+    headings.forEach((heading) => {
       const element = document.getElementById(heading.id);
       if (element) {
         observer.observe(element);
@@ -50,14 +63,9 @@ export function TableOfContents() {
     });
 
     return () => {
-      collectedHeadings.forEach((heading) => {
-        const element = document.getElementById(heading.id);
-        if (element) {
-          observer.unobserve(element);
-        }
-      });
+      observer.disconnect();
     };
-  }, [getHeadings]);
+  }, [headings]);
 
   const scroll = (id: string) => {
     const element = document.getElementById(id);
@@ -76,17 +84,17 @@ export function TableOfContents() {
 
   return (
     <div className="space-y-2">
-      <p className="mb-3 font-medium">Table of Contents</p>
+      <p className="mb-3 font-semibold">Table of Contents</p>
       <nav className="space-y-1 text-sm">
         {headings.map((heading) => (
           <a
             key={heading.id}
             href={`#${heading.id}`}
             className={cn(
-              "hover:text-secondary block py-1 transition-colors",
+              "hover:text-primary block py-1 transition-colors",
               heading.level === 3 && "pl-4",
               activeId === heading.id
-                ? "text-secondary font-medium"
+                ? "text-primary font-medium"
                 : "text-muted-foreground"
             )}
             onClick={(e) => {

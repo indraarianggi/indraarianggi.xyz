@@ -5,7 +5,7 @@ time:
   updated: "2023-12-25T10:00:00Z"
 author:
   name: "Indra Arianggi"
-  avatar: "/images/profile-avatar.png"
+  avatar: "/avatar.svg"
   title: "Full Stack Developer"
 coverImage: "/placeholder.svg?height=600&width=1200"
 excerpt: "Learn the best practices and patterns for building large-scale React applications that are maintainable and performant."
@@ -77,9 +77,9 @@ Performance is crucial for a good user experience, especially as your applicatio
 Code splitting allows you to split your code into smaller chunks that can be loaded on demand, reducing the initial load time of your application. React.lazy and Suspense make it easy to implement code splitting in React.
 
 ```jsx
-import React, { Suspense } from 'react';
+import React, { Suspense } from "react";
 
-const LazyComponent = React.lazy(() => import('./LazyComponent'));
+const LazyComponent = React.lazy(() => import("./LazyComponent"));
 
 function App() {
   return (
@@ -112,4 +112,4 @@ Integration tests verify that different parts of your application work together 
 
 Building scalable React applications requires careful planning, good architecture, and attention to performance and maintainability. By following the practices outlined in this guide, you can create React applications that scale with your needs and remain maintainable as they grow.
 
-Remember that scalability is not just about handling more users or data; it's also about making your codebase easier to understand, modify, and extend over time. Invest in good practices early, and your future self (and team) will thank you. 
+Remember that scalability is not just about handling more users or data; it's also about making your codebase easier to understand, modify, and extend over time. Invest in good practices early, and your future self (and team) will thank you.

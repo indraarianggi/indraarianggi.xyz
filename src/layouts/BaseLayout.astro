@@ -16,27 +16,47 @@ const { title, description, image } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" suppressHydrationWarning>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/avatar.svg" />
     <Seo title={title} description={description} image={image} />
     <script is:inline>
-      // Theme initialization script
-      try {
-        const stored = localStorage.getItem("theme");
-        const preferred =
-          stored ||
-          (matchMedia("(prefers-color-scheme: dark)").matches
-            ? "dark"
-            : "light");
-        document.documentElement.classList.toggle("dark", preferred === "dark");
-      } catch {}
+      // Prevent flash of unstyled content - sync with next-themes
+      (function() {
+        try {
+          const storageKey = 'theme';
+          const theme = localStorage.getItem(storageKey);
+          const systemIsDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          
+          let isDark = false;
+          if (theme === 'dark') {
+            isDark = true;
+          } else if (theme === 'light') {
+            isDark = false;
+          } else if (theme === 'system' || !theme) {
+            isDark = systemIsDark;
+          }
+          
+          if (isDark) {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        } catch (e) {}
+      })();
     </script>
   </head>
-  <body>
-    <ThemeProvider client:load attribute="class" defaultTheme="system" enableSystem>
+  <body suppressHydrationWarning>
+    <ThemeProvider 
+      client:load
+      attribute="class" 
+      defaultTheme="system" 
+      enableSystem
+      storageKey="theme"
+      disableTransitionOnChange={false}
+    >
       <div class="flex min-h-screen flex-col">
         <Navigation client:load />
         <main class="flex-1">
