@@ -1,0 +1,148 @@
+---
+import { getCollection } from "astro:content";
+import type { GetStaticPaths } from "astro";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { calculateReadingTime } from "@/lib/reading-time";
+import { Calendar, Clock, ArrowLeft } from "lucide-react";
+import MdxImage from "@/components/MdxComponents.astro";
+import { FloatingTableOfContents } from "@/components/react/FloatingTableOfContents";
+
+export const getStaticPaths = (async () => {
+  const posts = await getCollection("posts");
+  return posts
+    .filter((post) => post.data.published !== false)
+    .map((post) => ({
+      params: { slug: post.slug },
+      props: { post },
+    }));
+}) satisfies GetStaticPaths;
+
+const { post } = Astro.props;
+const { Content, headings } = await post.render();
+const rt = calculateReadingTime(post.body);
+
+// Format date
+const formattedDate = new Date(post.data.time.created).toLocaleDateString(
+  "en-US",
+  {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  }
+);
+---
+
+<BaseLayout
+  title={post.data.title}
+  description={post.data.excerpt}
+  image={post.data.coverImage}
+>
+  <article class="py-12">
+    <div class="container mx-auto px-4">
+      <div class="mx-auto max-w-4xl">
+        <!-- Back Button -->
+        <a
+          href="/blog"
+          class="text-muted-foreground hover:text-primary mb-8 inline-flex items-center gap-2 text-sm transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Blog
+        </a>
+
+        <!-- Post Header -->
+        <header class="mb-12">
+          <h1 class="mb-6 text-4xl font-bold leading-tight md:text-5xl">
+            {post.data.title}
+          </h1>
+
+          <!-- Meta Info -->
+          <div class="text-muted-foreground flex flex-wrap items-center gap-4 text-sm">
+            <div class="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              <time datetime={typeof post.data.time.created === 'string' ? post.data.time.created : post.data.time.created.toISOString()}>
+                {formattedDate}
+              </time>
+            </div>
+            <span>•</span>
+            <div class="flex items-center gap-2">
+              <Clock className="h-4 w-4" />
+              <span>{rt.text}</span>
+            </div>
+          </div>
+
+          <!-- Tags -->
+          {
+            post.data.tags && post.data.tags.length > 0 && (
+              <div class="mt-6 flex flex-wrap gap-2">
+                {post.data.tags.map((tag) => (
+                  <span class="bg-primary/10 text-primary border-primary/20 inline-flex items-center justify-center rounded-full border px-3 py-1 text-xs font-medium">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )
+          }
+
+          <!-- Cover Image -->
+          {
+            post.data.coverImage && (
+              <div class="mt-8">
+                <img
+                  src={post.data.coverImage}
+                  alt={post.data.title}
+                  class="w-full rounded-lg border shadow-lg"
+                />
+              </div>
+            )
+          }
+        </header>
+
+        <!-- Post Content (Full Width) -->
+        <div
+          class="prose prose-neutral dark:prose-invert prose-lg max-w-none prose-headings:scroll-mt-24 prose-headings:font-bold prose-h1:text-4xl prose-h2:text-3xl prose-h3:text-2xl prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-code:rounded prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:font-mono prose-code:text-sm prose-code:before:content-none prose-code:after:content-none prose-pre:border prose-pre:bg-muted/50"
+        >
+          <Content components={{ Image: MdxImage }} />
+        </div>
+
+        <!-- Author Info -->
+        {
+          post.data.author && (
+            <div class="mt-12 border-t pt-8">
+              <div class="flex items-center gap-4">
+                {post.data.author.avatar && (
+                  <img
+                    src={post.data.author.avatar}
+                    alt={post.data.author.name}
+                    class="h-16 w-16 rounded-full border-2 border-primary/20"
+                  />
+                )}
+                <div>
+                  <p class="font-semibold">{post.data.author.name}</p>
+                  {post.data.author.occupation && (
+                    <p class="text-muted-foreground text-sm">
+                      {post.data.author.occupation}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )
+        }
+
+        <!-- Navigation to Other Posts -->
+        <div class="mt-12 border-t pt-8">
+          <a
+            href="/blog"
+            class="hover:bg-primary hover:text-white inline-flex items-center gap-2 rounded-md border px-4 py-2 text-sm transition-all"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            View All Posts
+          </a>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- Floating Table of Contents & Share Buttons -->
+  <FloatingTableOfContents client:load title={post.data.title} />
+</BaseLayout>

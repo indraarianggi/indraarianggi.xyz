@@ -1,0 +1,85 @@
+---
+title: MDX Test Page
+description: Testing MDX plugins and syntax highlighting
+---
+
+import "../styles/globals.css";
+
+# MDX Test Page 🧪
+
+This page tests the MDX integration with all plugins.
+
+## Features Being Tested
+
+### 1. GitHub Flavored Markdown (remark-gfm)
+
+**Task List:**
+- [x] Install MDX plugins
+- [x] Configure rehype-pretty-code
+- [ ] Test in production
+
+**Table:**
+
+| Plugin | Status | Purpose |
+|--------|--------|---------|
+| remark-gfm | ✅ | GitHub Flavored Markdown |
+| rehype-slug | ✅ | Add IDs to headings |
+| rehype-pretty-code | ✅ | Syntax highlighting |
+
+### 2. Syntax Highlighting (rehype-pretty-code + Shiki)
+
+```typescript
+// TypeScript example
+interface Post {
+  title: string;
+  excerpt: string;
+  tags: string[];
+  published: boolean;
+}
+
+function getPublishedPosts(posts: Post[]): Post[] {
+  return posts.filter(post => post.published);
+}
+
+const posts: Post[] = [
+  { title: "Hello World", excerpt: "First post", tags: ["intro"], published: true },
+];
+
+console.log(getPublishedPosts(posts));
+```
+
+```javascript
+// JavaScript example with line numbers
+function calculateReadingTime(content) {
+  const wordsPerMinute = 225;
+  const words = content.split(/\s+/).length;
+  const minutes = Math.ceil(words / wordsPerMinute);
+  return `${minutes} min read`;
+}
+```
+
+```bash
+# Bash commands
+bun install
+bun run dev
+bun run build
+```
+
+### 3. Heading Anchors (rehype-slug)
+
+All headings above should have IDs that can be linked to. For example, you can link to [Features Being Tested](#features-being-tested).
+
+### 4. Inline Code
+
+This is `inline code` and it should be styled properly.
+
+## Conclusion
+
+If you can see:
+- ✅ Formatted tables
+- ✅ Task lists with checkboxes  
+- ✅ Syntax-highlighted code blocks
+- ✅ Heading anchor links
+- ✅ Styled inline code
+
+Then the MDX integration is working perfectly! 🎉

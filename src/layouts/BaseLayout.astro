@@ -1,0 +1,70 @@
+---
+import Seo from "@/components/astro/Seo.astro";
+import Footer from "@/components/astro/Footer.astro";
+import { Navigation } from "@/components/react/Navigation";
+import { ThemeProvider } from "@/components/react/ThemeProvider";
+import { Toaster } from "@/components/react/Toaster";
+import "@/styles/globals.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+}
+
+const { title, description, image } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" suppressHydrationWarning>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/avatar.svg" />
+    <Seo title={title} description={description} image={image} />
+    <script is:inline>
+      // Prevent flash of unstyled content - sync with next-themes
+      (function() {
+        try {
+          const storageKey = 'theme';
+          const theme = localStorage.getItem(storageKey);
+          const systemIsDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          
+          let isDark = false;
+          if (theme === 'dark') {
+            isDark = true;
+          } else if (theme === 'light') {
+            isDark = false;
+          } else if (theme === 'system' || !theme) {
+            isDark = systemIsDark;
+          }
+          
+          if (isDark) {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body suppressHydrationWarning>
+    <ThemeProvider 
+      client:load
+      attribute="class" 
+      defaultTheme="system" 
+      enableSystem
+      storageKey="theme"
+      disableTransitionOnChange={false}
+    >
+      <div class="flex min-h-screen flex-col">
+        <Navigation client:load />
+        <main class="flex-1">
+          <slot />
+        </main>
+        <Footer />
+      </div>
+      <Toaster client:load />
+    </ThemeProvider>
+  </body>
+</html>

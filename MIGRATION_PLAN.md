@@ -25,7 +25,7 @@ This plan migrates the Next.js 15 static-export site to Astro (SSG) with React i
 
 ---
 
-## Phase 1 — Environment setup and backup
+## Phase 1 — Environment setup and backup ✅ COMPLETED
 
 ### Objective
 
@@ -58,7 +58,7 @@ git reset --hard pre-astro-migration
 
 ---
 
-## Phase 2 — Initialize Astro project with React integration
+## Phase 2 — Initialize Astro project with React integration ✅ COMPLETED
 
 ### Objective
 
@@ -106,7 +106,7 @@ rm -rf astro-temp
 
 ---
 
-## Phase 3 — Configure Bun as package manager
+## Phase 3 — Configure Bun as package manager ✅ COMPLETED
 
 ### Objective
 
@@ -155,7 +155,7 @@ Revert `package.json` changes
 
 ---
 
-## Phase 4 — Migrate Tailwind CSS v4 with PostCSS
+## Phase 4 — Migrate Tailwind CSS v4 with PostCSS ✅ COMPLETED
 
 ### Objective
 
@@ -221,11 +221,13 @@ Remove Tailwind-related files and deps
 
 ---
 
-## Phase 5 — Port global styles and custom CSS
+## Phase 5 — Port global styles and custom CSS ✅ COMPLETED
 
 ### Objective
 
 Migrate `src/app/globals.css` and custom CSS to Astro.
+
+Note: This was combined with Phase 4 Tailwind setup.
 
 ### Files
 
@@ -249,7 +251,7 @@ Restore previous `globals.css`
 
 ---
 
-## Phase 6 — Setup MDX integration with rehype/remark plugins
+## Phase 6 — Setup MDX integration with rehype/remark plugins ✅ COMPLETED
 
 ### Objective
 
@@ -313,7 +315,7 @@ Remove MDX integration from `astro.config.mjs`
 
 ---
 
-## Phase 7 — Migrate utility functions and types
+## Phase 7 — Migrate utility functions and types ✅ COMPLETED
 
 ### Objective
 
@@ -380,7 +382,7 @@ Remove or revert utils files
 
 ---
 
-## Phase 8 — Migrate content (author, menu, blog posts) via content collections
+## Phase 8 — Migrate content (author, menu, blog posts) via content collections ✅ COMPLETED
 
 ### Objective
 
@@ -451,7 +453,7 @@ Revert changes, keep original location
 
 ---
 
-## Phase 9 — Convert static UI components to Astro
+## Phase 9 — Convert static UI components to Astro ✅ COMPLETED
 
 ### Objective
 
@@ -595,7 +597,7 @@ Temporarily disable hydration directives
 
 ---
 
-## Phase 11 — Create Astro layouts
+## Phase 11 — Create Astro layouts ✅ COMPLETED
 
 ### Objective
 
@@ -666,7 +668,7 @@ Revert to simple page-level structure
 
 ---
 
-## Phase 12 — Migrate homepage
+## Phase 12 — Migrate homepage ✅ COMPLETED
 
 ### Objective
 
@@ -694,7 +696,7 @@ Comment out sections to isolate issues
 
 ---
 
-## Phase 13 — Migrate about page
+## Phase 13 — Migrate about page ✅ COMPLETED
 
 ### Objective
 
@@ -751,7 +753,7 @@ Remove route
 
 ---
 
-## Phase 15 — Migrate blog listing page
+## Phase 15 — Migrate blog listing page ✅ COMPLETED
 
 ### Objective
 
@@ -810,7 +812,7 @@ Temporarily hide unpublished posts
 
 ---
 
-## Phase 16 — Migrate blog post dynamic route
+## Phase 16 — Migrate blog post dynamic route ✅ COMPLETED
 
 ### Objective
 
@@ -1081,7 +1083,7 @@ Remove tool configs and hooks
 
 ---
 
-## Phase 19 — Final testing and optimization
+## Phase 19 — Final testing and optimization ✅ COMPLETED
 
 ### Objective
 
@@ -1112,7 +1114,7 @@ Fix regressions; revert last commits if necessary
 
 ---
 
-## Phase 20 — Deployment preparation (VPS via GitHub Actions)
+## Phase 20 — Deployment preparation (VPS via GitHub Actions) ✅ COMPLETED
 
 ### Objective
 
