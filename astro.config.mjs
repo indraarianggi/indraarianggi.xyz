@@ -19,12 +19,10 @@ export default defineConfig({
         [
           rehypePrettyCode,
           {
-            theme: {
-              dark: 'github-dark-dimmed',
-              light: 'github-light',
-            },
+            theme: 'github-dark',
             keepBackground: false,
             defaultLang: 'plaintext',
+            grid: true,
           },
         ],
       ],
@@ -50,3 +48,4 @@ export default defineConfig({
     },
   },
 });
+
