@@ -68,7 +68,7 @@ export function FloatingTableOfContents({
           className={cn("absolute top-28 -left-8", isOpen ? "z-70" : "z-30")}
         >
           <Button
-            variant="outline"
+            variant="ghost"
             size="icon"
             className="bg-background h-8 w-8 rounded-r-none border border-r-0 transition-all duration-200"
             onClick={toggleSidebar}
@@ -97,31 +97,6 @@ export function FloatingTableOfContents({
             <ShareButtons title={title} />
           </div>
         </div>
-
-        {/* <div className="flex h-full flex-col">
-          <div className="flex items-center justify-between border-b p-4">
-            <h2 className="text-lg font-semibold">Navigation</h2>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={closeSidebar}
-              aria-label="Close sidebar"
-            >
-              <X className="h-5 w-5" />
-            </Button>
-          </div>
-
-          <div className="flex-1 space-y-6 p-6">
-            <div className="bg-muted/30 rounded-lg border p-4">
-              <TableOfContents />
-            </div>
-
-            <div className="bg-muted/30 rounded-lg border p-4">
-              <p className="mb-3 text-sm font-medium">Share this post</p>
-              <ShareButtons title={title} />
-            </div>
-          </div>
-        </div> */}
       </aside>
     </>
   );

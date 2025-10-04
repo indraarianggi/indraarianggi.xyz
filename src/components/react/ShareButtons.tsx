@@ -55,36 +55,36 @@ export function ShareButtons({ title }: ShareButtonsProps) {
   return (
     <div className="flex flex-wrap gap-2">
       <Button
-        variant="outline"
+        variant="ghost"
         size="icon"
-        className="cursor-pointer rounded-full"
+        className="cursor-pointer rounded-full border"
         onClick={() => handleShare("twitter")}
         aria-label="Share on Twitter"
       >
         <Twitter className="h-4 w-4" />
       </Button>
       <Button
-        variant="outline"
+        variant="ghost"
         size="icon"
-        className="cursor-pointer rounded-full"
+        className="cursor-pointer rounded-full border"
         onClick={() => handleShare("linkedin")}
         aria-label="Share on LinkedIn"
       >
         <Linkedin className="h-4 w-4" />
       </Button>
       <Button
-        variant="outline"
+        variant="ghost"
         size="icon"
-        className="cursor-pointer rounded-full"
+        className="cursor-pointer rounded-full border"
         onClick={() => handleShare("facebook")}
         aria-label="Share on Facebook"
       >
         <Facebook className="h-4 w-4" />
       </Button>
       <Button
-        variant="outline"
+        variant="ghost"
         size="icon"
-        className="cursor-pointer rounded-full"
+        className="cursor-pointer rounded-full border"
         onClick={() => handleShare("copy")}
         aria-label="Copy link"
       >

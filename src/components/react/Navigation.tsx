@@ -19,7 +19,7 @@ export function Navigation() {
 
   return (
     <>
-      <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b backdrop-blur">
+      <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-99 w-full border-b backdrop-blur">
         <div className="container mx-auto px-4">
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
