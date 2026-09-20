@@ -2,7 +2,7 @@ import { defineCollection } from 'astro:content';
 import { z } from 'astro/zod';
 import { glob } from 'astro/loaders';
 
-const imageFields = (image: () => z.ZodType) => ({
+const imageFields = <S extends z.ZodType>(image: () => S) => ({
   image: image().optional(),
   imageAlt: z.string().trim().min(1).optional(),
 });

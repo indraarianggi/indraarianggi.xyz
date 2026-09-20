@@ -1,12 +1,13 @@
 ---
 type Props = {
   message: string;
+  tone?: 'default' | 'inverse';
 };
 
-const { message } = Astro.props;
+const { message, tone = 'default' } = Astro.props;
 ---
 
-<div class="empty-state">
+<div class:list={['empty-state', { 'empty-state-inverse': tone === 'inverse' }]}>
   <p class="empty-message">{message}</p>
 </div>
 
@@ -14,6 +15,13 @@ const { message } = Astro.props;
   .empty-state {
     border-top: 1px solid var(--rule);
     padding-block: 1.75rem;
+
+  .empty-state-inverse {
+    border-top-color: var(--muted);
+  }
+
+  .empty-state-inverse .empty-message {
+    color: var(--surface);
   }
 
   .empty-message {

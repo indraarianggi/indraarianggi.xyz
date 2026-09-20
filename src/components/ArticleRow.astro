@@ -1,0 +1,82 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { formatDate } from '../lib/content';
+
+type Props = {
+  entry: CollectionEntry<'blog'>;
+  showTopic?: boolean;
+};
+
+const { entry, showTopic = true } = Astro.props;
+---
+
+<li class="article-row">
+  <p class="row-date kicker">{formatDate(entry.data.date)}</p>
+  <h3 class="row-title-small">
+    <a class="link-underline" href={`/blog/${entry.id}/`}>{entry.data.title}</a>
+  </h3>
+  {showTopic && entry.data.topics.length > 0 && <p class="row-topic kicker kicker-red">{entry.data.topics[0]}</p>}
+</li>
+
+<style>
+  .article-row {
+    display: grid;
+    grid-template-columns: 8rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 1.5rem;
+    min-height: 5.5rem;
+    border-top: 1px solid var(--rule);
+    padding-block: 1rem;
+  }
+
+  .article-row:last-child {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .row-date {
+    margin: 0;
+    color: var(--muted);
+  }
+
+  .row-title-small {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-weight: 800;
+    letter-spacing: -0.031em;
+    font-size: clamp(1.0625rem, 1.4vw, 1.3125rem);
+    line-height: 1.1;
+  }
+
+  .row-title-small a {
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .row-topic {
+    margin: 0;
+    color: var(--red);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .row-title-small a:hover {
+      text-decoration-thickness: 1px;
+    }
+  }
+
+  @media (max-width: 47.9375rem) {
+    .article-row {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0.25rem;
+      min-height: 0;
+      padding-block: 1.25rem;
+    }
+
+    .row-date {
+      color: var(--red);
+    }
+
+    .row-topic {
+      display: none;
+    }
+  }
+</style>

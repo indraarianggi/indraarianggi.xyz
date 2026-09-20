@@ -1,0 +1,147 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+import { formatDate } from '../lib/content';
+
+type Props = {
+  entry: CollectionEntry<'blog'>;
+};
+
+const { entry } = Astro.props;
+---
+
+<article class="lead">
+  <div class="lead-visual">
+    {
+      entry.data.image ? (
+        <Image
+          src={entry.data.image}
+          alt={entry.data.imageAlt ?? ''}
+          widths={[560, 840]}
+          sizes="(min-width: 48rem) 37.5rem, 100vw"
+        />
+      ) : (
+        <p class="lead-graphic poster" aria-hidden="true">?</p>
+      )
+    }
+  </div>
+  <div class="lead-copy">
+    <p class="lead-meta kicker kicker-red">
+      {formatDate(entry.data.date)}
+      {entry.data.topics.length > 0 && <span aria-hidden="true"> / </span>}
+      {entry.data.topics[0]}
+    </p>
+    <h3 class="lead-title"><a class="link-underline" href={`/blog/${entry.id}/`}>{entry.data.title}</a></h3>
+    <p class="lead-summary">{entry.data.description}</p>
+    <p class="lead-link kicker kicker-red"><a class="link-underline" href={`/blog/${entry.id}/`}>Read article ↗</a></p>
+  </div>
+</article>
+
+<style>
+  .lead {
+    display: grid;
+    grid-template-columns: minmax(0, 37.5rem) minmax(0, 1fr);
+    gap: 2rem;
+    align-items: stretch;
+  }
+
+  .lead-visual {
+    display: grid;
+    place-items: center;
+    min-height: 24.5rem;
+    background: var(--ink);
+    padding: 1.5rem;
+  }
+
+  .lead-visual :global(img) {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+  }
+
+  .lead-graphic {
+    margin: 0;
+    font-size: 13.75rem;
+    line-height: 0.8;
+    color: var(--surface);
+  }
+
+  .lead-copy {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1rem;
+    padding-block: 1rem;
+  }
+
+  .lead-meta {
+    margin: 0;
+  }
+
+  .lead-title {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-weight: 700;
+    font-size: clamp(1.75rem, 2.9vw, 2.6875rem);
+    line-height: 1.05;
+    letter-spacing: -0.033em;
+  }
+
+  .lead-title a {
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .lead-summary {
+    max-width: 44ch;
+    font-family: var(--font-serif);
+    font-size: 1.125rem;
+    line-height: 1.45;
+    color: var(--muted);
+  }
+
+  .lead-link {
+    margin: 0;
+  }
+
+  .lead-link a {
+    color: var(--red);
+    text-decoration: none;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .lead-title a:hover,
+    .lead-link a:hover {
+      text-decoration-thickness: 1px;
+    }
+  }
+
+  @media (max-width: 47.9375rem) {
+    .lead {
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
+
+    .lead-visual {
+      min-height: 0;
+      aspect-ratio: 16 / 10;
+    }
+
+    .lead-graphic {
+      font-size: 7.8125rem;
+    }
+
+    .lead-title {
+      color: var(--surface);
+    }
+
+    .lead-title a {
+      color: var(--surface);
+    }
+
+    .lead-summary {
+      display: none;
+    }
+  }
+</style>

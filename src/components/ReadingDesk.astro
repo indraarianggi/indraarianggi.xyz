@@ -1,0 +1,136 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import EmptyState from './EmptyState.astro';
+
+type Props = {
+  current: CollectionEntry<'books'>[];
+  finished: CollectionEntry<'books'>[];
+};
+
+const { current, finished } = Astro.props;
+const hasBooks = current.length > 0 || finished.length > 0;
+
+const bookStatusLabels = {
+  reading: 'Reading now',
+  finished: 'Finished',
+  paused: 'Paused',
+  'want-to-read': 'Want to read',
+} as const;
+---
+
+<section class="desk">
+  <p class="desk-kicker kicker">Reading desk / open</p>
+  <h3 class="desk-title poster-section">Books that hold my interest</h3>
+
+  {
+    hasBooks ? (
+      <>
+        {current.length > 0 && (
+          <div class="shelf">
+            <p class="shelf-label kicker kicker-red">Reading now</p>
+            <ul class="book-list">
+              {current.map((book) => (
+                <li class="book">
+                  <p class="book-status kicker kicker-red">{bookStatusLabels[book.data.status]}</p>
+                  <p class="book-title">{book.data.title}</p>
+                  <p class="book-author">{book.data.author}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {finished.length > 0 && (
+          <div class="shelf">
+            <p class="shelf-label kicker">Finished</p>
+            <ul class="book-list">
+              {finished.map((book) => (
+                <li class="book">
+                  <p class="book-status kicker">{bookStatusLabels[book.data.status]}</p>
+                  <p class="book-title">{book.data.title}</p>
+                  <p class="book-author">{book.data.author}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </>
+    ) : (
+      <EmptyState message="No books recorded here yet." tone="inverse" />
+    )
+  }
+</section>
+
+<style>
+  .desk {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: var(--ink);
+    color: var(--surface);
+  }
+
+  .desk-kicker {
+    margin: 0;
+  }
+
+  .desk-title {
+    margin: 0;
+    font-size: clamp(1.75rem, 2.5vw, 2.25rem);
+    line-height: 0.95;
+    letter-spacing: -0.044em;
+  }
+
+  .book-author {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: 0.8125rem;
+    line-height: 1.35;
+    color: var(--rule);
+  }
+
+  .book-status {
+    margin: 0;
+  }
+
+  .shelf {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    border-top: 1px solid var(--muted);
+    padding-block-start: 0.75rem;
+  }
+
+  .shelf-label {
+    margin: 0;
+    color: var(--surface);
+  }
+
+  .book-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .book-title {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    line-height: 1.15;
+  }
+  .book-status {
+    margin: 0;
+  }
+
+  .shelf-label,
+  .book-status {
+    font-weight: 500;
+  }
+
+  .shelf-label {
+    text-transform: uppercase;
+  }
+</style>

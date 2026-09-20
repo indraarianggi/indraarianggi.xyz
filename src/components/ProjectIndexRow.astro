@@ -1,0 +1,129 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { formatDate, workStatusLabels } from '../lib/content';
+
+type Props = {
+  entry: CollectionEntry<'work'>;
+  index: number;
+  variant?: 'feature' | 'index';
+  prompt?: string;
+};
+
+const { entry, index, variant = 'index', prompt } = Astro.props;
+
+const number = String(index + 1).padStart(2, '0');
+const href = `/work/${entry.id}/`;
+const meta = `${entry.data.role} / ${workStatusLabels[entry.data.status]}`;
+---
+
+<a
+  class:list={['project-row', `project-row-${variant}`]}
+  href={href}
+  data-project-row
+>
+  <span class="row-number kicker" aria-hidden="true">{number}</span>
+  <span class="row-main">
+    <span class="row-title">{entry.data.title}</span>
+    {
+      variant === 'feature' && (
+        <span class="row-meta">
+          {entry.data.role} / {workStatusLabels[entry.data.status]}
+        </span>
+      )
+    }
+    {variant === 'index' && <span class="row-meta mono-meta">{meta}</span>}
+  </span>
+  <span class="row-year kicker" aria-hidden="true">{formatDate(entry.data.date).slice(-4)}</span>
+  {prompt && <span class="row-prompt mono-meta">{prompt}</span>}
+</a>
+
+<style>
+  .project-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.375rem 1.25rem;
+    min-height: 5.75rem;
+    padding: 1rem 0.75rem;
+    border-top: 1px solid var(--rule);
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .project-row:last-of-type {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .row-number {
+    align-self: start;
+    padding-block-start: 0.5rem;
+  }
+
+  .row-main {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+  }
+
+  .row-year {
+    align-self: start;
+    padding-block-start: 0.5rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+  }
+
+  .project-row-index {
+    padding-block: 1.25rem 1.75rem;
+    min-height: 7.5rem;
+    align-content: center;
+  }
+
+  .project-row-index .row-number {
+    color: var(--muted);
+  }
+
+  .row-prompt {
+    grid-column: 2;
+    justify-self: start;
+    padding-block-start: 0.25rem;
+    letter-spacing: 0.11em;
+  }
+
+  .project-row-feature {
+    background: transparent;
+    box-shadow: inset 4px 0 0 var(--red);
+  }
+
+  .project-row-feature:first-of-type {
+    border-top: 1px solid var(--rule);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .project-row:hover {
+      background: var(--red-soft);
+      box-shadow: inset 4px 0 0 var(--red);
+    }
+  }
+
+  .project-row:active {
+    background: var(--red-soft);
+    box-shadow: inset 4px 0 0 var(--red);
+  }
+
+  @media (max-width: 47.9375rem) {
+    .project-row {
+      grid-template-columns: auto minmax(0, 1fr);
+      min-height: 5rem;
+      padding: 0.875rem 0.25rem;
+    }
+
+    .row-year {
+      display: none;
+    }
+
+    .row-prompt {
+      display: none;
+    }
+  }
+</style>

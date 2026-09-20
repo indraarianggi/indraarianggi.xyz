@@ -21,3 +21,16 @@ export function groupBooks<
     return entries.length ? [{ status, entries }] : [];
   });
 }
+
+export function formatDate(date: Date): string {
+  const day = String(date.getUTCDate()).padStart(2, '0');
+  const month = date.toLocaleString('en-US', { month: 'short', timeZone: 'UTC' }).toUpperCase();
+  return `${day} ${month} ${date.getUTCFullYear()}`;
+}
+
+export const workStatusLabels = {
+  building: 'Building',
+  shipped: 'Shipped',
+  paused: 'Paused',
+  archived: 'Archived',
+} as const;

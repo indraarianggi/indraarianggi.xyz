@@ -1,0 +1,80 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+import { workStatusLabels } from '../lib/content';
+
+type Props = {
+  entry: CollectionEntry<'work'>;
+  index: number;
+};
+
+const { entry, index } = Astro.props;
+
+const number = String(index + 1).padStart(2, '0');
+---
+
+<div class="stage" data-project-panel>
+  <p class="stage-tag kicker">{`ACTIVE / ${number}`}</p>
+  <div class="stage-visual">
+    {
+      entry.data.image ? (
+        <Image
+          src={entry.data.image}
+          alt={entry.data.imageAlt ?? ''}
+          widths={[720, 1080]}
+          sizes="(min-width: 48rem) 40rem, 100vw"
+          loading="lazy"
+        />
+      ) : (
+        <p class="stage-word poster-mark">{entry.data.title}</p>
+      )
+    }
+  </div>
+  <p class="stage-foot mono-meta kicker-red">
+    {entry.data.role} / {workStatusLabels[entry.data.status]}
+  </p>
+</div>
+
+<style>
+  .stage {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    background: var(--ink);
+    padding: 1rem;
+  }
+
+  .stage-tag {
+    margin: 0;
+    color: var(--surface);
+  }
+
+  .stage-visual {
+    display: grid;
+    min-height: 24rem;
+    place-items: center;
+    background: var(--red);
+    padding: 1.5rem;
+  }
+
+  .stage-visual :global(img) {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+  }
+
+  .stage-word {
+    margin: 0;
+    color: var(--surface);
+  }
+
+  .stage-foot {
+    margin: 0;
+    color: var(--red);
+  }
+
+  [data-project-panel] .stage-foot {
+    text-transform: uppercase;
+  }
+</style>
