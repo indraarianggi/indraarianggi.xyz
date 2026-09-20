@@ -1,0 +1,10 @@
+# Example restricted authorized_keys entry for the deploy user.
+#
+# Install as a single line in /home/deploy/.ssh/authorized_keys, replacing the
+# key with the public half of the DEPLOY_SSH_KEY repository secret.
+#
+# rrsync confines the session to the site directory and `-wo` permits writes
+# only, so the deploy key cannot read the served files, run commands, open
+# tunnels, or touch anything outside this path.
+
+command="/usr/bin/rrsync -wo /srv/indraarianggi.xyz/site",no-agent-forwarding,no-port-forwarding,no-pty,no-user-rc,no-X11-forwarding ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI_REPLACE_WITH_YOUR_DEPLOY_PUBLIC_KEY deploy@github-actions

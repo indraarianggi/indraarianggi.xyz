@@ -1,0 +1,26 @@
+name: indraarianggi-xyz
+
+services:
+  web:
+    image: caddy:2-alpine
+    container_name: indraarianggi-web
+    restart: unless-stopped
+    # Loopback only: the tunnel reaches this, the LAN and the internet do not.
+    ports:
+      - '127.0.0.1:8080:80'
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      # The directory the GitHub Actions deploy job rsyncs into.
+      - /srv/indraarianggi.xyz/site:/srv:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+
+volumes:
+  caddy-data:
+  caddy-config:

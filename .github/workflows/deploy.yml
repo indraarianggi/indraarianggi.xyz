@@ -1,0 +1,165 @@
+name: Deploy
+
+# Builds the static site on a GitHub-hosted runner and pushes the result to the
+# home server over a Cloudflare Tunnel. Nothing listens for inbound traffic, and
+# no self-hosted runner is involved, so this stays safe while the repository is
+# public.
+#
+# Required repository secrets:
+#   DEPLOY_SSH_KEY        private half of the deploy key
+#   DEPLOY_KNOWN_HOSTS    pinned host key for the deploy hostname
+#   CF_ACCESS_CLIENT_ID   Cloudflare Access service token client id
+#   CF_ACCESS_CLIENT_SECRET  Cloudflare Access service token client secret
+#
+# Optional repository variables:
+#   SITE_URL     public origin baked into canonical URLs, sitemap, and feed
+#   DEPLOY_HOST  tunnel hostname routed to sshd on the server
+#
+# See deploy/README.md for the full runbook.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Never let two deploys interleave, and never cancel a half-finished rsync.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  SITE_URL: ${{ vars.SITE_URL || 'https://indraarianggi.xyz' }}
+  DEPLOY_HOST: ${{ vars.DEPLOY_HOST || 'ssh.indraarianggi.xyz' }}
+  DEPLOY_USER: deploy
+  CLOUDFLARED_VERSION: '2026.9.1'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Test
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
+
+      - name: Verify build output
+        run: |
+          set -eu
+          for file in index.html 404.html robots.txt rss.xml sitemap-index.xml favicon.svg; do
+            test -f "dist/$file" || { echo "missing dist/$file"; exit 1; }
+          done
+          grep -q "$SITE_URL" dist/sitemap-index.xml || {
+            echo "sitemap does not use SITE_URL=$SITE_URL"
+            exit 1
+          }
+          if grep -rq 'portfolio.invalid' dist; then
+            echo "placeholder SITE_URL leaked into dist"
+            exit 1
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      # Artifact extraction does not guarantee readable modes for the web server.
+      - name: Normalize file permissions
+        run: chmod -R a+rX dist
+
+      - name: Install cloudflared
+        run: |
+          set -eu
+          curl -fsSL --retry 3 -o /tmp/cloudflared \
+            "https://github.com/cloudflare/cloudflared/releases/download/${CLOUDFLARED_VERSION}/cloudflared-linux-amd64"
+          chmod +x /tmp/cloudflared
+          sudo install -m 0755 /tmp/cloudflared /usr/local/bin/cloudflared
+          cloudflared --version
+
+      - name: Configure SSH through Cloudflare Access
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          set -eu
+          install -m 700 -d "$HOME/.ssh"
+          printf '%s\n' "$DEPLOY_SSH_KEY" > "$HOME/.ssh/id_ed25519"
+          chmod 600 "$HOME/.ssh/id_ed25519"
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 644 "$HOME/.ssh/known_hosts"
+          cat > "$HOME/.ssh/config" <<EOF
+          Host deploy-target
+            HostName $DEPLOY_HOST
+            User $DEPLOY_USER
+            IdentityFile ~/.ssh/id_ed25519
+            IdentitiesOnly yes
+            StrictHostKeyChecking yes
+            BatchMode yes
+            ProxyCommand cloudflared access ssh --hostname %h
+          EOF
+          chmod 600 "$HOME/.ssh/config"
+          ssh -G deploy-target > /dev/null
+
+      # rrsync roots the transfer at the restricted directory, so the
+      # destination is "/" (the site root), not the absolute host path: an
+      # absolute path is re-rooted inside the tree and would nest the build.
+      # The option set is limited to what rrsync accepts on rsync 3.2.x:
+      # --delay-updates is missing from its allowlist before 3.2.7.
+      - name: Deploy
+        env:
+          TUNNEL_SERVICE_TOKEN_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
+          TUNNEL_SERVICE_TOKEN_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
+        run: |
+          set -eu
+          rsync --recursive --links --times --delete \
+            --human-readable --itemize-changes \
+            dist/ deploy-target:/
+
+      - name: Verify the live site
+        run: |
+          set -eu
+          code=000
+          for _ in $(seq 1 10); do
+            code=$(curl -sS -o /tmp/home.html -w '%{http_code}' "$SITE_URL/" || echo 000)
+            [ "$code" = "200" ] && break
+            sleep 5
+          done
+          test "$code" = "200" || { echo "home page returned $code"; exit 1; }
+          grep -q 'Indra Arianggi' /tmp/home.html || {
+            echo "home page does not contain the expected content"
+            exit 1
+          }
+
+          status=$(curl -sS -o /tmp/missing.html -w '%{http_code}' "$SITE_URL/this-page-does-not-exist")
+          test "$status" = "404" || { echo "unknown path returned $status"; exit 1; }
+
+          for path in robots.txt rss.xml sitemap-index.xml favicon.svg; do
+            status=$(curl -sS -o /dev/null -w '%{http_code}' "$SITE_URL/$path")
+            test "$status" = "200" || { echo "$path returned $status"; exit 1; }
+          done
