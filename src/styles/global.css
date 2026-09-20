@@ -172,8 +172,11 @@ button {
   font-variant-numeric: tabular-nums;
 }
 
+/* Signal red at normal text size fails WCAG AA on light surfaces (3.85:1),
+   so small red labels render in ink. Red stays for fields, rules, large
+   text, and text on ink fields, which passes (5.9:1). */
 .kicker-red {
-  color: var(--red);
+  color: var(--ink);
 }
 
 .mono-meta {

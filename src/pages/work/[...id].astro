@@ -28,21 +28,17 @@ const website = entry.data.website ?? undefined;
           <dt class="kicker">Role</dt>
           <dd class="meta-value">{entry.data.role}</dd>
         </div>
-        <div class="meta-row-pair">
-          <div class="meta-row">
-            <dt class="kicker">Status</dt>
-            <dd class="meta-value">{workStatusLabels[entry.data.status]}</dd>
-          </div>
-          <div class="meta-row-pair-item">
-            <dt class="kicker">Updated</dt>
-            <dd class="meta-meta mono-meta">
-              {
-                entry.data.endDate
-                  ? `${formatDate(entry.data.date).slice(-4)} / ${formatDate(entry.data.endDate).slice(-4)}`
-                  : formatDate(entry.data.date).slice(-4)
-              }
-            </dd>
-          </div>
+        <div class="meta-row meta-row-split">
+          <dt class="kicker">Status</dt>
+          <dd class="meta-value">{workStatusLabels[entry.data.status]}</dd>
+          <dt class="kicker">Updated</dt>
+          <dd class="meta-updated">
+            {
+              entry.data.endDate
+                ? `${formatDate(entry.data.date).slice(-4)} / ${formatDate(entry.data.endDate).slice(-4)}`
+                : formatDate(entry.data.date).slice(-4)
+            }
+          </dd>
         </div>
         {
           entry.data.stack.length > 0 && (
@@ -85,7 +81,7 @@ const website = entry.data.website ?? undefined;
     gap: 1.25rem;
     padding: 1.5rem;
     background: var(--red);
-    color: var(--surface);
+    color: var(--ink);
   }
 
   .meta-panel :global(dl),
@@ -101,10 +97,18 @@ const website = entry.data.website ?? undefined;
     gap: 0.875rem;
   }
 
-  .meta-row-pair {
+  .meta-row-split {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 0.875rem;
+  }
+
+  .meta-updated {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 0.8125rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
   }
 
   .meta-value {
@@ -128,7 +132,7 @@ const website = entry.data.website ?? undefined;
   }
 
   .meta-panel :global(.meta-link) {
-    color: var(--surface);
+    color: var(--ink);
     font-family: var(--font-mono);
     font-size: 0.6875rem;
     letter-spacing: 0.09em;
@@ -150,7 +154,7 @@ const website = entry.data.website ?? undefined;
   }
 
   .back-link a {
-    color: var(--red);
+    color: var(--ink);
     text-decoration: none;
   }
 </style>

@@ -96,7 +96,7 @@ const currentPath = normalize(pathname);
 
   .nav-link-active {
     background: var(--red);
-    color: var(--surface);
+    color: var(--ink);
   }
 
   @media (hover: hover) and (pointer: fine) {
@@ -117,8 +117,17 @@ const currentPath = normalize(pathname);
       padding-block: 0;
     }
 
+    /* Keep the full name in the accessibility tree while showing the
+       compact IA mark visually. */
     .brand-full {
-      display: none;
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      padding: 0;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
     }
 
     .brand-short {
