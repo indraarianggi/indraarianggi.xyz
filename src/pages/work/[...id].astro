@@ -1,0 +1,156 @@
+---
+import { getCollection, render } from 'astro:content';
+import { buildTocTree } from '../../lib/toc';
+import { formatDate, workStatusLabels } from '../../lib/content';
+import DetailLayout from '../../layouts/DetailLayout.astro';
+import AnalogNote from '../../components/AnalogNote.astro';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('work');
+  return entries
+    .filter(({ data }) => !import.meta.env.PROD || !data.draft)
+    .map((entry) => ({ params: { id: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content, headings } = await render(entry);
+const tree = buildTocTree(headings);
+const toc = tree.length >= 2 ? tree : undefined;
+const repository = entry.data.repository ?? undefined;
+const website = entry.data.website ?? undefined;
+---
+
+<DetailLayout title={entry.data.title} path={`/work/${entry.id}/`} variant="project" toc={toc}>
+  <Fragment slot="metadata">
+    <div class="meta-panel">
+      <dl class="meta-list">
+        <div class="meta-row">
+          <dt class="kicker">Role</dt>
+          <dd class="meta-value">{entry.data.role}</dd>
+        </div>
+        <div class="meta-row-pair">
+          <div class="meta-row">
+            <dt class="kicker">Status</dt>
+            <dd class="meta-value">{workStatusLabels[entry.data.status]}</dd>
+          </div>
+          <div class="meta-row-pair-item">
+            <dt class="kicker">Updated</dt>
+            <dd class="meta-meta mono-meta">
+              {
+                entry.data.endDate
+                  ? `${formatDate(entry.data.date).slice(-4)} / ${formatDate(entry.data.endDate).slice(-4)}`
+                  : formatDate(entry.data.date).slice(-4)
+              }
+            </dd>
+          </div>
+        </div>
+        {
+          entry.data.stack.length > 0 && (
+            <div class="meta-row">
+              <dt class="kicker">Stack</dt>
+              <dd class="meta-stack">{entry.data.stack.join(', ')}</dd>
+            </div>
+          )
+        }
+      </dl>
+      {
+        (website || repository) && (
+          <div class="meta-links">
+            {website && <a class="meta-link kicker" href={website}>Live demo ↗</a>}
+            {repository && <a class="meta-link kicker" href={repository}>Repository ↗</a>}
+          </div>
+        )
+      }
+    </div>
+  </Fragment>
+
+  <article class="prose">
+    <Content />
+  </article>
+
+  <Fragment slot="after-content">
+    <AnalogNote label="Field note / {entry.id}">
+      <p>Working record. The notes above change as the project does.</p>
+    </AnalogNote>
+    <p class="back-link kicker kicker-red">
+      <a class="link-underline" href="/work/">Back to work index ↗</a>
+    </p>
+  </Fragment>
+</DetailLayout>
+
+<style>
+  .meta-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding: 1.5rem;
+    background: var(--red);
+    color: var(--surface);
+  }
+
+  .meta-panel :global(dl),
+  .meta-panel :global(dd),
+  .meta-panel :global(dt),
+  .meta-panel :global(p) {
+    margin: 0;
+  }
+
+  .meta-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+  }
+
+  .meta-row-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.875rem;
+  }
+
+  .meta-value {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 0.9375rem;
+    letter-spacing: -0.01em;
+  }
+
+  .meta-stack {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+  }
+
+  .meta-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+  }
+
+  .meta-panel :global(.meta-link) {
+    color: var(--surface);
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .meta-panel :global(.meta-link:hover) {
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 0.3em;
+    }
+  }
+
+  .back-link {
+    margin: 0;
+    font-size: 0.75rem;
+  }
+
+  .back-link a {
+    color: var(--red);
+    text-decoration: none;
+  }
+</style>

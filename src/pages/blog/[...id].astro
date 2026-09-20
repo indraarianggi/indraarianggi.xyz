@@ -1,0 +1,103 @@
+---
+import { getCollection, render } from 'astro:content';
+import { buildTocTree } from '../../lib/toc';
+import { formatDate } from '../../lib/content';
+import DetailLayout from '../../layouts/DetailLayout.astro';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('blog');
+  return entries
+    .filter(({ data }) => !import.meta.env.PROD || !data.draft)
+    .map((entry) => ({ params: { id: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content, headings } = await render(entry);
+const tree = buildTocTree(headings);
+const toc = tree.length >= 2 ? tree : undefined;
+---
+
+<DetailLayout title={entry.data.title} path={`/blog/${entry.id}/`} variant="article" toc={toc}>
+  <Fragment slot="metadata">
+    <div class="meta-panel">
+      <dl class="meta-list">
+        <div class="meta-row">
+          <dt class="kicker">Published</dt>
+          <dd class="meta-value">{formatDate(entry.data.date)}</dd>
+        </div>
+        {
+          entry.data.updatedDate && (
+            <div class="meta-row">
+              <dt class="kicker">Updated</dt>
+              <dd class="meta-value">{formatDate(entry.data.updatedDate)}</dd>
+            </div>
+          )
+        }
+        {
+          entry.data.topics.length > 0 && (
+            <div class="meta-row">
+              <dt class="kicker">Topics</dt>
+              <dd class="meta-topics">{entry.data.topics.join(' / ')}</dd>
+            </div>
+          )
+        }
+      </dl>
+    </div>
+  </Fragment>
+
+  <article class="prose">
+    <Content />
+  </article>
+
+  <Fragment slot="after-content">
+    <p class="back-link kicker kicker-red">
+      <a class="link-underline" href="/blog/">Back to field notes ↗</a>
+    </p>
+  </Fragment>
+</DetailLayout>
+
+<style>
+  .meta-panel {
+    padding: 1.5rem;
+    background: var(--red);
+    color: var(--surface);
+  }
+
+  .meta-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+  }
+
+  .meta-list,
+  .meta-row,
+  .meta-list :global(dd),
+  .meta-list :global(dt),
+  .meta-panel :global(p) {
+    margin: 0;
+  }
+
+  .meta-value {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 0.8125rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .meta-topics {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    line-height: 1.5;
+  }
+
+  .back-link {
+    margin: 0;
+    font-size: 0.75rem;
+  }
+
+  .back-link a {
+    color: var(--red);
+    text-decoration: none;
+  }
+</style>
