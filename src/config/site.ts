@@ -12,5 +12,5 @@ export const site = {
     { href: '/about/', label: 'About' },
     { href: '/read/', label: 'Read' },
   ],
-  socialLinks: [],
+  socialLinks: [] as ReadonlyArray<{ href: string; label: string }>,
 } as const;

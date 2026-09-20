@@ -1,0 +1,26 @@
+---
+type Props = {
+  message: string;
+};
+
+const { message } = Astro.props;
+---
+
+<div class="empty-state">
+  <p class="empty-message">{message}</p>
+</div>
+
+<style>
+  .empty-state {
+    border-top: 1px solid var(--rule);
+    padding-block: 1.75rem;
+  }
+
+  .empty-message {
+    max-width: 44ch;
+    font-family: var(--font-serif);
+    font-size: 1.0625rem;
+    line-height: 1.45;
+    color: var(--muted);
+  }
+</style>

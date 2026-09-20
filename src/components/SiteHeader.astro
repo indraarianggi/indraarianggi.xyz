@@ -1,0 +1,134 @@
+---
+import { site } from '../config/site';
+
+const { pathname } = Astro.url;
+
+const normalize = (href: string) => (href === '/' ? '/' : href.replace(/\/$/, ''));
+const currentPath = normalize(pathname);
+---
+
+<header class="masthead">
+  <div class="shell masthead-inner">
+    <a
+      class="brand"
+      href="/"
+      aria-current={currentPath === '/' ? 'page' : undefined}
+    >
+      <span class="brand-full">Indra Arianggi</span>
+      <span class="brand-short" aria-hidden="true">IA</span>
+    </a>
+    <nav aria-label="Primary">
+      <ul class="nav-list">
+        {
+          site.primaryNav.map((item) => {
+            const path = normalize(item.href);
+            const active = path === '/' ? currentPath === '/' : currentPath.startsWith(path);
+            return (
+              <li>
+                <a
+                  class:list={['nav-link', { 'nav-link-active': active }]}
+                  href={item.href}
+                  aria-current={active ? 'page' : undefined}
+                >
+                  {item.label}
+                </a>
+              </li>
+            );
+          })
+        }
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .masthead {
+    border-bottom: 1px solid var(--ink);
+    background: var(--paper);
+  }
+
+  .masthead-inner {
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: 1.5rem;
+    min-height: 4.5rem;
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    padding-block: 0.625rem;
+    color: var(--ink);
+    text-decoration: none;
+    font-family: var(--font-poster);
+    font-size: 1.125rem;
+    letter-spacing: -0.028em;
+    text-transform: uppercase;
+  }
+
+  .brand-short {
+    display: none;
+    font-size: 1.25rem;
+  }
+
+  .nav-list {
+    display: flex;
+    align-items: stretch;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .nav-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 1rem 0.875rem;
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 0.6875rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+
+  .nav-link-active {
+    background: var(--red);
+    color: var(--surface);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .nav-link:not(.nav-link-active):hover {
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 0.3em;
+    }
+  }
+
+  @media (max-width: 47.9375rem) {
+    .masthead-inner {
+      min-height: 3.875rem;
+      gap: 1rem;
+    }
+
+    .brand {
+      padding-block: 0;
+    }
+
+    .brand-full {
+      display: none;
+    }
+
+    .brand-short {
+      display: inline;
+    }
+
+    .nav-link {
+      padding: 1rem 0.625rem;
+      font-size: 0.625rem;
+      letter-spacing: 0.05em;
+    }
+  }
+</style>

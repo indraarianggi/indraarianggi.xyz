@@ -1,0 +1,58 @@
+---
+type Props = {
+  label?: string;
+};
+
+const { label } = Astro.props;
+---
+
+<aside class="analog-note">
+  {label && <p class="note-label kicker kicker-red">{label}</p>}
+  <div class="note-body">
+    <slot />
+  </div>
+  <p class="note-mark" aria-hidden="true">////</p>
+</aside>
+
+<style>
+  .analog-note {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-width: 24rem;
+    padding: 1.25rem;
+    background: var(--surface);
+    border: 1px solid var(--ink);
+    box-shadow: 0.375rem 0.375rem 0 var(--paper);
+    rotate: -0.75deg;
+  }
+
+  .note-label {
+    margin: 0;
+  }
+
+  .note-body {
+    font-family: var(--font-serif);
+    font-size: 1.0625rem;
+    line-height: 1.4;
+    color: var(--ink);
+  }
+
+  .note-body :global(p) {
+    margin: 0;
+  }
+
+  .note-mark {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    letter-spacing: 0.18em;
+    color: var(--red);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .analog-note {
+      rotate: 0deg;
+    }
+  }
+</style>

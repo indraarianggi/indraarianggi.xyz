@@ -1,6 +1,8 @@
 ---
 import { ClientRouter, fade } from 'astro:transitions';
 import SeoHead from '../components/SeoHead.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
 import '../styles/fonts.css';
 import '../styles/global.css';
 
@@ -22,22 +24,24 @@ const { title, description, path, image, article } = Astro.props;
 <!doctype html>
 <html lang="en">
   <head>
-    <ClientRouter />
+    <meta charset="utf-8" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content"
     />
     <meta name="theme-color" content="#f1efe8" />
-    <ClientRouter fallback="none" />
+    <ClientRouter />
     <SeoHead title={title} description={description} path={path} image={image} article={article} />
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to content</a>
 
-    <!-- Shared editorial shell (header and footer) is integrated in the next task. -->
+    <SiteHeader />
 
     <main id="main-content" tabindex="-1" transition:animate={fade({ duration: '180ms' })}>
       <slot />
     </main>
+
+    <SiteFooter />
   </body>
 </html>
