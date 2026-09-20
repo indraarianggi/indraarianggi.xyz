@@ -1,0 +1,40 @@
+---
+import { site } from '../config/site';
+
+type Props = {
+  title: string;
+  description?: string;
+  path: string;
+  image?: { src: string; alt: string };
+  article?: {
+    publishedTime?: Date;
+    modifiedTime?: Date;
+    tags?: string[];
+  };
+};
+
+const { title, description = site.description, path, image, article } = Astro.props;
+
+const canonicalURL = new URL(path, Astro.site ?? Astro.url);
+const ogImageURL = image ? new URL(image.src, Astro.site ?? Astro.url) : undefined;
+
+const published = article?.publishedTime?.toISOString();
+const modified = article?.modifiedTime?.toISOString() ?? published;
+---
+
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonicalURL} />
+
+<meta property="og:type" content={article ? 'article' : 'website'} />
+<meta property="og:site_name" content={site.name} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonicalURL} />
+{published && <meta property="article:published_time" content={published} />}
+{modified && <meta property="article:modified_time" content={modified} />}
+{article?.tags?.map((tag) => <meta property="article:tag" content={tag} />)}
+
+{ogImageURL && <meta property="og:image" content={ogImageURL} />}
+{ogImageURL && <meta property="og:image:alt" content={image?.alt} />}
+{image && <meta name="twitter:card" content="summary_large_image" />}
