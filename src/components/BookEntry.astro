@@ -1,0 +1,148 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { render } from 'astro:content';
+import { Image } from 'astro:assets';
+
+type Props = {
+  book: CollectionEntry<'books'>;
+  shelf: 'red' | 'black';
+  statusLabel: string;
+};
+
+const { book, shelf, statusLabel } = Astro.props;
+const { Content } = book.body ? await render(book) : { Content: null };
+---
+
+<li class="book">
+  <div class:list={['spine', `spine-${shelf}`]}>
+    <span class="spine-status kicker">{statusLabel}</span>
+  </div>
+  <div class="book-main">
+    {
+      book.data.cover && book.data.coverAlt && (
+        <Image
+          class="book-cover"
+          src={book.data.cover}
+          alt={book.data.coverAlt}
+          widths={[120, 240]}
+          sizes="120px"
+          loading="lazy"
+        />
+      )
+    }
+    <div class="book-copy">
+      <p class="book-status kicker kicker-red">{statusLabel}</p>
+      <p class="book-title">{book.data.title}</p>
+      <p class="book-author">{book.data.author}</p>
+    </div>
+    {Content && <div class="prose book-note"><Content /></div>}
+  </div>
+</li>
+
+<style>
+  .book {
+    display: grid;
+    grid-template-columns: 3.375rem minmax(0, 1fr);
+    min-height: 8.5rem;
+    background: var(--surface);
+    outline: 1px solid oklch(0 0 0 / 0.1);
+    outline-offset: -1px;
+  }
+
+  .spine {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 0.75rem 0.25rem;
+  }
+
+  .spine-red {
+    background: var(--red);
+  }
+
+  .spine-black {
+    background: var(--ink);
+  }
+
+  .spine-status {
+    color: var(--surface);
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    font-size: 0.625rem;
+    letter-spacing: 0.12em;
+  }
+
+  .book-main {
+    display: flex;
+    gap: 1.25rem;
+    padding: 1rem 1.25rem;
+    min-width: 0;
+  }
+
+  .book-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+  }
+
+  .book-status {
+    margin: 0;
+  }
+
+  .book-title {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-weight: 800;
+    letter-spacing: -0.031em;
+    text-transform: uppercase;
+    font-size: 1.125rem;
+    line-height: 1.1;
+  }
+
+  .book-author {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+  }
+
+  .book-cover {
+    width: 6rem;
+    height: auto;
+    align-self: flex-start;
+  }
+
+  .book-note {
+    margin-block-start: 0.75rem;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 47.9375rem) {
+    .book {
+      grid-template-columns: 1fr;
+      min-height: 0;
+    }
+
+    .spine {
+      flex-direction: row;
+      justify-content: flex-start;
+      padding: 0.5rem 0.875rem;
+      min-height: 2rem;
+    }
+
+    .spine-status {
+      writing-mode: horizontal-tb;
+    }
+
+    .spine {
+      grid-column: 1;
+    }
+
+    .book-main {
+      padding: 1rem 1.25rem 1.25rem;
+    }
+  }
+</style>

@@ -1,0 +1,131 @@
+---
+import { site } from '../config/site';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import AnalogNote from '../components/AnalogNote.astro';
+---
+
+<BaseLayout title={`About | ${site.name}`} path="/about/">
+  <div class="shell">
+    <section class="poster-header" aria-labelledby="about-title">
+      <div class="poster-field">
+        <p class="kicker kicker-red">About / Statement</p>
+        <h1 class="poster-headline poster" id="about-title">I learn by making things.</h1>
+      </div>
+      <div class="poster-panel">
+        <p class="panel-name kicker">{site.name}</p>
+        <p class="panel-copy serif-lede">Software engineer. Learning through projects, questions, writing, and books from many fields.</p>
+      </div>
+    </section>
+
+    <section class="practice" aria-label="Practice">
+      <div class="practice">
+        <p>
+          Indra is a software engineer. He learns by making things and reflecting through projects, questions,
+          writing, and books from many fields.
+        </p>
+        <p>This site records work in progress and the lessons kept near the work.</p>
+      </div>
+
+      <div class="principles" aria-label="Principles">
+        <AnalogNote label="Principle / 01">
+          <p>Make the question smaller.</p>
+        </AnalogNote>
+        <AnalogNote label="Principle / 02">
+          <p>Keep failure visible.</p>
+        </AnalogNote>
+        <AnalogNote label="Principle / 03">
+          <p>Write down what changed.</p>
+        </AnalogNote>
+      </div>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .poster-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 24rem);
+    gap: 0.5rem;
+    margin-block-start: 1.25rem;
+  }
+
+  .poster-field {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 5rem;
+    padding: 1.75rem;
+    background: var(--ink);
+  }
+
+  .poster-field p {
+    margin: 0;
+  }
+
+  .poster-headline {
+    margin: 0;
+    color: var(--surface);
+    font-size: clamp(2.75rem, 5.6vw, 4.9375rem);
+    line-height: 0.86;
+    letter-spacing: -0.047em;
+  }
+
+  .poster-panel {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 1.5rem;
+    background: var(--red);
+    color: var(--surface);
+  }
+
+  .poster-panel p {
+    margin: 0;
+  }
+
+  .practice {
+    max-width: 44rem;
+    margin-block: 2rem;
+    font-family: var(--font-serif);
+    font-size: 1.1875rem;
+    line-height: 1.6;
+  }
+
+  .practice p {
+    margin-block-end: 1.25em;
+  }
+
+  .principles {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.25rem;
+    margin-block-end: 3.5rem;
+  }
+
+  .principles :global(.analog-note:nth-child(2)) {
+    rotate: 0.6deg;
+    background: var(--red-soft);
+  }
+
+  .principles :global(.analog-note:nth-child(3)) {
+    rotate: -0.4deg;
+  }
+
+  @media (max-width: 47.9375rem) {
+    .poster-header {
+      grid-template-columns: 1fr;
+      margin-block-start: 1rem;
+    }
+
+    .poster-field {
+      padding: 1.25rem;
+      gap: 3rem;
+    }
+
+    .principles {
+      margin-block-end: 2.5rem;
+    }
+  }
+</style>

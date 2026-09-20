@@ -1,0 +1,93 @@
+---
+import { site } from '../config/site';
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title={`Page not found | ${site.name}`} path="/404/">
+  <div class="shell">
+    <section class="misprint" aria-labelledby="notfound-title">
+      <p class="giant-number poster" aria-hidden="true">404</p>
+      <div class="message-panel">
+        <p class="kicker">Misprint / Page not found</p>
+        <h1 class="message poster" id="notfound-title">This page is not in the index.</h1>
+        <ul class="recovery">
+          <li><a class="recovery-link kicker" href="/">Home ↗</a></li>
+          <li><a class="recovery-link kicker" href="/work/">Work ↗</a></li>
+          <li><a class="recovery-link kicker" href="/blog/">Blog ↗</a></li>
+        </ul>
+      </div>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .misprint {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 24rem);
+    gap: 0.5rem;
+    margin-block: 1.25rem 3.5rem;
+  }
+
+  .giant-number {
+    margin: 0;
+    font-size: clamp(7rem, 17vw, 15rem);
+    line-height: 0.8;
+    letter-spacing: -0.05em;
+  }
+
+  .message-panel {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 4rem;
+    padding: 1.5rem;
+    background: var(--red);
+    color: var(--surface);
+  }
+
+  .message-panel p {
+    margin: 0;
+  }
+
+  .message {
+    margin: 0;
+    color: var(--surface);
+    font-size: clamp(1.75rem, 2.6vw, 2.375rem);
+    line-height: 0.92;
+    letter-spacing: -0.04em;
+  }
+
+  .recovery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .recovery-link {
+    color: var(--surface);
+    text-decoration: none;
+    font-size: 0.6875rem;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .recovery-link:hover {
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 0.3em;
+    }
+  }
+
+  @media (max-width: 47.9375rem) {
+    .misprint {
+      grid-template-columns: 1fr;
+      margin-block: 1rem 2.5rem;
+    }
+
+    .message-panel {
+      gap: 3rem;
+    }
+  }
+</style>
