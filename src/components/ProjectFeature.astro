@@ -71,8 +71,8 @@ const number = String(index + 1).padStart(2, '0');
 
   .stage-foot {
     margin: 0;
-    /* Red passes AA on the ink field (5.9:1). */
-    color: var(--red);
+    /* Red at normal size fails on ink (4.45:1); surface passes (19.4:1). */
+    color: var(--surface);
   }
 
   [data-project-panel] .stage-foot {

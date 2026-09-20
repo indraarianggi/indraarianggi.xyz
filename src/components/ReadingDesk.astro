@@ -119,8 +119,8 @@ const bookStatusLabels = {
   }
   .book-status {
     margin: 0;
-    /* Red passes AA on the ink field (5.9:1). */
-    color: var(--red);
+    /* Red at normal size fails on ink (4.45:1); surface passes. */
+    color: var(--surface);
   }
 
   .shelf-label {
@@ -129,10 +129,7 @@ const bookStatusLabels = {
     text-transform: uppercase;
   }
 
-  .shelf-label.kicker-red {
-    color: var(--red);
-  }
-
+  .shelf-label.kicker-red,
   .shelf-label.kicker {
     color: var(--surface);
   }
