@@ -12,6 +12,7 @@ Headline: "Making software. Learning as I go."
 | Language | TypeScript, `astro/tsconfigs/strict` |
 | Content | Markdown via Astro content collections (`glob` loader, Zod schemas) |
 | Styling | Native CSS with custom properties in `src/styles/global.css` |
+| Images | `sharp` behind `astro:assets`, WebP output with responsive widths |
 | Type | Archivo Black, Archivo, Literata, IBM Plex Mono (local Fontsource packages) |
 | Icons | `astro-icon` with `@iconify-json/ph` |
 | Feeds | `@astrojs/rss`, `@astrojs/sitemap` |
@@ -157,6 +158,21 @@ coverAlt: Cover of Example book  # required when cover is set
 
 Images are processed by the Astro image pipeline and must live beside the entry that references them. Set `imageAlt` (or `coverAlt` for books) whenever an image is present; the schema rejects entries that omit it.
 
+### Markdown support
+
+Rendered as expected: headings (`h2` and `h3` feed the contents rail), paragraphs, bold, italic, inline code, links, autolinks, blockquotes, horizontal rules, ordered and unordered lists including nesting, images referenced relatively, fenced code blocks with syntax highlighting, and GFM tables.
+
+Not supported by the current processor:
+
+- **Footnotes.** `[^1]` and `^[inline]` render as literal text.
+- **Task lists.** `- [x]` renders as a disabled checkbox with no accessible name, which drops the detail page to a Lighthouse accessibility score of 92. Write the state in the text instead, as the sample entries do.
+
+Both come from Astro 7 using Sätteri as the default Markdown processor. The legacy unified pipeline, which supports footnotes and would allow a rehype plugin to label task list checkboxes, needs `@astrojs/markdown-remark` installed first. Astro reports this explicitly if you add `remarkPlugins` or `rehypePlugins` to the config.
+
+### Sample entries
+
+The repository ships six placeholder entries so the layouts can be reviewed with real content: `atlas-index`, `beacon-monitor`, and `cairn-notes` under `work`, and `reading-code-slowly`, `keeping-a-field-log`, and `small-tools-that-stick` under `blog`. Each one says so at the top and bottom of its body. Replace them with real material before publishing, and keep the `books` collection empty until there are books to list.
+
 ## Design system
 
 Tokens live in `src/styles/global.css` and match `DESIGN_REPORT.md`.
@@ -195,13 +211,16 @@ pnpm check    # 0 errors, 0 warnings, 0 hints
 pnpm build    # type-check plus static build of every route
 ```
 
-`pnpm check` and the build emit empty-collection notices while `src/content/work`, `src/content/blog`, and `src/content/books` contain no published Markdown. Those notices disappear once real entries exist.
+The build prints an empty-collection notice for `src/content/books` only, since that collection has no entries yet. The notices for `work` and `blog` disappeared when the sample entries landed.
 
-The current build was verified in a production preview at 1440px and 390px: Lighthouse accessibility, best practices, and SEO scored 100 on every route, with zero console errors, failed assets, or horizontal overflow. Accessibility details worth preserving during edits:
+The built site was verified in a production preview at 1440px and 390px: zero console errors, zero failed requests, and zero horizontal overflow on every route, including the six detail pages. Lighthouse accessibility scored 100 on the home page, all three work detail pages, and a blog detail page, with no failing audits. Accessibility details worth preserving during edits:
 
 - Normal-size red text fails WCAG AA on both paper (3.85:1) and ink (4.45:1), so small labels use `--ink` on light surfaces, `--surface` on ink fields, and `--ink-on-red` on red fields. Red remains for fields, rules, decorations, and qualifying large text.
+- Code blocks use `github-light-high-contrast`, because the default `github-light` theme paints tokens such as `#e36209` at 3.48:1 on the code surface.
 - The mobile masthead keeps the full name "Indra Arianggi" in the accessibility tree while showing the `IA` mark visually.
 - The skip link targets `#main-content`, and `prefers-reduced-motion` disables smooth scrolling and animations.
+
+Markdown config changes do not invalidate Astro's cached rendering of content. After editing `astro.config.mjs`, remove `.astro/` before building, or the previous output is reused and the change appears to have no effect.
 
 ## Deployment
 
