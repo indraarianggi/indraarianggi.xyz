@@ -62,8 +62,8 @@ for (const group of groups) {
 
 <BaseLayout title={`Read | ${site.name}`} path="/read/">
   <div class="shell">
-    <section class="header" aria-labelledby="read-title">
-      <h1 class="giant poster" id="read-title">Read / Curiosity</h1>
+    <section class="header" aria-labelledby="read-title" data-reveal>
+      <h1 class="giant poster" id="read-title">Read /<br />Curiosity</h1>
       <div class="context">
         <p class="kicker">Curiosity shelf / open</p>
         <p class="serif-lede">A record of books that hold my interest, wherever they came from.</p>
@@ -79,7 +79,7 @@ for (const group of groups) {
       {
         shelves.map((shelf) => (
           <section class="shelf" aria-label={shelf.label}>
-            <div class:list={['shelf-block', `shelf-${shelf.spine}`]}>
+            <div class:list={['shelf-block', `shelf-${shelf.spine}`]} data-reveal>
               <p class="shelf-number poster">{shelf.number}</p>
               <p class="shelf-label kicker">{shelf.label}</p>
             </div>
@@ -98,26 +98,25 @@ for (const group of groups) {
 <style>
   .header {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 24rem);
-    gap: 0.5rem;
-    margin-block-start: 1.25rem;
+    grid-template-columns: minmax(0, 930fr) minmax(0, 398fr);
+    min-height: 21.25rem;
   }
 
   .giant {
     margin: 0;
-    font-size: clamp(3.25rem, 7.4vw, 6.625rem);
-    line-height: 0.83;
+    padding-block-start: 0.125rem;
+    font-size: clamp(3.25rem, 6.25vw, 5.625rem);
+    line-height: 0.84;
     letter-spacing: -0.047em;
   }
 
   .context {
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
-    gap: 0.75rem;
+    justify-content: space-between;
+    gap: 2rem;
     padding: 1.5rem;
     background: var(--red);
-    color: var(--ink-on-red);
   }
 
   .context p {
@@ -128,88 +127,135 @@ for (const group of groups) {
     color: var(--ink-on-red);
   }
 
+  .context .serif-lede {
+    color: var(--surface);
+    font-size: 1.5625rem;
+    line-height: 1.25;
+  }
+
   .shelves {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-    margin-block: 2rem 3.5rem;
+    margin-block-end: 3.5rem;
   }
 
   .shelf {
     display: grid;
     grid-template-columns: minmax(0, 16.25rem) minmax(0, 1fr);
-    gap: 0.5rem;
     align-items: stretch;
+    min-height: 19.375rem;
+    border-bottom: 1px solid var(--ink);
   }
 
   .shelf-block {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    gap: 4rem;
-    padding: 1.25rem;
+    gap: 2rem;
+    padding: 1.375rem;
   }
 
   .shelf-red {
     background: var(--red);
-    color: var(--ink-on-red);
   }
 
   .shelf-red .shelf-label {
     color: var(--ink-on-red);
   }
 
-  .shelf-red .poster-mark,
-  .shelf-red .poster {
-    color: var(--surface);
-  }
-
   .shelf-black {
     background: var(--ink);
-    color: var(--surface);
   }
 
   .shelf-block p {
     margin: 0;
   }
 
-  .shelf-label {
+  .shelf-number {
+    font-size: 4.0625rem;
+    line-height: 1.1;
     color: var(--surface);
+  }
+
+  .shelf-label {
+    color: var(--red-on-ink);
   }
 
   .shelf-books {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(24rem, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.375rem;
     margin: 0;
-    padding: 0;
+    padding: 1.375rem;
     list-style: none;
+  }
+
+  @media (min-width: 48rem) and (max-width: 67.5rem) {
+    .shelf-books {
+      grid-template-columns: 1fr;
+    }
   }
 
   @media (max-width: 47.9375rem) {
     .header {
       grid-template-columns: 1fr;
-      margin-block-start: 1rem;
+      min-height: 0;
+      gap: 0.75rem;
+      margin-block: 0.75rem;
+    }
+
+    .giant {
+      font-size: clamp(2.8125rem, 14.1vw, 3.4375rem);
+      line-height: 0.86;
+    }
+
+    .context {
+      gap: 0.5rem;
+      padding: 0;
+      background: transparent;
+    }
+
+    .context .kicker {
+      color: var(--red-text);
+    }
+
+    .context .serif-lede {
+      color: var(--muted);
+      font-size: 1.1875rem;
+      line-height: 1.35;
     }
 
     .shelves {
-      margin-block: 1.5rem 2.5rem;
+      gap: 0.75rem;
+      margin-block-end: 2.5rem;
     }
 
     .shelf {
       grid-template-columns: 1fr;
+      min-height: 0;
+      border: 0;
     }
 
     .shelf-block {
       flex-direction: row;
       align-items: center;
-      justify-content: space-between;
       gap: 1rem;
-      padding: 0.875rem 1.25rem;
+      min-height: 4.125rem;
+      padding: 0.875rem;
+    }
+
+    .shelf-number {
+      font-size: 1.75rem;
+    }
+
+    .shelf-label {
+      text-align: right;
     }
 
     .shelf-books {
       grid-template-columns: 1fr;
+      gap: 0;
+      padding: 0;
     }
   }
 </style>

@@ -127,6 +127,8 @@ const { tree } = Astro.props;
     flex-direction: column;
     max-height: calc(100dvh - 9rem);
     overflow-y: auto;
+    background: var(--surface);
+    border: 1px solid var(--ink);
   }
 
   .rail-header {
@@ -134,11 +136,13 @@ const { tree } = Astro.props;
     align-items: center;
     justify-content: space-between;
     gap: 0.5rem;
-    padding-block-end: 0.75rem;
+    min-height: 4.25rem;
+    padding: 0.5rem 1rem;
+    background: var(--ink);
   }
 
   .rail-label {
-    color: var(--ink);
+    color: var(--surface);
   }
   .rail-collapse {
     display: inline-flex;
@@ -148,13 +152,17 @@ const { tree } = Astro.props;
     padding: 0.5rem 0.75rem;
     background: none;
     border: 0;
-    color: var(--red);
+    color: var(--red-on-ink);
     cursor: pointer;
+  }
+
+  .rail-collapse :global(.kicker-red) {
+    color: inherit;
   }
 
   .rail-list {
     margin: 0;
-    padding: 0;
+    padding: 1rem;
     list-style: none;
     border-top: 1px solid var(--ink);
   }
@@ -292,7 +300,7 @@ const { tree } = Astro.props;
     height: 3rem;
     background: none;
     border: 0;
-    color: var(--red);
+    color: var(--red-text);
     cursor: pointer;
   }
 
@@ -368,7 +376,7 @@ const { tree } = Astro.props;
     display: none;
   }
 
-  @media (max-width: 63.9375rem) {
+  @media (max-width: 47.9375rem) {
     .desktop-rail,
     .collapsed-rail {
       display: none;
@@ -386,7 +394,7 @@ const { tree } = Astro.props;
 
   /* ---- Desktop rail controls: 150ms opacity/color ---- */
 
-  @media (min-width: 64rem) {
+  @media (min-width: 48rem) and (hover: hover) and (pointer: fine) {
     .rail-link,
     .rail-child {
       transition:
@@ -412,6 +420,13 @@ const { tree } = Astro.props;
     .mobile-dialog[open] {
       animation: none;
     }
+
+    .rail-link,
+    .rail-child,
+    .rail-collapse,
+    .collapsed-rail {
+      transition: none;
+    }
   }
 </style>
 
@@ -419,7 +434,8 @@ const { tree } = Astro.props;
   /* Rail width is reserved by the DetailLayout grid column; the collapsed
      control lives in the same column, so the reading measure never moves. */
 
-  @media (min-width: 64rem) {
+  @media (min-width: 48rem) {
+    .desktop-rail[hidden],
     .collapsed-rail[hidden] {
       display: none;
     }
@@ -431,11 +447,14 @@ const { tree } = Astro.props;
   // Guards a component data flag so a second bundle execution is a no-op.
   const state = {
     observer: undefined as IntersectionObserver | undefined,
+    cleanup: undefined as (() => void) | undefined,
   };
 
   function disconnect() {
     state.observer?.disconnect();
     state.observer = undefined;
+    state.cleanup?.();
+    state.cleanup = undefined;
   }
 
   function headingTargets(root: HTMLElement): Element[] {
@@ -457,6 +476,7 @@ const { tree } = Astro.props;
     const collapseButton = root.querySelector<HTMLButtonElement>('[data-toc-collapse]');
     const expandButton = root.querySelector<HTMLButtonElement>('[data-toc-expand]');
     const links = [...root.querySelectorAll<HTMLAnchorElement>('[data-toc-link]')];
+    const mobileViewport = window.matchMedia('(max-width: 47.9375rem)');
 
     if (links.length === 0) return;
 
@@ -505,7 +525,7 @@ const { tree } = Astro.props;
     // measure never changes; only the control inside the column changes width.
     const setCollapsed = (collapsed: boolean) => {
       collapseButton?.setAttribute('aria-expanded', String(!collapsed));
-      expandButton?.setAttribute('aria-expanded', String(collapsed));
+      expandButton?.setAttribute('aria-expanded', String(!collapsed));
       if (collapsed) {
         rail?.setAttribute('hidden', '');
         expandButton?.removeAttribute('hidden');
@@ -528,7 +548,11 @@ const { tree } = Astro.props;
       document.documentElement.style.overflow = locked ? 'hidden' : '';
     };
 
+    // Focus returns to the control used to open the sheet. Opening scrolls the
+    // page and can hide the trigger again, so remember the open context.
+    let openedFromTrigger = false;
     trigger?.addEventListener('click', () => {
+      openedFromTrigger = true;
       dialog?.showModal();
       lockScroll(true);
     });
@@ -547,8 +571,23 @@ const { tree } = Astro.props;
 
     dialog?.addEventListener('close', () => {
       lockScroll(false);
-      trigger?.focus();
+      if (mobileViewport.matches && openedFromTrigger) {
+        trigger?.focus();
+      } else {
+        (rail?.hidden ? expandButton : collapseButton)?.focus();
+      }
+      openedFromTrigger = false;
     });
+
+    const onViewportChange = () => {
+      if (!mobileViewport.matches && dialog?.open) dialog.close();
+    };
+    mobileViewport.addEventListener('change', onViewportChange);
+    state.cleanup = () => {
+      mobileViewport.removeEventListener('change', onViewportChange);
+      if (dialog?.open) dialog.close();
+      lockScroll(false);
+    };
   }
 
   document.addEventListener('astro:page-load', () => {

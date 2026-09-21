@@ -6,6 +6,8 @@
   --rule: #b9b4aa;
   --red: #e33122;
   --red-soft: #f5d8d2;
+  --red-text: #b92b1e;
+  --red-on-ink: #ff7667;
   --focus-ring: #e33122;
   /* True black for normal-size text directly on signal-red fields.
      --ink (#0a0a0a) on red measures 4.45:1; #000 measures 4.73:1. */
@@ -14,9 +16,9 @@
   --font-sans: 'Archivo Variable', sans-serif;
   --font-serif: 'Literata Variable', serif;
   --font-mono: 'IBM Plex Mono', monospace;
-  --ease-out: cubic-bezier(0.2, 0, 0, 1);
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --measure: 68ch;
-  --page-gutter: clamp(1rem, 4vw, 4rem);
+  --page-gutter: clamp(1rem, 3.889vw, 3.5rem);
   color-scheme: light;
 }
 
@@ -95,9 +97,9 @@ button {
 
 .shell {
   width: 100%;
-  max-width: 83rem;
+  max-width: 90rem;
   margin-inline: auto;
-  padding-inline: var(--page-gutter);
+  padding-inline: max(var(--page-gutter), env(safe-area-inset-left)) max(var(--page-gutter), env(safe-area-inset-right));
 }
 
 /* Full-bleed bands (black fields, red panels) sit inside a normal-flow shell. */
@@ -175,13 +177,10 @@ button {
   font-variant-numeric: tabular-nums;
 }
 
-/* Signal red at normal text size fails WCAG AA on light surfaces (3.85:1)
-   and on the approved ink field (4.45:1). Small labels therefore render
-   in ink on light surfaces, surface on ink fields, or --ink-on-red on red
-   fields. Red remains for fields, rules, decorations, and qualifying
-   large text. */
+/* A darker ink for small signal labels preserves the reference's red voice
+   without sacrificing contrast on paper. Large fields retain vermilion. */
 .kicker-red {
-  color: var(--ink);
+  color: var(--red-text);
 }
 
 .mono-meta {
@@ -350,6 +349,32 @@ img {
   }
 }
 
+/* Editorial reveals are progressive enhancement; content is visible by default. */
+[data-reveal].reveal-pending {
+  opacity: 0;
+  transform: translateY(18px);
+}
+
+[data-reveal].reveal-ready {
+  transition: opacity 500ms var(--ease-out), transform 500ms var(--ease-out);
+}
+
+[data-reveal].reveal-ready:not(.reveal-pending) {
+  opacity: 1;
+  transform: none;
+}
+
+::selection {
+  background: var(--red);
+  color: var(--surface);
+}
+
+@media (max-width: 47.9375rem) {
+  :root {
+    --page-gutter: 1rem;
+  }
+}
+
 /* ---- Reduced motion ---- */
 
 @media (prefers-reduced-motion: reduce) {
@@ -363,5 +388,10 @@ img {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+  }
+
+  [data-reveal].reveal-pending {
+    opacity: 1;
+    transform: none;
   }
 }

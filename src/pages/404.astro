@@ -5,7 +5,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 <BaseLayout title={`Page not found | ${site.name}`} path="/404/">
   <div class="shell">
-    <section class="misprint" aria-labelledby="notfound-title">
+    <section class="misprint" aria-labelledby="notfound-title" data-reveal>
       <p class="giant-number poster" aria-hidden="true">404</p>
       <div class="message-panel">
         <p class="kicker">Misprint / Page not found</p>
@@ -23,15 +23,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 <style>
   .misprint {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 24rem);
-    gap: 0.5rem;
-    margin-block: 1.25rem 3.5rem;
+    grid-template-columns: minmax(0, 840fr) minmax(0, 488fr);
+    min-height: 37.5rem;
   }
 
   .giant-number {
     margin: 0;
-    font-size: clamp(7rem, 17vw, 15rem);
-    line-height: 0.8;
+    font-size: clamp(10rem, 23.6vw, 21.25rem);
+    line-height: 0.85;
     letter-spacing: -0.05em;
   }
 
@@ -40,7 +39,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     flex-direction: column;
     justify-content: space-between;
     gap: 4rem;
-    padding: 1.5rem;
+    padding: 1.75rem;
     background: var(--red);
     color: var(--ink-on-red);
   }
@@ -51,16 +50,17 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
   .message {
     margin: 0;
-    color: var(--surface);
-    font-size: clamp(1.75rem, 2.6vw, 2.375rem);
-    line-height: 0.92;
+    color: var(--ink-on-red);
+    font-size: clamp(1.75rem, 2.92vw, 2.625rem);
+    line-height: 0.95;
     letter-spacing: -0.04em;
   }
 
   .recovery {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem 1.5rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -69,7 +69,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   .recovery-link {
     color: var(--ink-on-red);
     text-decoration: none;
-    font-size: 0.6875rem;
+    display: inline-block;
+    padding-block: 0.25rem;
+    font-size: 0.8125rem;
   }
 
   @media (hover: hover) and (pointer: fine) {
@@ -83,11 +85,33 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   @media (max-width: 47.9375rem) {
     .misprint {
       grid-template-columns: 1fr;
-      margin-block: 1rem 2.5rem;
+      min-height: 0;
+    }
+
+    .giant-number {
+      padding-block: 0.75rem 1.25rem;
+      font-size: 9.0625rem;
+      line-height: 0.95;
     }
 
     .message-panel {
-      gap: 3rem;
+      min-height: 20.625rem;
+      gap: 2.5rem;
+      padding: 1.125rem;
+    }
+
+    .message {
+      font-size: 2.125rem;
+    }
+
+    .recovery {
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 0.5rem 1.5rem;
+    }
+
+    .recovery-link {
+      font-size: 0.6875rem;
     }
   }
 </style>

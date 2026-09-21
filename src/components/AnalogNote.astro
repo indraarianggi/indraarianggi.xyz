@@ -19,6 +19,7 @@ const { label } = Astro.props;
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+    min-width: 0;
     max-width: 24rem;
     padding: 1.25rem;
     background: var(--surface);
@@ -29,6 +30,7 @@ const { label } = Astro.props;
 
   .note-label {
     margin: 0;
+    color: var(--red-text);
   }
 
   .note-body {
@@ -36,6 +38,7 @@ const { label } = Astro.props;
     font-size: 1.0625rem;
     line-height: 1.4;
     color: var(--ink);
+    overflow-wrap: anywhere;
   }
 
   .note-body :global(p) {
@@ -47,7 +50,7 @@ const { label } = Astro.props;
     font-family: var(--font-mono);
     font-size: 1rem;
     letter-spacing: 0.18em;
-    color: var(--red);
+    color: var(--red-text);
   }
 
   @media (prefers-reduced-motion: reduce) {

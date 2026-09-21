@@ -4,8 +4,7 @@ import { visibleNewestFirst } from '../lib/content';
 import { site } from '../config/site';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import EmptyState from '../components/EmptyState.astro';
-import ProjectIndexRow from '../components/ProjectIndexRow.astro';
-import ProjectFeature from '../components/ProjectFeature.astro';
+import ProjectIndex from '../components/ProjectIndex.astro';
 import ArticleRow from '../components/ArticleRow.astro';
 import ReadingDesk from '../components/ReadingDesk.astro';
 
@@ -20,7 +19,7 @@ const articles = visibleNewestFirst(blogAll, production);
 const books = visibleNewestFirst(booksAll, production);
 
 const featuredWork = work.filter((entry) => entry.data.featured).slice(0, 3);
-const recentArticles = articles.slice(0, 4);
+const recentArticles = articles.slice(0, 3);
 const currentBooks = books.filter((entry) => entry.data.status === 'reading').slice(0, 1);
 const finishedBooks = books
   .filter((entry) => entry.data.status === 'finished')
@@ -32,15 +31,19 @@ const finishedBooks = books
     <section class="hero" aria-labelledby="home-headline">
       <div class="hero-field">
         <p class="hero-kicker kicker kicker-red">{site.name} / Software Engineer</p>
-        <h1 class="hero-headline poster" id="home-headline">Making software. Learning as I go.</h1>
+        <h1 class="hero-headline poster" id="home-headline">
+          <span>Making software.</span>
+          <span>Learning as I go.</span>
+        </h1>
       </div>
       <div class="hero-note">
-        <p class="hero-note-label kicker">Status / Learning</p>
-        <p class="hero-note-copy serif-lede">I learn by making things.</p>
+        <p class="hero-note-label kicker">Note / 01</p>
+        <p class="hero-note-copy">I build to understand. I write to remember. I read because useful ideas rarely stay inside one field.</p>
+        <span class="hero-note-mark" aria-hidden="true">////</span>
       </div>
     </section>
 
-    <section class="selected-work" aria-labelledby="selected-work-title">
+    <section class="selected-work" aria-labelledby="selected-work-title" data-reveal>
       <header class="section-poster">
         <p class="section-number poster" aria-hidden="true">01</p>
         <div>
@@ -51,23 +54,14 @@ const finishedBooks = books
 
       {
         featuredWork.length > 0 ? (
-          <div class="work-stage">
-            <div class="work-index">
-              {featuredWork.map((entry, index) => (
-                <ProjectIndexRow entry={entry} index={index} variant="feature" />
-              ))}
-            </div>
-            <div class="work-visual">
-              <ProjectFeature entry={featuredWork[0]} index={0} />
-            </div>
-          </div>
+          <ProjectIndex entries={featuredWork} variant="feature" />
         ) : (
           <EmptyState message="Nothing published here yet. I'm still building." />
         )
       }
     </section>
 
-    <section class="writing-reading" aria-labelledby="writing-title">
+    <section class="writing-reading" aria-labelledby="writing-title" data-reveal>
       <div class="writing">
         <p class="kicker kicker-red">Recent writing</p>
         <h2 class="section-poster-title poster-section" id="writing-title">Notes from the work</h2>
@@ -88,8 +82,8 @@ const finishedBooks = books
       <ReadingDesk current={currentBooks} finished={finishedBooks} />
     </section>
 
-    <section class="closing" aria-label="Closing statement">
-      <p class="closing-statement poster">Still learning. Still making.</p>
+    <section class="closing" aria-label="Closing statement" data-reveal>
+      <p class="closing-statement poster">Still learning.<br />Still making.</p>
       <p class="closing-links kicker kicker-red">
         <a class="link-underline" href="/about/">About ↗</a>
         <span aria-hidden="true">&ensp;&ensp;</span>
@@ -102,41 +96,51 @@ const finishedBooks = books
 <style>
   .hero {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 24rem);
-    gap: 0.5rem;
-    margin-block-start: 1.25rem;
+    grid-template-columns: minmax(0, 900fr) minmax(0, 428fr);
+    min-height: 31.25rem;
+    border-bottom: 3px solid var(--ink);
   }
 
   .hero-field {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    gap: 2rem;
-    padding: 2rem;
+    gap: 6rem;
+    padding: 1.75rem;
     background: var(--ink);
+    container-type: inline-size;
   }
 
   .hero-kicker {
     margin: 0;
-    color: var(--surface);
+    color: var(--red-on-ink);
   }
 
   .hero-headline {
     margin: 0;
     color: var(--surface);
-    font-size: clamp(2.75rem, 5.4vw, 4.75rem);
+    font-size: clamp(2.5rem, 8.95cqw, 4.75rem);
     line-height: 0.86;
     letter-spacing: -0.047em;
+    text-wrap: initial;
+  }
+
+  .hero-headline span {
+    display: block;
+    animation: poster-in 650ms var(--ease-out) both;
+  }
+
+  .hero-headline span + span {
+    animation-delay: 70ms;
   }
 
   .hero-note {
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
-    gap: 0.75rem;
-    padding: 1.5rem;
+    justify-content: space-between;
+    gap: 2rem;
+    padding: 1.75rem;
     background: var(--red);
-    color: var(--surface);
   }
 
   .hero-note-label {
@@ -146,29 +150,49 @@ const finishedBooks = books
 
   .hero-note-copy {
     margin: 0;
-    color: var(--ink-on-red);
+    color: var(--surface);
+    font-family: var(--font-serif);
+    font-size: clamp(1.35rem, 1.95vw, 1.75rem);
+    line-height: 1.2;
+    text-wrap: pretty;
+    animation: poster-in 650ms 140ms var(--ease-out) both;
+  }
+
+  .hero-note-mark {
+    font-family: var(--font-mono);
+    font-size: 1.125rem;
+    letter-spacing: 0.25em;
   }
 
   .selected-work {
-    margin-block-start: 2.5rem;
+    margin-block-start: 3.375rem;
   }
 
   .section-poster {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: center;
-    gap: 1.5rem;
-    border-top: 1px solid var(--ink);
-    padding-block: 1rem;
+    grid-template-columns: 9.75rem minmax(0, 1fr);
+    align-items: stretch;
+    min-height: 8.625rem;
+    border-top: 3px solid var(--ink);
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .section-poster > div {
+    align-self: center;
+    padding: 1.25rem 1.75rem;
+  }
+
+  .section-poster .kicker {
+    margin-bottom: 0.5rem;
   }
 
   .section-number {
+    display: grid;
+    place-items: center;
     margin: 0;
-    padding: 0.5rem 1rem;
-    background: var(--ink);
+    background: var(--red);
     color: var(--surface);
-    font-size: clamp(2.5rem, 4vw, 3.875rem);
-    line-height: 0.9;
+    font-size: 3.875rem;
     letter-spacing: -0.048em;
   }
 
@@ -176,26 +200,25 @@ const finishedBooks = books
     margin: 0;
   }
 
-  .work-stage {
-    display: grid;
-    grid-template-columns: minmax(0, 39rem) minmax(0, 1fr);
-    gap: 1.5rem;
-    align-items: start;
-    margin-block-start: 0.5rem;
-  }
-
   .writing-reading {
     display: grid;
-    grid-template-columns: minmax(0, 49rem) minmax(0, 1fr);
-    gap: 2rem;
-    align-items: start;
-    margin-block-start: 1.5rem;
+    grid-template-columns: minmax(0, 780fr) minmax(0, 548fr);
+    align-items: stretch;
+    min-height: 30rem;
+    margin-block-start: 2rem;
   }
 
   .writing {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
+    padding: 1.75rem 1.75rem 1.75rem 0;
+  }
+
+  .writing > .kicker {
+    margin-bottom: 0.75rem;
+  }
+
+  .writing .poster-section {
+    margin-bottom: 1.75rem;
+    font-size: clamp(1.75rem, 3.055vw, 2.75rem);
   }
 
   .article-list {
@@ -206,57 +229,131 @@ const finishedBooks = books
 
   .closing {
     display: flex;
-    flex-wrap: wrap;
-    align-items: flex-end;
+    align-items: center;
     justify-content: space-between;
-    gap: 1rem 2rem;
-    margin-block: 3rem 3.5rem;
+    gap: 2rem;
+    min-height: 15.625rem;
+    border-top: 1px solid var(--ink);
+    padding-block: 3rem;
   }
 
   .closing-statement {
     margin: 0;
-    font-size: clamp(2.5rem, 4.4vw, 3.4375rem);
+    font-size: clamp(2.5rem, 3.82vw, 3.4375rem);
     line-height: 0.9;
     letter-spacing: -0.045em;
   }
 
   .closing-links {
     margin: 0;
+    white-space: nowrap;
     font-size: 0.75rem;
   }
 
   .closing-links a {
-    color: var(--ink);
+    color: var(--red-text);
     text-decoration: none;
   }
 
-  @media (max-width: 63.9375rem) {
-    .writing-reading {
-      grid-template-columns: 1fr;
+  @keyframes poster-in {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-headline span,
+    .hero-note-copy {
+      animation: none;
+    }
+  }
+
+  @media (max-width: 63.9375rem) and (min-width: 48rem) {
+    .hero {
+      min-height: 27rem;
+    }
+
+    .hero-headline {
+      font-size: 10cqw;
     }
   }
 
   @media (max-width: 47.9375rem) {
     .hero {
-      grid-template-columns: 1fr;
-      margin-block-start: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.125rem;
+      min-height: 32.5rem;
+      padding: 1.5rem;
+      background: var(--ink);
     }
 
     .hero-field {
-      padding: 1.25rem;
-      gap: 4rem;
+      display: contents;
     }
 
-    .work-stage {
-      grid-template-columns: 1fr;
+    .hero-kicker {
+      font-size: 0.5625rem;
+      letter-spacing: 0.055em;
     }
 
-    .work-visual {
+    .hero-headline {
+      font-size: clamp(2.375rem, 12.82vw, 3.125rem);
+      line-height: 0.9;
+    }
+
+    .hero-note {
+      display: block;
+      padding: 0;
+      background: transparent;
+    }
+
+    .hero-note-label,
+    .hero-note-mark {
       display: none;
     }
 
+    .hero-note-copy {
+      font-size: 1.125rem;
+      line-height: 1.35;
+    }
+
+    .selected-work {
+      margin-block-start: 1.5rem;
+    }
+
+    .section-poster {
+      display: block;
+      min-height: 0;
+      border: 0;
+    }
+
+    .section-poster > div {
+      padding: 0 0 0.875rem;
+    }
+
+    .section-number,
+    .section-poster .kicker {
+      display: none;
+    }
+
+    .section-poster-title {
+      font-size: clamp(1.75rem, 9.74vw, 2.375rem);
+    }
+
+    .writing-reading {
+      grid-template-columns: 1fr;
+      margin-block-start: 0;
+    }
+
+    .writing {
+      padding: 1.5rem 0 2rem;
+    }
+
     .closing {
-      margin-block: 2rem;
+      flex-wrap: wrap;
+      min-height: 0;
+      margin-block-start: 1.5rem;
+      padding-block: 2rem;
     }
   }
 </style>

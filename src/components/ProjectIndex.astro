@@ -1,0 +1,131 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import ProjectIndexRow from './ProjectIndexRow.astro';
+import ProjectFeature from './ProjectFeature.astro';
+
+type Props = {
+  entries: CollectionEntry<'work'>[];
+  variant?: 'feature' | 'index';
+};
+
+const { entries, variant = 'index' } = Astro.props;
+---
+
+<project-index class:list={['project-index', `project-index-${variant}`]}>
+  <div class="project-list">
+    {entries.map((entry, index) => (
+      <ProjectIndexRow entry={entry} index={index} variant={variant} />
+    ))}
+  </div>
+  <div class="project-previews" aria-hidden="true">
+    {entries.map((entry, index) => (
+      <div class:list={['preview-panel', { 'is-active': index === 0 }]} data-preview-panel>
+        <ProjectFeature entry={entry} index={index} />
+      </div>
+    ))}
+  </div>
+</project-index>
+
+<script>
+  class ProjectIndex extends HTMLElement {
+    connectedCallback() {
+      const rows = Array.from(this.querySelectorAll<HTMLAnchorElement>('[data-project-row]'));
+      const panels = Array.from(this.querySelectorAll<HTMLElement>('[data-preview-panel]'));
+      const controller = new AbortController();
+      this.controller?.abort();
+      this.controller = controller;
+      let active = 0;
+      const activate = (index: number, keyboard = false) => {
+        if (index === active) return;
+        this.classList.toggle('keyboard-preview', keyboard);
+        rows[active]?.classList.remove('is-active');
+        panels[active]?.classList.remove('is-active');
+        rows[index]?.classList.add('is-active');
+        panels[index]?.classList.add('is-active');
+        active = index;
+      };
+      rows.forEach((row, index) => {
+        row.addEventListener('pointerenter', (event) => {
+          if (event.pointerType === 'mouse') activate(index);
+        }, { signal: controller.signal });
+        row.addEventListener('focus', () => activate(index, true), { signal: controller.signal });
+      });
+    }
+
+    private controller?: AbortController;
+
+    disconnectedCallback() {
+      this.controller?.abort();
+    }
+  }
+
+  if (!customElements.get('project-index')) customElements.define('project-index', ProjectIndex);
+</script>
+
+<style>
+  .project-index {
+    display: grid;
+    grid-template-columns: minmax(0, 650fr) minmax(0, 678fr);
+    border-bottom: 2px solid var(--ink);
+  }
+
+  .project-index-feature {
+    grid-template-columns: minmax(0, 620fr) minmax(0, 708fr);
+  }
+
+  .project-list {
+    min-width: 0;
+  }
+
+  .project-previews {
+    position: relative;
+    min-width: 0;
+    min-height: 35rem;
+    overflow: hidden;
+    background: var(--ink);
+  }
+
+  .project-index-feature .project-previews {
+    min-height: 23.125rem;
+  }
+
+  .preview-panel {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(8px);
+    transition: opacity 220ms var(--ease-out), transform 220ms var(--ease-out), visibility 220ms;
+  }
+
+  .preview-panel.is-active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .keyboard-preview .preview-panel {
+    transition: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .preview-panel {
+      transform: none;
+    }
+  }
+
+  .keyboard-preview :global(.project-row::before) {
+    transition: none;
+  }
+
+  @media (max-width: 47.9375rem) {
+    .project-index {
+      grid-template-columns: 1fr;
+      border-bottom: 0;
+    }
+
+    .project-previews {
+      display: none;
+    }
+  }
+</style>

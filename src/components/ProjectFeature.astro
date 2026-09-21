@@ -14,68 +14,73 @@ const number = String(index + 1).padStart(2, '0');
 ---
 
 <div class="stage" data-project-panel>
+  {entry.data.image && (
+    <Image
+      class="stage-image"
+      src={entry.data.image}
+      alt={entry.data.imageAlt ?? ''}
+      widths={[720, 1080]}
+      sizes="(min-width: 90rem) 44rem, 50vw"
+      loading="lazy"
+    />
+  )}
   <p class="stage-tag kicker">{`ACTIVE / ${number}`}</p>
-  <div class="stage-visual">
-    {
-      entry.data.image ? (
-        <Image
-          src={entry.data.image}
-          alt={entry.data.imageAlt ?? ''}
-          widths={[720, 1080]}
-          sizes="(min-width: 48rem) 40rem, 100vw"
-          loading="lazy"
-        />
-      ) : (
-        <p class="stage-word poster-mark">{entry.data.title}</p>
-      )
-    }
+  <div class="stage-caption">
+    <p class="stage-summary">{entry.data.summary}</p>
+    <p class="stage-foot mono-meta">{entry.data.role} / {workStatusLabels[entry.data.status]}</p>
   </div>
-  <p class="stage-foot mono-meta kicker-red">
-    {entry.data.role} / {workStatusLabels[entry.data.status]}
-  </p>
 </div>
 
 <style>
   .stage {
+    position: relative;
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    justify-content: space-between;
+    align-items: flex-start;
+    height: 100%;
+    gap: 2rem;
+    overflow: hidden;
     background: var(--ink);
-    padding: 1rem;
+    color: var(--surface);
+    padding: 1.75rem;
+  }
+
+  .stage :global(.stage-image) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    outline: none;
   }
 
   .stage-tag {
+    position: relative;
     margin: 0;
-    color: var(--surface);
+    padding: 0.5rem 0.625rem;
+    background: var(--ink);
+    color: var(--red-on-ink);
   }
 
-  .stage-visual {
-    display: grid;
-    min-height: 24rem;
-    place-items: center;
-    background: var(--red);
-    padding: 1.5rem;
+  .stage-caption {
+    position: relative;
+    max-width: 34rem;
+    padding: 1.25rem;
+    background: var(--ink);
   }
 
-  .stage-visual :global(img) {
-    width: 100%;
-    height: auto;
-    display: block;
-    object-fit: cover;
-  }
-
-  .stage-word {
-    margin: 0;
-    color: var(--surface);
+  .stage-summary {
+    margin: 0 0 1rem;
+    font-family: var(--font-serif);
+    font-size: clamp(1.25rem, 1.94vw, 1.75rem);
+    line-height: 1.2;
+    text-wrap: pretty;
   }
 
   .stage-foot {
     margin: 0;
-    /* Red at normal size fails on ink (4.45:1); surface passes (19.4:1). */
-    color: var(--surface);
-  }
-
-  [data-project-panel] .stage-foot {
-    text-transform: uppercase;
+    line-height: 1.5;
+    color: var(--red-on-ink);
   }
 </style>

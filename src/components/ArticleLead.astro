@@ -31,7 +31,7 @@ const { entry } = Astro.props;
       {entry.data.topics.length > 0 && <span aria-hidden="true"> / </span>}
       {entry.data.topics[0]}
     </p>
-    <h3 class="lead-title"><a class="link-underline" href={`/blog/${entry.id}/`}>{entry.data.title}</a></h3>
+    <h2 class="lead-title"><a class="link-underline" href={`/blog/${entry.id}/`}>{entry.data.title}</a></h2>
     <p class="lead-summary">{entry.data.description}</p>
     <p class="lead-link kicker kicker-red"><a class="link-underline" href={`/blog/${entry.id}/`}>Read article ↗</a></p>
   </div>
@@ -40,22 +40,25 @@ const { entry } = Astro.props;
 <style>
   .lead {
     display: grid;
-    grid-template-columns: minmax(0, 37.5rem) minmax(0, 1fr);
-    gap: 2rem;
-    align-items: stretch;
+    grid-template-columns: minmax(0, 600fr) minmax(0, 728fr);
+    min-height: 24.375rem;
   }
 
   .lead-visual {
     display: grid;
+    position: relative;
     place-items: center;
-    min-height: 24.5rem;
+    min-width: 0;
+    min-height: 24.375rem;
+    overflow: hidden;
     background: var(--ink);
-    padding: 1.5rem;
   }
 
   .lead-visual :global(img) {
+    position: absolute;
+    inset: 0;
     width: 100%;
-    height: auto;
+    height: 100%;
     display: block;
     object-fit: cover;
   }
@@ -70,31 +73,37 @@ const { entry } = Astro.props;
   .lead-copy {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    gap: 1rem;
-    padding-block: 1rem;
+    justify-content: space-between;
+    gap: 1.5rem;
+    min-width: 0;
+    padding: 1.75rem;
   }
 
   .lead-meta {
     margin: 0;
+    color: var(--red-text);
   }
 
   .lead-title {
     margin: 0;
     font-family: var(--font-serif);
     font-weight: 700;
-    font-size: clamp(1.75rem, 2.9vw, 2.6875rem);
+    font-size: clamp(1.75rem, 2.99vw, 2.6875rem);
     line-height: 1.05;
     letter-spacing: -0.033em;
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
   }
 
   .lead-title a {
     color: var(--ink);
     text-decoration: none;
+    transition: color 150ms var(--ease-out);
   }
 
   .lead-summary {
     max-width: 44ch;
+    margin: 0;
     font-family: var(--font-serif);
     font-size: 1.125rem;
     line-height: 1.45;
@@ -106,21 +115,38 @@ const { entry } = Astro.props;
   }
 
   .lead-link a {
-    color: var(--ink);
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    color: var(--red-text);
     text-decoration: none;
+  }
+
+  .lead-title a:focus-visible,
+  .lead-link a:focus-visible {
+    outline-offset: 5px;
+    text-decoration: underline;
+  }
+
+  .lead-title a:active,
+  .lead-link a:active {
+    opacity: 0.7;
   }
 
   @media (hover: hover) and (pointer: fine) {
     .lead-title a:hover,
     .lead-link a:hover {
+      color: var(--red-text);
+      text-decoration: underline;
       text-decoration-thickness: 1px;
+      text-underline-offset: 0.12em;
     }
   }
 
   @media (max-width: 47.9375rem) {
     .lead {
       grid-template-columns: 1fr;
-      gap: 1.25rem;
+      background: var(--ink);
     }
 
     .lead-visual {
@@ -132,16 +158,41 @@ const { entry } = Astro.props;
       font-size: 7.8125rem;
     }
 
+    .lead-copy {
+      gap: 1.25rem;
+      padding: 1.125rem;
+    }
+
     .lead-title {
+      font-size: 1.75rem;
+      line-height: 1.06;
+    }
+
+    .lead-title a,
+    .lead-summary {
       color: var(--surface);
     }
 
-    .lead-title a {
-      color: var(--surface);
+    .lead-meta,
+    .lead-link a {
+      color: var(--red-on-ink);
     }
 
     .lead-summary {
-      display: none;
+      font-size: 1rem;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .lead-title a:hover,
+      .lead-link a:hover {
+        color: var(--red-on-ink);
+      }
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lead-title a {
+      transition: none;
     }
   }
 </style>
