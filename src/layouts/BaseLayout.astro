@@ -46,3 +46,49 @@ const { title, description, path, image, article } = Astro.props;
     <SiteFooter />
   </body>
 </html>
+
+<script>
+  let cleanupReveals: (() => void) | undefined;
+
+  document.addEventListener('astro:page-load', () => {
+    cleanupReveals?.();
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (reducedMotion.matches) return;
+
+    const controller = new AbortController();
+    const sections = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
+    const reveal = (section: Element) => {
+      section.classList.remove('reveal-pending');
+      observer.unobserve(section);
+    };
+    const observer = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) reveal(entry.target);
+      }
+    }, { threshold: 0.08 });
+
+    for (const section of sections) {
+      // Never hide content already on screen, including restored scroll positions.
+      if (section.getBoundingClientRect().top < window.innerHeight) continue;
+      section.classList.add('reveal-ready', 'reveal-pending');
+      observer.observe(section);
+      section.addEventListener('focusin', () => reveal(section), { signal: controller.signal });
+    }
+
+    reducedMotion.addEventListener('change', () => {
+      if (!reducedMotion.matches) return;
+      sections.forEach(reveal);
+      observer.disconnect();
+    }, { signal: controller.signal });
+
+    cleanupReveals = () => {
+      observer.disconnect();
+      controller.abort();
+    };
+  });
+
+  document.addEventListener('astro:before-swap', () => {
+    cleanupReveals?.();
+    cleanupReveals = undefined;
+  });
+</script>

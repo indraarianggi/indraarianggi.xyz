@@ -10,7 +10,7 @@ type Props = {
 const { entry, showTopic = true } = Astro.props;
 ---
 
-<li class="article-row">
+<li class:list={['article-row', { 'without-topic': !showTopic }]}>
   <p class="row-date kicker">{formatDate(entry.data.date)}</p>
   <h3 class="row-title-small">
     <a class="link-underline" href={`/blog/${entry.id}/`}>{entry.data.title}</a>
@@ -21,16 +21,24 @@ const { entry, showTopic = true } = Astro.props;
 <style>
   .article-row {
     display: grid;
-    grid-template-columns: 8rem minmax(0, 1fr) auto;
+    grid-template-columns: 6.5rem minmax(0, 1fr) auto;
     align-items: center;
     gap: 1.5rem;
     min-height: 5.5rem;
-    border-top: 1px solid var(--rule);
+    border-top: 1px solid var(--ink);
     padding-block: 1rem;
   }
 
   .article-row:last-child {
-    border-bottom: 1px solid var(--rule);
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .article-row.without-topic {
+    grid-template-columns: 6.5rem minmax(0, 1fr);
+  }
+
+  .article-row > * {
+    min-width: 0;
   }
 
   .row-date {
@@ -40,43 +48,73 @@ const { entry, showTopic = true } = Astro.props;
 
   .row-title-small {
     margin: 0;
-    font-family: var(--font-sans);
-    font-weight: 800;
+    font-family: var(--font-poster);
+    font-weight: 400;
     letter-spacing: -0.031em;
-    font-size: clamp(1.0625rem, 1.4vw, 1.3125rem);
+    font-size: clamp(1.0625rem, 1.46vw, 1.3125rem);
     line-height: 1.1;
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
   }
 
   .row-title-small a {
+    display: flex;
+    align-items: center;
+    min-height: 2.75rem;
     color: var(--ink);
     text-decoration: none;
+    transition: color 150ms var(--ease-out);
   }
 
   .row-topic {
     margin: 0;
-    color: var(--ink);
+    justify-self: end;
+    color: var(--red-text);
+  }
+
+  .row-title-small a:focus-visible {
+    text-decoration: underline;
+  }
+
+  .row-title-small a:active {
+    opacity: 0.7;
   }
 
   @media (hover: hover) and (pointer: fine) {
     .row-title-small a:hover {
+      color: var(--red-text);
+      text-decoration: underline;
       text-decoration-thickness: 1px;
+      text-underline-offset: 0.15em;
     }
   }
 
   @media (max-width: 47.9375rem) {
-    .article-row {
+    .article-row,
+    .article-row.without-topic {
       grid-template-columns: minmax(0, 1fr);
-      gap: 0.25rem;
-      min-height: 0;
+      align-content: center;
+      gap: 0.5rem;
+      min-height: 7.5rem;
       padding-block: 1.25rem;
     }
 
     .row-date {
-      color: var(--ink);
+      color: var(--red-text);
+    }
+
+    .row-title-small {
+      font-size: 1.1875rem;
     }
 
     .row-topic {
-      display: none;
+      font-size: 0.625rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .row-title-small a {
+      transition: none;
     }
   }
 </style>

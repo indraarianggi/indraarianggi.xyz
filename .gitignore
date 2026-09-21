@@ -5,3 +5,8 @@ dist
 .DS_Store
 .idea
 .vscode
+
+# Deployment secrets: tunnel credentials and generated deploy keys
+deploy/cloudflared/*.json
+deploy_key
+deploy_key.pub

@@ -20,17 +20,20 @@ const repository = entry.data.repository ?? undefined;
 const website = entry.data.website ?? undefined;
 ---
 
-<DetailLayout title={entry.data.title} path={`/work/${entry.id}/`} variant="project" toc={toc}>
+<DetailLayout title={entry.data.title} summary={entry.data.summary} path={`/work/${entry.id}/`} variant="project" toc={toc}>
   <Fragment slot="metadata">
     <div class="meta-panel">
+      <p class="meta-heading kicker">Project details</p>
       <dl class="meta-list">
         <div class="meta-row">
           <dt class="kicker">Role</dt>
           <dd class="meta-value">{entry.data.role}</dd>
         </div>
-        <div class="meta-row meta-row-split">
+        <div class="meta-row">
           <dt class="kicker">Status</dt>
           <dd class="meta-value">{workStatusLabels[entry.data.status]}</dd>
+        </div>
+        <div class="meta-row">
           <dt class="kicker">Updated</dt>
           <dd class="meta-updated">
             {
@@ -78,7 +81,8 @@ const website = entry.data.website ?? undefined;
   .meta-panel {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    justify-content: space-between;
+    gap: 1.5rem;
     padding: 1.5rem;
     background: var(--red);
     color: var(--ink-on-red);
@@ -94,35 +98,43 @@ const website = entry.data.website ?? undefined;
   .meta-list {
     display: flex;
     flex-direction: column;
-    gap: 0.875rem;
+    gap: 0.5rem;
   }
 
-  .meta-row-split {
+  .meta-row {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.875rem;
+    grid-template-columns: 5rem minmax(0, 1fr);
+    align-items: baseline;
+    gap: 0.75rem;
+  }
+
+  .meta-heading,
+  .meta-row .kicker {
+    font-size: 0.6875rem;
   }
 
   .meta-updated {
     font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
-    font-size: 0.8125rem;
+    font-size: 0.6875rem;
     letter-spacing: 0.05em;
     text-transform: uppercase;
   }
 
   .meta-value {
-    font-family: var(--font-sans);
-    font-weight: 600;
-    font-size: 0.9375rem;
-    letter-spacing: -0.01em;
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 0.6875rem;
+    line-height: 1.8;
+    text-transform: uppercase;
   }
 
   .meta-stack {
     font-family: var(--font-mono);
-    font-size: 0.75rem;
-    line-height: 1.5;
-    letter-spacing: 0.02em;
+    font-size: 0.6875rem;
+    line-height: 1.8;
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
   }
 
   .meta-links {
@@ -156,5 +168,27 @@ const website = entry.data.website ?? undefined;
   .back-link a {
     color: var(--ink);
     text-decoration: none;
+  }
+
+  @media (max-width: 47.9375rem) {
+    .meta-panel {
+      gap: 1rem;
+      padding: 0.875rem;
+    }
+
+    .meta-heading {
+      display: none;
+    }
+
+    .meta-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.5rem 1rem;
+    }
+
+    .meta-row {
+      grid-template-columns: 1fr;
+      gap: 0.125rem;
+    }
   }
 </style>

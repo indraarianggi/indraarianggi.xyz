@@ -1,15 +1,15 @@
 ---
 import type { CollectionEntry } from 'astro:content';
-import { formatDate, workStatusLabels } from '../lib/content';
+import { Image } from 'astro:assets';
+import { workStatusLabels } from '../lib/content';
 
 type Props = {
   entry: CollectionEntry<'work'>;
   index: number;
   variant?: 'feature' | 'index';
-  prompt?: string;
 };
 
-const { entry, index, variant = 'index', prompt } = Astro.props;
+const { entry, index, variant = 'index' } = Astro.props;
 
 const number = String(index + 1).padStart(2, '0');
 const href = `/work/${entry.id}/`;
@@ -17,113 +17,224 @@ const meta = `${entry.data.role} / ${workStatusLabels[entry.data.status]}`;
 ---
 
 <a
-  class:list={['project-row', `project-row-${variant}`]}
+  class:list={['project-row', `project-row-${variant}`, { 'is-active': index === 0 }]}
   href={href}
   data-project-row
 >
   <span class="row-number kicker" aria-hidden="true">{number}</span>
-  <span class="row-main">
-    <span class="row-title">{entry.data.title}</span>
-    {
-      variant === 'feature' && (
-        <span class="row-meta">
-          {entry.data.role} / {workStatusLabels[entry.data.status]}
-        </span>
-      )
-    }
-    {variant === 'index' && <span class="row-meta mono-meta">{meta}</span>}
+  <span class="row-meta mono-meta">{meta}</span>
+  <span class="row-title">{entry.data.title}</span>
+  <span class="row-prompt kicker">
+    <span class="preview-prompt">Focus to preview</span>
+    <span class="view-prompt">View project <span class="row-arrow" aria-hidden="true">↗</span></span>
   </span>
-  <span class="row-year kicker" aria-hidden="true">{formatDate(entry.data.date).slice(-4)}</span>
-  {prompt && <span class="row-prompt mono-meta">{prompt}</span>}
+  {
+    variant === 'index' && index === 0 && (
+      <span class="inline-preview">
+        {entry.data.image && (
+          <Image src={entry.data.image} alt={entry.data.imageAlt ?? ''} widths={[400, 720]} sizes="calc(100vw - 2rem)" loading="lazy" />
+        )}
+        <span class="kicker">View case study ↗</span>
+      </span>
+    )
+  }
 </a>
 
 <style>
   .project-row {
+    position: relative;
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 0.375rem 1.25rem;
-    min-height: 5.75rem;
-    padding: 1rem 0.75rem;
-    border-top: 1px solid var(--rule);
+    grid-template-columns: auto minmax(0, 1fr);
+    align-content: center;
+    gap: 0.75rem 1rem;
+    min-height: 11rem;
+    padding: 1.375rem;
+    border-bottom: 1px solid var(--rule);
     color: var(--ink);
     text-decoration: none;
   }
 
-  .project-row:last-of-type {
-    border-bottom: 1px solid var(--rule);
+  .project-row::before {
+    position: absolute;
+    content: '';
+    inset: 0 auto 0 0;
+    width: 6px;
+    background: var(--red);
+    transform: scaleY(0);
+    transform-origin: top;
+    transition: transform 180ms var(--ease-out);
+  }
+
+  .project-row.is-active {
+    background: var(--red-soft);
+  }
+
+  .project-row.is-active::before {
+    transform: scaleY(1);
   }
 
   .row-number {
-    align-self: start;
-    padding-block-start: 0.5rem;
+    color: var(--red-text);
   }
 
-  .row-main {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    min-width: 0;
+  .row-meta {
+    justify-self: end;
+    text-align: right;
+    line-height: 1.5;
   }
 
-  .row-year {
-    align-self: start;
-    padding-block-start: 0.5rem;
-    font-variant-numeric: tabular-nums;
-    color: var(--muted);
-  }
-
-  .project-row-index {
-    padding-block: 1.25rem 1.75rem;
-    min-height: 7.5rem;
-    align-content: center;
-  }
-
-  .project-row-index .row-number {
-    color: var(--muted);
+  .row-title {
+    grid-column: 1 / -1;
+    font-size: clamp(1.5rem, 2.1vw, 1.875rem);
+    text-transform: uppercase;
   }
 
   .row-prompt {
-    grid-column: 2;
-    justify-self: start;
-    padding-block-start: 0.25rem;
-    letter-spacing: 0.11em;
+    grid-column: 1 / -1;
+    font-size: 0.625rem;
+    color: var(--muted);
+  }
+
+  .view-prompt {
+    display: none;
+    color: var(--red-text);
+  }
+
+  .is-active .preview-prompt {
+    display: none;
+  }
+
+  .is-active .view-prompt {
+    display: inline;
+  }
+
+  .row-arrow {
+    display: inline-block;
+    transition: transform 180ms var(--ease-out);
   }
 
   .project-row-feature {
-    background: transparent;
-    box-shadow: inset 4px 0 0 var(--red);
+    min-height: 7rem;
+    grid-template-columns: 1.125rem minmax(0, 1fr);
+    gap: 0.5rem 1rem;
+    padding: 1.25rem;
   }
 
-  .project-row-feature:first-of-type {
-    border-top: 1px solid var(--rule);
+  .project-row-feature .row-number {
+    grid-column: 1;
+    grid-row: 1;
+    align-self: center;
   }
 
-  @media (hover: hover) and (pointer: fine) {
-    .project-row:hover {
-      background: var(--red-soft);
-      box-shadow: inset 4px 0 0 var(--red);
-    }
+  .project-row-feature .row-title {
+    grid-column: 2;
+    grid-row: 1;
+    font-size: clamp(1.25rem, 1.74vw, 1.5625rem);
+  }
+
+  .project-row-feature .row-meta {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: start;
+    font-family: var(--font-serif);
+    font-size: 0.875rem;
+    text-align: left;
+    letter-spacing: 0;
+  }
+
+  .project-row-feature .row-prompt,
+  .inline-preview {
+    display: none;
+  }
+
+  .project-row:focus-visible {
+    z-index: 1;
+    outline-offset: -3px;
   }
 
   .project-row:active {
     background: var(--red-soft);
-    box-shadow: inset 4px 0 0 var(--red);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .project-row:hover .row-arrow {
+      transform: translate(2px, -2px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .project-row::before,
+    .row-arrow {
+      transition: none;
+    }
   }
 
   @media (max-width: 47.9375rem) {
-    .project-row {
+    .project-row,
+    .project-row-feature {
       grid-template-columns: auto minmax(0, 1fr);
-      min-height: 5rem;
-      padding: 0.875rem 0.25rem;
+      align-content: start;
+      gap: 0.875rem 1rem;
+      min-height: 10.625rem;
+      padding: 1.125rem 0;
+      border-top: 1px solid var(--ink);
+      border-bottom: 0;
     }
 
-    .row-year {
+    .project-row.is-active {
+      background: transparent;
+    }
+
+    .project-row::before,
+    .preview-prompt {
       display: none;
     }
 
-    .row-prompt {
-      display: none;
+    .project-row-feature .row-meta {
+      grid-column: 2;
+      grid-row: 1;
+      justify-self: end;
+      font-family: var(--font-mono);
+      font-size: 0.5625rem;
+      letter-spacing: 0.025em;
+      text-align: right;
+    }
+
+    .project-row-feature .row-title {
+      grid-column: 1 / -1;
+      grid-row: 2;
+      font-size: 1.5625rem;
+    }
+
+    .project-row-feature .row-prompt,
+    .view-prompt {
+      display: block;
+    }
+
+    .inline-preview {
+      position: relative;
+      display: flex;
+      grid-column: 1 / -1;
+      align-items: flex-end;
+      overflow: hidden;
+      min-height: 8rem;
+      padding: 1rem;
+      background: var(--ink);
+      color: var(--surface);
+    }
+
+    .inline-preview :global(img) {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .inline-preview .kicker {
+      position: relative;
+      padding: 0.5rem;
+      background: var(--ink);
     }
   }
 </style>

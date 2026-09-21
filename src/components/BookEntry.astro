@@ -14,7 +14,7 @@ const { Content } = book.body ? await render(book) : { Content: null };
 ---
 
 <li class="book">
-  <div class:list={['spine', `spine-${shelf}`]}>
+  <div class:list={['spine', `spine-${shelf}`]} aria-hidden="true">
     <span class="spine-status kicker">{statusLabel}</span>
   </div>
   <div class="book-main">
@@ -43,17 +43,17 @@ const { Content } = book.body ? await render(book) : { Content: null };
   .book {
     display: grid;
     grid-template-columns: 3.375rem minmax(0, 1fr);
-    min-height: 8.5rem;
+    min-width: 0;
+    min-height: 16.625rem;
     background: var(--surface);
-    outline: 1px solid oklch(0 0 0 / 0.1);
-    outline-offset: -1px;
+    border: 1px solid var(--rule);
   }
 
   .spine {
     display: flex;
-    align-items: flex-start;
+    align-items: flex-end;
     justify-content: center;
-    padding: 0.75rem 0.25rem;
+    padding: 1.125rem 0.25rem;
   }
 
   .spine-red {
@@ -77,17 +77,21 @@ const { Content } = book.body ? await render(book) : { Content: null };
   }
 
   .book-main {
-    display: flex;
-    gap: 1.25rem;
-    padding: 1rem 1.25rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    gap: 1.125rem;
+    padding: 1.125rem;
     min-width: 0;
   }
 
   .book-copy {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    justify-content: space-between;
+    gap: 1.25rem;
     min-width: 0;
+    min-height: 14.25rem;
   }
 
   .book-status {
@@ -96,12 +100,13 @@ const { Content } = book.body ? await render(book) : { Content: null };
 
   .book-title {
     margin: 0;
-    font-family: var(--font-sans);
-    font-weight: 800;
+    font-family: var(--font-poster);
+    font-weight: 400;
     letter-spacing: -0.031em;
     text-transform: uppercase;
-    font-size: 1.125rem;
-    line-height: 1.1;
+    overflow-wrap: anywhere;
+    font-size: 1.4375rem;
+    line-height: 1.15;
   }
 
   .book-author {
@@ -114,39 +119,53 @@ const { Content } = book.body ? await render(book) : { Content: null };
 
   .book-cover {
     width: 6rem;
+    max-width: 100%;
     height: auto;
-    align-self: flex-start;
+  }
+
+  .book-main:has(.book-cover) .book-copy {
+    min-height: 0;
   }
 
   .book-note {
-    margin-block-start: 0.75rem;
+    min-width: 0;
+    overflow-wrap: anywhere;
     font-size: 0.9375rem;
     line-height: 1.5;
+  }
+
+  .book-note :global(:last-child) {
+    margin-block-end: 0;
+  }
+
+  .book-note :global(a:active) {
+    opacity: 0.7;
   }
 
   @media (max-width: 47.9375rem) {
     .book {
       grid-template-columns: 1fr;
-      min-height: 0;
+      min-height: 7.5rem;
+      border-width: 0 0 1px;
+      border-color: var(--ink);
     }
 
     .spine {
-      flex-direction: row;
-      justify-content: flex-start;
-      padding: 0.5rem 0.875rem;
-      min-height: 2rem;
-    }
-
-    .spine-status {
-      writing-mode: horizontal-tb;
-    }
-
-    .spine {
-      grid-column: 1;
+      display: none;
     }
 
     .book-main {
-      padding: 1rem 1.25rem 1.25rem;
+      padding: 0.875rem;
+      gap: 0.875rem;
+    }
+
+    .book-copy {
+      min-height: 5.75rem;
+      gap: 0.5rem;
+    }
+
+    .book-title {
+      font-size: 1.3125rem;
     }
   }
 </style>

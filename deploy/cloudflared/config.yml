@@ -1,0 +1,23 @@
+# Cloudflare Tunnel ingress for indraarianggi.xyz.
+#
+# Locally-managed tunnel: these rules live in the repository and are read by
+# cloudflared on the server. Replace TUNNEL_ID with the UUID printed by
+# `cloudflared tunnel create`, and install this file at
+# /etc/cloudflared/config.yml next to the tunnel credentials.
+
+tunnel: TUNNEL_ID
+credentials-file: /etc/cloudflared/credentials.json
+
+ingress:
+  # Public site. Caddy publishes plain HTTP on the loopback interface.
+  - hostname: indraarianggi.xyz
+    service: http://localhost:8080
+
+  # Deploy channel for GitHub Actions. Cloudflare Access authenticates the
+  # runner with a service token before any traffic reaches sshd, and the SSH key
+  # authenticates the deploy user on top of that.
+  - hostname: ssh.indraarianggi.xyz
+    service: ssh://localhost:22
+
+  # Required catch-all for unmatched hostnames.
+  - service: http_status:404

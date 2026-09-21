@@ -18,9 +18,9 @@ const bookStatusLabels = {
 } as const;
 ---
 
-<section class="desk">
+<section class="desk" aria-labelledby="reading-desk-title">
   <p class="desk-kicker kicker">Reading desk / open</p>
-  <h3 class="desk-title poster-section">Books that hold my interest</h3>
+  <h3 class="desk-title poster-section" id="reading-desk-title">Books that hold my interest</h3>
 
   {
     hasBooks ? (
@@ -55,23 +55,30 @@ const bookStatusLabels = {
         )}
       </>
     ) : (
-      <EmptyState message="No books recorded here yet." tone="inverse" />
+      <div class="desk-note">
+        <p class="kicker kicker-red">A shelf in progress</p>
+        <EmptyState message="No books recorded here yet." />
+        <p class="desk-note-copy">No ratings. No fixed subject. Just a record of curiosity.</p>
+      </div>
     )
   }
+  <a class="desk-link kicker" href="/read/">Visit the reading desk <span aria-hidden="true">↗</span></a>
 </section>
 
 <style>
   .desk {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    padding: 1.5rem;
-    background: var(--ink);
+    gap: 1.125rem;
+    min-height: 32.5rem;
+    padding: 1.75rem;
+    background: var(--red);
     color: var(--surface);
   }
 
   .desk-kicker {
     margin: 0;
+    color: var(--ink-on-red);
   }
 
   .desk-title {
@@ -86,7 +93,7 @@ const bookStatusLabels = {
     font-family: var(--font-sans);
     font-size: 0.8125rem;
     line-height: 1.35;
-    color: var(--rule);
+    color: var(--muted);
   }
 
   .book-status {
@@ -97,8 +104,9 @@ const bookStatusLabels = {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
-    border-top: 1px solid var(--muted);
-    padding-block-start: 0.75rem;
+    padding: 1.125rem;
+    background: var(--surface);
+    color: var(--ink);
   }
 
 
@@ -119,8 +127,7 @@ const bookStatusLabels = {
   }
   .book-status {
     margin: 0;
-    /* Red at normal size fails on ink (4.45:1); surface passes. */
-    color: var(--surface);
+    color: var(--red-text);
   }
 
   .shelf-label {
@@ -131,6 +138,53 @@ const bookStatusLabels = {
 
   .shelf-label.kicker-red,
   .shelf-label.kicker {
-    color: var(--surface);
+    color: var(--red-text);
+  }
+
+  .desk-note {
+    padding: 1.25rem;
+    background: var(--surface);
+    color: var(--ink);
+    rotate: -1deg;
+  }
+
+  .desk-note-copy {
+    margin: 1rem 0 0;
+    font-family: var(--font-serif);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--muted);
+  }
+
+  .desk-link {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    gap: 0.75rem;
+    min-height: 2.75rem;
+    margin-block-start: auto;
+    color: var(--ink-on-red);
+    text-underline-offset: 0.35em;
+  }
+
+  .desk-link span {
+    transition: transform 180ms var(--ease-out);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .desk-link:hover span {
+      transform: translate(2px, -2px);
+    }
+  }
+
+  @media (max-width: 47.9375rem) {
+    .desk {
+      min-height: 16.25rem;
+      padding: 1.125rem;
+    }
+
+    .desk-title {
+      font-size: 2rem;
+    }
   }
 </style>
