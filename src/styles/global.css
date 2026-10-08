@@ -1,45 +1,70 @@
+/*
+  Motion system
+  -------------
+  The site is a composition; scrolling is the playhead.
+  - Stage (dark)   : where titles and indexes play. A comp viewer is dark so
+                     the type reads as light on screen.
+  - Paper (warm)   : long-form reading surfaces roll up over the stage.
+  - Signal (red)   : marks time only. Playhead, keyframes, the scene wipe.
+  Signature curves: --ease-out for entrances, --ease-in-out for wipes.
+  Duration palette: 180 / 420 / 900ms.
+*/
+
 :root {
+  --stage: #0c0c0d;
+  --stage-raise: #18181a;
+  --chalk: #f1efe8;
+  --dim: #9d998f;
+  --line: rgb(241 239 232 / 0.16);
+
   --paper: #f1efe8;
   --surface: #fffdf8;
-  --ink: #0a0a0a;
-  --muted: #6b6861;
+  --ink: #0c0c0d;
+  --muted: #625f58;
   --rule: #b9b4aa;
-  --red: #e33122;
-  --red-soft: #f5d8d2;
-  --red-text: #b92b1e;
-  --red-on-ink: #ff7667;
-  --focus-ring: #e33122;
-  /* True black for normal-size text directly on signal-red fields.
-     --ink (#0a0a0a) on red measures 4.45:1; #000 measures 4.73:1. */
-  --ink-on-red: #000000;
-  --font-poster: 'Archivo Black', sans-serif;
-  --font-sans: 'Archivo Variable', sans-serif;
-  --font-serif: 'Literata Variable', serif;
-  --font-mono: 'IBM Plex Mono', monospace;
+
+  --signal: #ff5233;
+  /* Legacy names kept for the table of contents and reading components. */
+  --red: #ff5233;
+  --red-soft: #f7d9d2;
+  --red-text: #b3291c;
+  --red-on-ink: #ff5233;
+  --ink-on-red: #0c0c0d;
+  --focus-ring: var(--signal);
+
+  --font-display: 'Archivo Variable', 'Archivo', system-ui, sans-serif;
+  --font-sans: 'Archivo Variable', 'Archivo', system-ui, sans-serif;
+  --font-serif: 'Literata Variable', Georgia, serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --dur-quick: 180ms;
+  --dur-std: 420ms;
+  --dur-slow: 900ms;
+
   --measure: 68ch;
   --page-gutter: clamp(1rem, 3.889vw, 3.5rem);
-  color-scheme: light;
+  --hud-h: 2.75rem;
+  color-scheme: dark;
 }
 
 html {
-  background: var(--paper);
-  color: var(--ink);
+  background: var(--stage);
+  color: var(--chalk);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   -webkit-tap-highlight-color: transparent;
-  scroll-padding-top: 7rem;
+  scroll-padding-top: 2rem;
+  scroll-padding-bottom: calc(var(--hud-h) + 1rem);
   text-size-adjust: 100%;
 }
 
-html {
-  scroll-behavior: smooth;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
+/* Scene wipes replace the browser's default root crossfade. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
 }
 
 body {
@@ -48,7 +73,8 @@ body {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  background: var(--paper);
+  background: var(--stage);
+  overflow-x: clip;
 }
 
 main {
@@ -86,6 +112,7 @@ a {
 
 button {
   font: inherit;
+  color: inherit;
 }
 
 :focus-visible {
@@ -93,7 +120,24 @@ button {
   outline-offset: 4px;
 }
 
-/* ---- Structural shell ---- */
+::selection {
+  background: var(--signal);
+  color: var(--ink);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---- Structure ---- */
 
 .shell {
   width: 100%;
@@ -102,113 +146,87 @@ button {
   padding-inline: max(var(--page-gutter), env(safe-area-inset-left)) max(var(--page-gutter), env(safe-area-inset-right));
 }
 
-/* Full-bleed bands (black fields, red panels) sit inside a normal-flow shell. */
-
-/* ---- Rules ---- */
-
-.rule-top {
-  border-top: 1px solid var(--ink);
+/* Paper surfaces: reading happens here. Tokens flip so components placed
+   inside read correctly without knowing where they live. */
+.paper {
+  --focus-ring: var(--red-text);
+  background: var(--paper);
+  color: var(--ink);
+  color-scheme: light;
 }
 
-.rule-soft {
-  border-top: 1px solid var(--rule);
+.paper ::selection {
+  background: var(--ink);
+  color: var(--paper);
 }
 
-/* ---- Typography voices ---- */
+/* ---- Type voices ---- */
 
-.poster {
-  font-family: var(--font-poster);
-  font-weight: 400;
+/* Display: Archivo pushed wide and heavy. The width axis is the motion
+   identity, so headlines sit on the expanded side by default. */
+.display {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-stretch: 112%;
   text-transform: uppercase;
-  line-height: 0.86;
+  line-height: 0.88;
   letter-spacing: -0.03em;
 }
 
-.poster-huge {
-  font-size: clamp(3.25rem, 7.4vw, 6.625rem);
-  line-height: 0.83;
-  letter-spacing: -0.047em;
-}
-
-.poster-h1 {
-  font-size: clamp(2.75rem, 5.3vw, 4.75rem);
-  line-height: 0.86;
-  letter-spacing: -0.036em;
-}
-
-.poster-section {
-  font-family: var(--font-poster);
-  font-weight: 400;
-  text-transform: uppercase;
-  font-size: clamp(1.9rem, 3.2vw, 2.8125rem);
-  line-height: 0.92;
-  letter-spacing: -0.045em;
-}
-
-.poster-mark {
-  font-family: var(--font-poster);
-  font-weight: 400;
-  font-size: clamp(1.875rem, 3.4vw, 3.4375rem);
-  line-height: 0.9;
-  letter-spacing: -0.045em;
-  text-transform: uppercase;
-}
-
-.row-title {
-  font-family: var(--font-sans);
-  font-weight: 800;
-  letter-spacing: -0.033em;
-  font-size: clamp(1.25rem, 1.9vw, 1.875rem);
-  line-height: 1.05;
-}
-
-.serif-lede {
+.serif {
   font-family: var(--font-serif);
-  font-size: clamp(1.125rem, 1.7vw, 1.625rem);
-  line-height: 1.25;
 }
 
-.kicker {
+/* Slate labels: mono because they carry timecodes, counts, and dates that
+   must align digit for digit. */
+.label {
   font-family: var(--font-mono);
   font-weight: 500;
   font-size: 0.6875rem;
-  letter-spacing: 0.11em;
-  text-transform: uppercase;
-  font-variant-numeric: tabular-nums;
-}
-
-/* A darker ink for small signal labels preserves the reference's red voice
-   without sacrificing contrast on paper. Large fields retain vermilion. */
-.kicker-red {
-  color: var(--red-text);
-}
-
-.mono-meta {
-  font-family: var(--font-mono);
-  font-size: 0.625rem;
+  line-height: 1.4;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   font-variant-numeric: tabular-nums;
+}
+
+.dim {
+  color: var(--dim);
+}
+
+.paper .dim {
   color: var(--muted);
 }
 
-/* ---- Long-form prose (detail pages consume this) ---- */
+/* The keyframe: the one repeated mark on the site. */
+.keyframe {
+  display: inline-block;
+  flex: none;
+  width: 0.5rem;
+  height: 0.5rem;
+  background: var(--signal);
+  rotate: 45deg;
+}
+
+/* ---- Long-form prose (paper sheet only) ---- */
 
 .prose {
   font-family: var(--font-serif);
   font-size: 1.125rem;
   line-height: 1.65;
   max-width: var(--measure);
+  color: var(--ink);
 }
 
 .prose h2,
 .prose h3 {
-  font-family: var(--font-poster);
-  font-weight: 400;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-stretch: 112%;
   text-transform: uppercase;
   line-height: 0.95;
   letter-spacing: -0.02em;
-  margin-block-start: 2.5rem;
+  margin-block-start: 2.75rem;
+  margin-block-end: 1rem;
 }
 
 .prose h2 {
@@ -216,7 +234,7 @@ button {
 }
 
 .prose h3 {
-  font-size: 1.3125rem;
+  font-size: 1.25rem;
 }
 
 .prose p {
@@ -234,7 +252,7 @@ button {
 }
 
 .prose ul li::marker {
-  color: var(--red);
+  color: var(--red-text);
 }
 
 .prose ol li::marker {
@@ -245,8 +263,13 @@ button {
 .prose blockquote {
   margin: 0 0 1.25em;
   padding-inline-start: 1.25rem;
-  border-inline-start: 3px solid var(--red);
+  border-inline-start: 3px solid var(--ink);
   color: var(--muted);
+}
+
+.prose code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
 }
 
 .prose pre {
@@ -255,15 +278,12 @@ button {
   overflow-x: auto;
   background: var(--surface);
   border: 1px solid var(--rule);
-  font-family: var(--font-mono);
   font-size: 0.875rem;
   line-height: 1.5;
 }
 
 .prose pre code {
-  background: none;
-  border: 0;
-  padding: 0;
+  font-size: inherit;
 }
 
 .prose table {
@@ -292,7 +312,7 @@ button {
 .prose a {
   color: var(--ink);
   text-decoration: underline;
-  text-decoration-color: var(--red);
+  text-decoration-color: var(--red-text);
   text-decoration-thickness: 1px;
   text-underline-offset: 0.25em;
 }
@@ -306,8 +326,12 @@ button {
 /* ---- Media ---- */
 
 img {
-  outline: 1px solid oklch(0 0 0 / 0.1);
+  outline: 1px solid oklch(1 0 0 / 0.1);
   outline-offset: -1px;
+}
+
+.paper img {
+  outline-color: oklch(0 0 0 / 0.1);
 }
 
 /* ---- Skip link ---- */
@@ -316,10 +340,10 @@ img {
   position: absolute;
   inset-inline-start: var(--page-gutter);
   top: 0.75rem;
-  z-index: 20;
+  z-index: 60;
   padding: 0.75rem 1rem;
-  background: var(--ink);
-  color: var(--surface);
+  background: var(--chalk);
+  color: var(--ink);
   font-family: var(--font-mono);
   font-size: 0.75rem;
   letter-spacing: 0.08em;
@@ -332,66 +356,109 @@ img {
   transform: translateY(0);
 }
 
-/* ---- Hover affordances: fine pointers only ---- */
+/* ---- Text links ---- */
+
+.text-link {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.3em;
+  text-decoration-color: var(--line);
+  transition: text-decoration-color var(--dur-quick) ease;
+}
+
+.paper .text-link {
+  text-decoration-color: var(--rule);
+}
 
 @media (hover: hover) and (pointer: fine) {
-  .link-underline {
-    text-decoration: underline;
-    text-decoration-thickness: 1px;
-    text-underline-offset: 0.25em;
-    text-decoration-color: transparent;
-    transition: text-decoration-color 150ms var(--ease-out);
-  }
-
-  .link-underline:hover,
-  .link-underline:focus-visible {
+  .text-link:hover {
     text-decoration-color: currentColor;
   }
 }
 
-/* Editorial reveals are progressive enhancement; content is visible by default. */
-[data-reveal].reveal-pending {
-  opacity: 0;
-  transform: translateY(18px);
+/* ---- Play-once motion (time based, triggered by the player script) ----
+   Content is visible by default. Only once JS has marked the document
+   do we hide what is waiting to play. */
+
+@media (prefers-reduced-motion: no-preference) {
+  .js [data-play]:not(.is-playing) [data-rise],
+  .js [data-play][data-rise]:not(.is-playing) {
+    opacity: 0;
+    transform: translateY(2rem);
+  }
+
+  .js [data-play].is-playing [data-rise],
+  .js [data-play][data-rise].is-playing {
+    animation: rise var(--dur-std) var(--ease-out) backwards;
+    animation-delay: calc(var(--rd, 0) * 70ms);
+  }
 }
 
-[data-reveal].reveal-ready {
-  transition: opacity 500ms var(--ease-out), transform 500ms var(--ease-out);
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(2rem);
+  }
 }
 
-[data-reveal].reveal-ready:not(.reveal-pending) {
-  opacity: 1;
-  transform: none;
+/* ---- Scroll-scrubbed motion (CSS scroll timelines) ----
+   Runs off the main thread where supported; elsewhere the page is simply
+   the finished, static frame. */
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    /* A band opens like a frame being pulled wide. */
+    [data-frame] {
+      animation: frame-open linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 80%;
+    }
+
+    /* Media drifts inside its frame: parallax with a fixed crop. */
+    [data-drift] {
+      animation: drift linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+  }
 }
 
-::selection {
-  background: var(--red);
-  color: var(--surface);
+@keyframes frame-open {
+  from {
+    clip-path: inset(0 6% round 0);
+  }
+  to {
+    clip-path: inset(0 0 round 0);
+  }
+}
+
+@keyframes drift {
+  from {
+    transform: translateY(-6%) scale(1.12);
+  }
+  to {
+    transform: translateY(6%) scale(1.12);
+  }
 }
 
 @media (max-width: 47.9375rem) {
   :root {
     --page-gutter: 1rem;
+    --hud-h: 0px;
   }
 }
 
-/* ---- Reduced motion ---- */
+/* ---- Reduced motion ----
+   Movement goes; state still changes. Colour and opacity cues stay. */
 
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-
   *,
   *::before,
   *::after {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-  }
-
-  [data-reveal].reveal-pending {
-    opacity: 1;
-    transform: none;
+    scroll-behavior: auto !important;
   }
 }

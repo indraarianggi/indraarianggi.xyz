@@ -4,73 +4,96 @@ import { visibleNewestFirst } from '../lib/content';
 import { site } from '../config/site';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import EmptyState from '../components/EmptyState.astro';
-import ProjectIndex from '../components/ProjectIndex.astro';
+import KineticText from '../components/KineticText.astro';
+import SceneSlate from '../components/SceneSlate.astro';
+import WorkDeck from '../components/WorkDeck.astro';
 import ArticleRow from '../components/ArticleRow.astro';
 import ReadingDesk from '../components/ReadingDesk.astro';
 
 const production = import.meta.env.PROD;
 
-const workAll = await getCollection('work');
-const blogAll = await getCollection('blog');
-const booksAll = await getCollection('books');
-
-const work = visibleNewestFirst(workAll, production);
-const articles = visibleNewestFirst(blogAll, production);
-const books = visibleNewestFirst(booksAll, production);
+const work = visibleNewestFirst(await getCollection('work'), production);
+const articles = visibleNewestFirst(await getCollection('blog'), production);
+const books = visibleNewestFirst(await getCollection('books'), production);
 
 const featuredWork = work.filter((entry) => entry.data.featured).slice(0, 3);
 const recentArticles = articles.slice(0, 3);
 const currentBooks = books.filter((entry) => entry.data.status === 'reading').slice(0, 1);
-const finishedBooks = books
-  .filter((entry) => entry.data.status === 'finished')
-  .slice(0, 2);
+const finishedBooks = books.filter((entry) => entry.data.status === 'finished').slice(0, 2);
+
+const note = 'I build to understand. I write to remember. I read because useful ideas rarely stay inside one field.';
+const noteWords = note.split(' ');
+
+const credits = [
+  { role: 'Written and built by', value: site.name },
+  { role: 'Framework', value: 'Astro' },
+  { role: 'Type', value: 'Archivo, Literata, IBM Plex Mono' },
+  { role: 'Motion', value: 'CSS scroll timelines, Web Animations API' },
+];
 ---
 
 <BaseLayout title={site.title} path="/">
-  <div class="shell">
-    <section class="hero" aria-labelledby="home-headline">
-      <div class="hero-field">
-        <p class="hero-kicker kicker kicker-red">{site.name} / Software Engineer</p>
-        <h1 class="hero-headline poster" id="home-headline">
-          <span>Making software.</span>
-          <span>Learning as I go.</span>
-        </h1>
-      </div>
-      <div class="hero-note">
-        <p class="hero-note-label kicker">Note / 01</p>
-        <p class="hero-note-copy">I build to understand. I write to remember. I read because useful ideas rarely stay inside one field.</p>
-        <span class="hero-note-mark" aria-hidden="true">////</span>
-      </div>
-    </section>
+  <!-- SC 00: title sequence -->
+  <section class="hero shell" data-scene="Title" aria-labelledby="home-headline">
+    <p class="hero-meta label">
+      <span>SC 00</span>
+      <span class="keyframe" aria-hidden="true"></span>
+      <span>{site.name}, software engineer</span>
+    </p>
+    <KineticText
+      as="h1"
+      id="home-headline"
+      split="chars"
+      delay={120}
+      text={['Making', 'software.', 'Learning', 'as I go.']}
+      class="hero-title display"
+    />
+    <p class="hero-foot label dim">
+      <span>Work, notes, and books.</span>
+      <span>Scroll to play</span>
+    </p>
+  </section>
 
-    <section class="selected-work" aria-labelledby="selected-work-title" data-reveal>
-      <header class="section-poster">
-        <p class="section-number poster" aria-hidden="true">01</p>
-        <div>
-          <p class="kicker kicker-red">Current index</p>
-          <h2 class="section-poster-title poster-section" id="selected-work-title">Selected work</h2>
-        </div>
-      </header>
+  <!-- SC 01: the note, lit word by word as it is read -->
+  <section class="note shell" data-scene="Note" aria-label="A note on how I work">
+    <p class="note-line label dim">SC 01 / Note</p>
+    <p class="note-text serif">
+      {noteWords.map((word) => <span class="w">{word}</span>)}
+    </p>
+  </section>
 
-      {
-        featuredWork.length > 0 ? (
-          <ProjectIndex entries={featuredWork} variant="feature" />
-        ) : (
-          <EmptyState message="Nothing published here yet. I'm still building." />
-        )
-      }
-    </section>
+  <!-- SC 02: selected work -->
+  <section class="work shell" data-scene="Selected work" aria-labelledby="selected-work-title">
+    <SceneSlate
+      scene={2}
+      label="Selected work"
+      title="Clips from the bench"
+      id="selected-work-title"
+      aside={`${String(featuredWork.length).padStart(2, '0')} clips`}
+    >
+      <a class="slate-link label" href="/work/">Full work index</a>
+    </SceneSlate>
+    {
+      featuredWork.length > 0 ? (
+        <WorkDeck entries={featuredWork} />
+      ) : (
+        <EmptyState message="Nothing published here yet. I'm still building." />
+      )
+    }
+  </section>
 
-    <section class="writing-reading" aria-labelledby="writing-title" data-reveal>
+  <!-- SC 03: writing and reading, on paper -->
+  <section class="band paper" data-scene="Writing" data-frame aria-labelledby="writing-title">
+    <div class="shell band-grid">
       <div class="writing">
-        <p class="kicker kicker-red">Recent writing</p>
-        <h2 class="section-poster-title poster-section" id="writing-title">Notes from the work</h2>
-
+        <SceneSlate scene={3} label="Recent writing" title="Notes from the work" id="writing-title">
+          <a class="slate-link label" href="/blog/">All field notes</a>
+        </SceneSlate>
         {
           recentArticles.length > 0 ? (
-            <ul class="article-list">
-              {recentArticles.map((entry) => (
-                <ArticleRow entry={entry} showTopic={false} />
+            <ul class="takes" data-play>
+              {recentArticles.map((entry, i) => (
+                <ArticleRow entry={entry} index={i} showTopic={false} />
               ))}
             </ul>
           ) : (
@@ -78,282 +101,273 @@ const finishedBooks = books
           )
         }
       </div>
-
       <ReadingDesk current={currentBooks} finished={finishedBooks} />
-    </section>
+    </div>
+  </section>
 
-    <section class="closing" aria-label="Closing statement" data-reveal>
-      <p class="closing-statement poster">Still learning.<br />Still making.</p>
-      <p class="closing-links kicker kicker-red">
-        <a class="link-underline" href="/about/">About ↗</a>
-        <span aria-hidden="true">&ensp;&ensp;</span>
-        <a class="link-underline" href="/read/">Read ↗</a>
-      </p>
-    </section>
-  </div>
+  <!-- SC 04: end credits -->
+  <section class="credits shell" data-scene="Credits" aria-labelledby="credits-title">
+    <KineticText
+      as="h2"
+      id="credits-title"
+      split="words"
+      play="view"
+      text={['Still learning.', 'Still making.']}
+      class="credits-title display"
+    />
+    <dl class="roll" data-play>
+      {
+        credits.map((credit, i) => (
+          <div class="roll-row" data-rise style={`--rd: ${i}`}>
+            <dt class="label dim">{credit.role}</dt>
+            <dd>{credit.value}</dd>
+          </div>
+        ))
+      }
+    </dl>
+    <p class="credits-links label">
+      <a class="text-link" href="/about/">About</a>
+      <a class="text-link" href="/read/">Read</a>
+      <a class="text-link" href="/rss.xml">RSS</a>
+    </p>
+  </section>
 </BaseLayout>
 
 <style>
+  /* ---- SC 00 ---- */
+
   .hero {
-    display: grid;
-    grid-template-columns: minmax(0, 900fr) minmax(0, 428fr);
-    min-height: 31.25rem;
-    border-bottom: 3px solid var(--ink);
-  }
-
-  .hero-field {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 6rem;
-    padding: 1.75rem;
-    background: var(--ink);
-    container-type: inline-size;
-  }
-
-  .hero-kicker {
-    margin: 0;
-    color: var(--red-on-ink);
-  }
-
-  .hero-headline {
-    margin: 0;
-    color: var(--surface);
-    font-size: clamp(2.5rem, 8.95cqw, 4.75rem);
-    line-height: 0.86;
-    letter-spacing: -0.047em;
-    text-wrap: initial;
-  }
-
-  .hero-headline span {
-    display: block;
-    animation: poster-in 650ms var(--ease-out) both;
-  }
-
-  .hero-headline span + span {
-    animation-delay: 70ms;
-  }
-
-  .hero-note {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     gap: 2rem;
-    padding: 1.75rem;
-    background: var(--red);
+    min-height: calc(100svh - 4.5rem - var(--hud-h));
+    padding-block: 1rem 1.5rem;
+    container-type: inline-size;
+    view-timeline: --hero block;
   }
 
-  .hero-note-label {
+  .hero-meta,
+  .hero-foot {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
     margin: 0;
-    color: var(--ink-on-red);
   }
 
-  .hero-note-copy {
+  .hero-foot {
+    justify-content: space-between;
+  }
+
+  .hero :global(.hero-title) {
     margin: 0;
-    color: var(--surface);
-    font-family: var(--font-serif);
-    font-size: clamp(1.35rem, 1.95vw, 1.75rem);
-    line-height: 1.2;
-    text-wrap: pretty;
-    animation: poster-in 650ms 140ms var(--ease-out) both;
+    font-size: min(14.4cqi, 17.5svh);
+    font-weight: 850;
+    line-height: 0.86;
+    letter-spacing: -0.035em;
   }
 
-  .hero-note-mark {
-    font-family: var(--font-mono);
-    font-size: 1.125rem;
-    letter-spacing: 0.25em;
+  /* Even lines sit right: the title reads as a composition, not a stack. */
+  .hero :global(.hero-title .k-line:nth-child(even)) {
+    text-align: end;
   }
 
-  .selected-work {
-    margin-block-start: 3.375rem;
+  /* Leaving the title: odd lines push left, even lines push right. */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .hero :global(.hero-title .k-line) {
+        animation: push-left linear both;
+        animation-timeline: --hero;
+        animation-range: exit 0% exit 90%;
+      }
+
+      .hero :global(.hero-title .k-line:nth-child(even)) {
+        animation-name: push-right;
+      }
+    }
   }
 
-  .section-poster {
+  @keyframes push-left {
+    to {
+      transform: translateX(-18cqi);
+      opacity: 0.15;
+    }
+  }
+
+  @keyframes push-right {
+    to {
+      transform: translateX(18cqi);
+      opacity: 0.15;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-meta,
+    .hero-foot {
+      animation: rise var(--dur-std) var(--ease-out) backwards;
+      animation-delay: 700ms;
+    }
+  }
+
+  /* ---- SC 01 ---- */
+
+  .note {
     display: grid;
-    grid-template-columns: 9.75rem minmax(0, 1fr);
-    align-items: stretch;
-    min-height: 8.625rem;
-    border-top: 3px solid var(--ink);
-    border-bottom: 1px solid var(--ink);
+    gap: 2rem;
+    padding-block: clamp(5rem, 16svh, 10rem);
   }
 
-  .section-poster > div {
-    align-self: center;
-    padding: 1.25rem 1.75rem;
-  }
-
-  .section-poster .kicker {
-    margin-bottom: 0.5rem;
-  }
-
-  .section-number {
-    display: grid;
-    place-items: center;
-    margin: 0;
-    background: var(--red);
-    color: var(--surface);
-    font-size: 3.875rem;
-    letter-spacing: -0.048em;
-  }
-
-  .section-poster-title {
+  .note-line {
     margin: 0;
   }
 
-  .writing-reading {
+  .note-text {
+    max-width: 22ch;
+    margin: 0;
+    font-size: clamp(2rem, 5.2vw, 5rem);
+    font-weight: 400;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+  }
+
+  .note-text .w + .w::before {
+    content: ' ';
+  }
+
+  /* Each word lights as it crosses the reading line. */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .note-text .w {
+        animation: light linear both;
+        animation-timeline: view();
+        animation-range: cover 18% cover 42%;
+      }
+    }
+  }
+
+  @keyframes light {
+    from {
+      opacity: 0.2;
+    }
+  }
+
+  /* ---- SC 02 ---- */
+
+  .work {
+    padding-block-end: clamp(4rem, 12svh, 8rem);
+  }
+
+  .slate-link {
+    justify-self: start;
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: var(--signal);
+    text-underline-offset: 0.35em;
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+  }
+
+  :global(.paper) .slate-link {
+    text-decoration-color: var(--red-text);
+  }
+
+  /* ---- SC 03 ---- */
+
+  .band {
+    padding-block: clamp(3rem, 8svh, 5rem);
+  }
+
+  .band-grid {
     display: grid;
-    grid-template-columns: minmax(0, 780fr) minmax(0, 548fr);
-    align-items: stretch;
-    min-height: 30rem;
-    margin-block-start: 2rem;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+    gap: 2.5rem;
+    align-items: start;
   }
 
-  .writing {
-    padding: 1.75rem 1.75rem 1.75rem 0;
-  }
-
-  .writing > .kicker {
-    margin-bottom: 0.75rem;
-  }
-
-  .writing .poster-section {
-    margin-bottom: 1.75rem;
-    font-size: clamp(1.75rem, 3.055vw, 2.75rem);
-  }
-
-  .article-list {
+  .takes {
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  .closing {
+  /* ---- SC 04 ---- */
+
+  .credits {
+    display: grid;
+    gap: 3rem;
+    padding-block: clamp(5rem, 16svh, 10rem) 4rem;
+  }
+
+  .credits :global(.credits-title) {
+    margin: 0;
+    font-size: clamp(3rem, 9vw, 8.5rem);
+  }
+
+  .roll {
+    display: grid;
+    gap: 0;
+    max-width: 44rem;
+    margin: 0;
+  }
+
+  .roll-row {
+    display: grid;
+    grid-template-columns: 12rem minmax(0, 1fr);
+    gap: 1.5rem;
+    align-items: baseline;
+    padding-block: 0.75rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .roll-row dd {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: 1.125rem;
+  }
+
+  .credits-links {
     display: flex;
+    gap: 1.5rem;
+    margin: 0;
+  }
+
+  .credits-links a {
+    display: inline-flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 2rem;
-    min-height: 15.625rem;
-    border-top: 1px solid var(--ink);
-    padding-block: 3rem;
+    min-height: 2.75rem;
   }
 
-  .closing-statement {
-    margin: 0;
-    font-size: clamp(2.5rem, 3.82vw, 3.4375rem);
-    line-height: 0.9;
-    letter-spacing: -0.045em;
-  }
-
-  .closing-links {
-    margin: 0;
-    white-space: nowrap;
-    font-size: 0.75rem;
-  }
-
-  .closing-links a {
-    color: var(--red-text);
-    text-decoration: none;
-  }
-
-  @keyframes poster-in {
-    from { opacity: 0; transform: translateY(24px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .hero-headline span,
-    .hero-note-copy {
-      animation: none;
-    }
-  }
-
-  @media (max-width: 63.9375rem) and (min-width: 48rem) {
-    .hero {
-      min-height: 27rem;
-    }
-
-    .hero-headline {
-      font-size: 10cqw;
+  @media (max-width: 63.9375rem) {
+    .band-grid {
+      grid-template-columns: 1fr;
     }
   }
 
   @media (max-width: 47.9375rem) {
+    /* Narrow screens: the title block sits low, poster-style, and the open
+       stage above it gives the rise somewhere to come from. */
     .hero {
-      display: flex;
-      flex-direction: column;
-      gap: 1.125rem;
-      min-height: 32.5rem;
-      padding: 1.5rem;
-      background: var(--ink);
+      justify-content: flex-end;
+      gap: 1.5rem;
+      min-height: calc(100svh - 3.75rem);
     }
 
-    .hero-field {
-      display: contents;
+    .hero-meta {
+      margin-block-end: auto;
     }
 
-    .hero-kicker {
-      font-size: 0.5625rem;
-      letter-spacing: 0.055em;
+    .hero :global(.hero-title) {
+      font-size: 14.4cqi;
     }
 
-    .hero-headline {
-      font-size: clamp(2.375rem, 12.82vw, 3.125rem);
-      line-height: 0.9;
-    }
-
-    .hero-note {
-      display: block;
-      padding: 0;
-      background: transparent;
-    }
-
-    .hero-note-label,
-    .hero-note-mark {
+    .hero-foot span:last-child {
       display: none;
     }
 
-    .hero-note-copy {
-      font-size: 1.125rem;
-      line-height: 1.35;
-    }
-
-    .selected-work {
-      margin-block-start: 1.5rem;
-    }
-
-    .section-poster {
-      display: block;
-      min-height: 0;
-      border: 0;
-    }
-
-    .section-poster > div {
-      padding: 0 0 0.875rem;
-    }
-
-    .section-number,
-    .section-poster .kicker {
-      display: none;
-    }
-
-    .section-poster-title {
-      font-size: clamp(1.75rem, 9.74vw, 2.375rem);
-    }
-
-    .writing-reading {
+    .roll-row {
       grid-template-columns: 1fr;
-      margin-block-start: 0;
-    }
-
-    .writing {
-      padding: 1.5rem 0 2rem;
-    }
-
-    .closing {
-      flex-wrap: wrap;
-      min-height: 0;
-      margin-block-start: 1.5rem;
-      padding-block: 2rem;
+      gap: 0.25rem;
     }
   }
 </style>

@@ -1,194 +1,52 @@
 ---
 import { getCollection, render } from 'astro:content';
 import { buildTocTree } from '../../lib/toc';
-import { formatDate, workStatusLabels } from '../../lib/content';
+import { visibleNewestFirst, workStatusLabels } from '../../lib/content';
 import DetailLayout from '../../layouts/DetailLayout.astro';
-import AnalogNote from '../../components/AnalogNote.astro';
+import Clapper from '../../components/Clapper.astro';
+import UpNext from '../../components/UpNext.astro';
 
 export async function getStaticPaths() {
-  const entries = await getCollection('work');
-  return entries
-    .filter(({ data }) => !import.meta.env.PROD || !data.draft)
-    .map((entry) => ({ params: { id: entry.id }, props: { entry } }));
+  const entries = visibleNewestFirst(await getCollection('work'), import.meta.env.PROD);
+  return entries.map((entry, i) => ({
+    params: { id: entry.id },
+    props: { entry, next: entries.length > 1 ? entries[(i + 1) % entries.length] : undefined },
+  }));
 }
 
-const { entry } = Astro.props;
+const { entry, next } = Astro.props;
 const { Content, headings } = await render(entry);
 const tree = buildTocTree(headings);
 const toc = tree.length >= 2 ? tree : undefined;
-const repository = entry.data.repository ?? undefined;
-const website = entry.data.website ?? undefined;
+
+const startYear = entry.data.date.getUTCFullYear();
+const years = entry.data.endDate ? `${startYear} / ${entry.data.endDate.getUTCFullYear()}` : String(startYear);
+const rows = [
+  { label: 'Role', value: entry.data.role },
+  { label: 'Status', value: workStatusLabels[entry.data.status] },
+  { label: 'Year', value: years },
+  ...(entry.data.stack.length > 0 ? [{ label: 'Stack', value: entry.data.stack.join(', ') }] : []),
+];
+const links = [
+  ...(entry.data.website ? [{ href: entry.data.website, label: 'Live site' }] : []),
+  ...(entry.data.repository ? [{ href: entry.data.repository, label: 'Repository' }] : []),
+];
 ---
 
-<DetailLayout title={entry.data.title} summary={entry.data.summary} path={`/work/${entry.id}/`} variant="project" toc={toc}>
-  <Fragment slot="metadata">
-    <div class="meta-panel">
-      <p class="meta-heading kicker">Project details</p>
-      <dl class="meta-list">
-        <div class="meta-row">
-          <dt class="kicker">Role</dt>
-          <dd class="meta-value">{entry.data.role}</dd>
-        </div>
-        <div class="meta-row">
-          <dt class="kicker">Status</dt>
-          <dd class="meta-value">{workStatusLabels[entry.data.status]}</dd>
-        </div>
-        <div class="meta-row">
-          <dt class="kicker">Updated</dt>
-          <dd class="meta-updated">
-            {
-              entry.data.endDate
-                ? `${formatDate(entry.data.date).slice(-4)} / ${formatDate(entry.data.endDate).slice(-4)}`
-                : formatDate(entry.data.date).slice(-4)
-            }
-          </dd>
-        </div>
-        {
-          entry.data.stack.length > 0 && (
-            <div class="meta-row">
-              <dt class="kicker">Stack</dt>
-              <dd class="meta-stack">{entry.data.stack.join(', ')}</dd>
-            </div>
-          )
-        }
-      </dl>
-      {
-        (website || repository) && (
-          <div class="meta-links">
-            {website && <a class="meta-link kicker" href={website}>Live demo ↗</a>}
-            {repository && <a class="meta-link kicker" href={repository}>Repository ↗</a>}
-          </div>
-        )
-      }
-    </div>
-  </Fragment>
+<DetailLayout
+  title={entry.data.title}
+  summary={entry.data.summary}
+  path={`/work/${entry.id}/`}
+  variant="project"
+  toc={toc}
+  cover={entry.data.image}
+  coverAlt={entry.data.imageAlt}
+>
+  <Clapper slot="metadata" heading="Project slate" rows={rows} links={links} />
 
   <article class="prose">
     <Content />
   </article>
 
-  <Fragment slot="after-content">
-    <AnalogNote label="Field note / {entry.id}">
-      <p>Working record. The notes above change as the project does.</p>
-    </AnalogNote>
-    <p class="back-link kicker kicker-red">
-      <a class="link-underline" href="/work/">Back to work index ↗</a>
-    </p>
-  </Fragment>
+  {next && <UpNext slot="after-content" href={`/work/${next.id}/`} title={next.data.title} kicker="Next clip" />}
 </DetailLayout>
-
-<style>
-  .meta-panel {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 1.5rem;
-    padding: 1.5rem;
-    background: var(--red);
-    color: var(--ink-on-red);
-  }
-
-  .meta-panel :global(dl),
-  .meta-panel :global(dd),
-  .meta-panel :global(dt),
-  .meta-panel :global(p) {
-    margin: 0;
-  }
-
-  .meta-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .meta-row {
-    display: grid;
-    grid-template-columns: 5rem minmax(0, 1fr);
-    align-items: baseline;
-    gap: 0.75rem;
-  }
-
-  .meta-heading,
-  .meta-row .kicker {
-    font-size: 0.6875rem;
-  }
-
-  .meta-updated {
-    font-family: var(--font-mono);
-    font-variant-numeric: tabular-nums;
-    font-size: 0.6875rem;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-  }
-
-  .meta-value {
-    font-family: var(--font-mono);
-    font-weight: 400;
-    font-size: 0.6875rem;
-    line-height: 1.8;
-    text-transform: uppercase;
-  }
-
-  .meta-stack {
-    font-family: var(--font-mono);
-    font-size: 0.6875rem;
-    line-height: 1.8;
-    text-transform: uppercase;
-    overflow-wrap: anywhere;
-  }
-
-  .meta-links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem 1.5rem;
-  }
-
-  .meta-panel :global(.meta-link) {
-    color: var(--ink-on-red);
-    font-family: var(--font-mono);
-    font-size: 0.6875rem;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-    text-decoration: none;
-  }
-
-  @media (hover: hover) and (pointer: fine) {
-    .meta-panel :global(.meta-link:hover) {
-      text-decoration: underline;
-      text-decoration-thickness: 1px;
-      text-underline-offset: 0.3em;
-    }
-  }
-
-  .back-link {
-    margin: 0;
-    font-size: 0.75rem;
-  }
-
-  .back-link a {
-    color: var(--ink);
-    text-decoration: none;
-  }
-
-  @media (max-width: 47.9375rem) {
-    .meta-panel {
-      gap: 1rem;
-      padding: 0.875rem;
-    }
-
-    .meta-heading {
-      display: none;
-    }
-
-    .meta-list {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 0.5rem 1rem;
-    }
-
-    .meta-row {
-      grid-template-columns: 1fr;
-      gap: 0.125rem;
-    }
-  }
-</style>

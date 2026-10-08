@@ -14,7 +14,7 @@ const { tree } = Astro.props;
   <!-- Desktop expanded rail -->
   <nav class="desktop-rail" aria-label="Table of contents" data-toc-rail>
     <div class="rail-header">
-      <span class="rail-label kicker">On this page</span>
+      <span class="rail-label label">On this page</span>
       <button
         type="button"
         class="rail-collapse"
@@ -22,7 +22,7 @@ const { tree } = Astro.props;
         aria-expanded="true"
         aria-controls="toc-desktop-list"
       >
-        <span class="kicker kicker-red">Hide</span>
+        <span class="label kicker-red">Hide</span>
         <Icon name="ph:x-bold" size={14} />
       </button>
     </div>
@@ -78,7 +78,7 @@ const { tree } = Astro.props;
   <!-- Mobile dialog -->
   <dialog class="mobile-dialog" data-toc-dialog aria-label="Table of contents">
     <header class="dialog-header">
-      <span class="kicker">Table of contents</span>
+      <span class="label">Table of contents</span>
       <button
         type="button"
         class="dialog-close"
@@ -252,7 +252,7 @@ const { tree } = Astro.props;
     width: 3rem;
     height: 3rem;
     background: var(--red);
-    color: var(--surface);
+    color: var(--ink);
     border: 0;
     box-shadow: 0.25rem 0.25rem 0 var(--ink);
     cursor: pointer;

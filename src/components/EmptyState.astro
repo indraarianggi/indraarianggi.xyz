@@ -1,35 +1,35 @@
 ---
+/* Honest empty state: says what is missing and that it is expected. */
 type Props = {
   message: string;
-  tone?: 'default' | 'inverse';
 };
 
-const { message, tone = 'default' } = Astro.props;
+const { message } = Astro.props;
 ---
 
-<div class:list={['empty-state', { 'empty-state-inverse': tone === 'inverse' }]}>
+<div class="empty-state">
+  <p class="empty-mark label" aria-hidden="true">No footage</p>
   <p class="empty-message">{message}</p>
 </div>
 
 <style>
   .empty-state {
-    border-top: 1px solid var(--rule);
+    display: grid;
+    gap: 0.5rem;
     padding-block: 1.75rem;
+    border-top: 1px dashed currentColor;
   }
 
-  .empty-state-inverse {
-    border-top-color: var(--muted);
-  }
-
-  .empty-state-inverse .empty-message {
-    color: var(--surface);
+  .empty-mark {
+    margin: 0;
+    opacity: 0.7;
   }
 
   .empty-message {
     max-width: 44ch;
+    margin: 0;
     font-family: var(--font-serif);
     font-size: 1.0625rem;
     line-height: 1.45;
-    color: var(--muted);
   }
 </style>

@@ -5,6 +5,7 @@ import { site } from '../config/site';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import EmptyState from '../components/EmptyState.astro';
 import BookEntry from '../components/BookEntry.astro';
+import KineticText from '../components/KineticText.astro';
 
 const production = import.meta.env.PROD;
 const books = visibleNewestFirst(await getCollection('books'), production);
@@ -61,28 +62,30 @@ for (const group of groups) {
 ---
 
 <BaseLayout title={`Read | ${site.name}`} path="/read/">
-  <div class="shell">
-    <section class="header" aria-labelledby="read-title" data-reveal>
-      <h1 class="giant poster" id="read-title">Read /<br />Curiosity</h1>
-      <div class="context">
-        <p class="kicker">Curiosity shelf / open</p>
-        <p class="serif-lede">A record of books that hold my interest, wherever they came from.</p>
-      </div>
-    </section>
+  <section class="title-card shell" data-scene="Title" aria-labelledby="read-title">
+    <p class="card-line label dim">
+      <span>Curiosity shelf / open</span>
+      <span class="keyframe" aria-hidden="true"></span>
+      <span>{String(books.length).padStart(2, '0')} books</span>
+    </p>
+    <KineticText as="h1" id="read-title" split="chars" text="Read." delay={80} class="card-title display" />
+    <p class="card-lede serif">A record of books that hold my interest, wherever they came from.</p>
+  </section>
 
-    <section class="shelves" aria-label="Book shelves">
+  <section class="shelves paper" data-scene="Shelves" data-frame aria-label="Book shelves">
+    <div class="shell">
       {
         shelves.length === 0 && (
-          <EmptyState message="No books recorded here yet." />
+          <EmptyState message="No books recorded here yet. The shelf fills as I finish them." />
         )
       }
       {
         shelves.map((shelf) => (
-          <section class="shelf" aria-label={shelf.label}>
-            <div class:list={['shelf-block', `shelf-${shelf.spine}`]} data-reveal>
-              <p class="shelf-number poster">{shelf.number}</p>
-              <p class="shelf-label kicker">{shelf.label}</p>
-            </div>
+          <section class="shelf" aria-label={shelf.label} data-play>
+            <p class="shelf-head" data-rise>
+              <span class="shelf-number display">{shelf.number}</span>
+              <span class="shelf-label label">{shelf.label}</span>
+            </p>
             <ul class="shelf-books">
               {shelf.entries.map((book) => (
                 <BookEntry book={book} shelf={shelf.spine} statusLabel={statusLabels[book.data.status]} />
@@ -91,171 +94,73 @@ for (const group of groups) {
           </section>
         ))
       }
-    </section>
-  </div>
+    </div>
+  </section>
 </BaseLayout>
 
 <style>
-  .header {
+  .title-card {
     display: grid;
-    grid-template-columns: minmax(0, 930fr) minmax(0, 398fr);
-    min-height: 21.25rem;
+    gap: 1.5rem;
+    padding-block: 2rem clamp(3rem, 8vw, 6rem);
+    container-type: inline-size;
   }
 
-  .giant {
-    margin: 0;
-    padding-block-start: 0.125rem;
-    font-size: clamp(3.25rem, 6.25vw, 5.625rem);
-    line-height: 0.84;
-    letter-spacing: -0.047em;
-  }
-
-  .context {
+  .card-line {
     display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 2rem;
-    padding: 1.5rem;
-    background: var(--red);
-  }
-
-  .context p {
+    align-items: center;
+    gap: 0.75rem;
     margin: 0;
   }
 
-  .context .kicker {
-    color: var(--ink-on-red);
+  .title-card :global(.card-title) {
+    margin: 0;
+    font-size: 27cqi;
+    line-height: 0.8;
+    letter-spacing: -0.05em;
   }
 
-  .context .serif-lede {
-    color: var(--surface);
-    font-size: 1.5625rem;
+  .card-lede {
+    max-width: 30ch;
+    margin: 0;
+    justify-self: end;
+    font-size: clamp(1.25rem, 2.2vw, 1.875rem);
     line-height: 1.25;
   }
 
   .shelves {
+    padding-block: clamp(2.5rem, 6vw, 4.5rem);
+  }
+
+  .shelf + .shelf {
+    margin-block-start: 3rem;
+  }
+
+  .shelf-head {
     display: flex;
-    flex-direction: column;
-    margin-block-end: 3.5rem;
-  }
-
-  .shelf {
-    display: grid;
-    grid-template-columns: minmax(0, 16.25rem) minmax(0, 1fr);
-    align-items: stretch;
-    min-height: 19.375rem;
-    border-bottom: 1px solid var(--ink);
-  }
-
-  .shelf-block {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 2rem;
-    padding: 1.375rem;
-  }
-
-  .shelf-red {
-    background: var(--red);
-  }
-
-  .shelf-red .shelf-label {
-    color: var(--ink-on-red);
-  }
-
-  .shelf-black {
-    background: var(--ink);
-  }
-
-  .shelf-block p {
-    margin: 0;
+    align-items: baseline;
+    gap: 1rem;
+    margin: 0 0 1.25rem;
+    padding-block-start: 1rem;
+    border-top: 1px solid var(--ink);
   }
 
   .shelf-number {
-    font-size: 4.0625rem;
-    line-height: 1.1;
-    color: var(--surface);
-  }
-
-  .shelf-label {
-    color: var(--red-on-ink);
+    font-size: 2.5rem;
   }
 
   .shelf-books {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.375rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+    gap: 1rem;
     margin: 0;
-    padding: 1.375rem;
+    padding: 0;
     list-style: none;
   }
 
-  @media (min-width: 48rem) and (max-width: 67.5rem) {
-    .shelf-books {
-      grid-template-columns: 1fr;
-    }
-  }
-
   @media (max-width: 47.9375rem) {
-    .header {
-      grid-template-columns: 1fr;
-      min-height: 0;
-      gap: 0.75rem;
-      margin-block: 0.75rem;
-    }
-
-    .giant {
-      font-size: clamp(2.8125rem, 14.1vw, 3.4375rem);
-      line-height: 0.86;
-    }
-
-    .context {
-      gap: 0.5rem;
-      padding: 0;
-      background: transparent;
-    }
-
-    .context .kicker {
-      color: var(--red-text);
-    }
-
-    .context .serif-lede {
-      color: var(--muted);
-      font-size: 1.1875rem;
-      line-height: 1.35;
-    }
-
-    .shelves {
-      gap: 0.75rem;
-      margin-block-end: 2.5rem;
-    }
-
-    .shelf {
-      grid-template-columns: 1fr;
-      min-height: 0;
-      border: 0;
-    }
-
-    .shelf-block {
-      flex-direction: row;
-      align-items: center;
-      gap: 1rem;
-      min-height: 4.125rem;
-      padding: 0.875rem;
-    }
-
-    .shelf-number {
-      font-size: 1.75rem;
-    }
-
-    .shelf-label {
-      text-align: right;
-    }
-
-    .shelf-books {
-      grid-template-columns: 1fr;
-      gap: 0;
-      padding: 0;
+    .card-lede {
+      justify-self: start;
     }
   }
 </style>

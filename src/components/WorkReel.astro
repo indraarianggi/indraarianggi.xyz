@@ -1,0 +1,307 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+import { workStatusLabels } from '../lib/content';
+
+/*
+  The full work index as a reel. Hovering a row stages it: the others dim
+  and a preview frame trails the cursor with a little lag, so it feels
+  carried rather than glued. The preview is decorative (aria-hidden); the
+  row itself carries all the information. Touch screens get an inline
+  thumbnail instead.
+*/
+type Props = {
+  entries: CollectionEntry<'work'>[];
+};
+
+const { entries } = Astro.props;
+---
+
+<work-reel class="reel">
+  <ol class="reel-list" data-play>
+    {
+      entries.map((entry, i) => {
+        const years = entry.data.endDate
+          ? `${entry.data.date.getUTCFullYear()} / ${entry.data.endDate.getUTCFullYear()}`
+          : String(entry.data.date.getUTCFullYear());
+        return (
+          <li data-rise style={`--rd: ${i}`}>
+            <a class="reel-row" href={`/work/${entry.id}/`} data-reel-row={i} data-wipe-label={entry.data.title}>
+              <span class="reel-num label">{String(i + 1).padStart(2, '0')}</span>
+              <span class="reel-title display">{entry.data.title}</span>
+              <span class="reel-meta label">
+                <span>{entry.data.role}</span>
+                <span>{workStatusLabels[entry.data.status]}</span>
+                <span>{years}</span>
+              </span>
+              {entry.data.image && (
+                <span class="reel-thumb">
+                  <Image src={entry.data.image} alt="" widths={[480, 800]} sizes="100vw" loading="lazy" />
+                </span>
+              )}
+            </a>
+          </li>
+        );
+      })
+    }
+  </ol>
+  <div class="reel-preview" data-reel-preview aria-hidden="true">
+    {
+      entries.map((entry, i) =>
+        entry.data.image ? (
+          <Image class="reel-shot" data-reel-shot={i} src={entry.data.image} alt="" widths={[480, 720]} sizes="20rem" loading="lazy" />
+        ) : (
+          <span class="reel-shot reel-shot-empty display" data-reel-shot={i}>{String(i + 1).padStart(2, '0')}</span>
+        ),
+      )
+    }
+  </div>
+</work-reel>
+
+<script>
+  class WorkReel extends HTMLElement {
+    private controller?: AbortController;
+    private frame = 0;
+
+    connectedCallback() {
+      this.controller?.abort();
+      const controller = new AbortController();
+      this.controller = controller;
+      const { signal } = controller;
+
+      const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+      const preview = this.querySelector<HTMLElement>('[data-reel-preview]');
+      const rows = Array.from(this.querySelectorAll<HTMLElement>('[data-reel-row]'));
+      const shots = Array.from(this.querySelectorAll<HTMLElement>('[data-reel-shot]'));
+      if (!preview) return;
+
+      // Target is where the pointer is; current eases toward it each frame.
+      const target = { x: 0, y: 0 };
+      const current = { x: 0, y: 0 };
+      let active = -1;
+
+      const tick = () => {
+        const ease = reducedMotion.matches ? 1 : 0.16;
+        current.x += (target.x - current.x) * ease;
+        current.y += (target.y - current.y) * ease;
+        preview.style.transform = `translate3d(${current.x}px, ${current.y}px, 0)`;
+        const settled = Math.abs(target.x - current.x) < 0.1 && Math.abs(target.y - current.y) < 0.1;
+        this.frame = settled ? 0 : requestAnimationFrame(tick);
+      };
+
+      // The frame sits to the lower right of the pointer so the title being
+      // pointed at stays readable, and is kept inside the viewport.
+      const place = (event: PointerEvent) => {
+        const { width, height } = preview.getBoundingClientRect();
+        target.x = Math.min(event.clientX + 24, window.innerWidth - width - 24);
+        target.y = Math.min(event.clientY + 24, window.innerHeight - height - 24);
+      };
+
+      const follow = (event: PointerEvent) => {
+        place(event);
+        if (!this.frame) this.frame = requestAnimationFrame(tick);
+      };
+
+      const show = (index: number, event: PointerEvent) => {
+        if (!finePointer.matches || event.pointerType !== 'mouse') return;
+        if (active === -1) {
+          // Arriving from outside: start at the pointer, no slide across the screen.
+          place(event);
+          current.x = target.x;
+          current.y = target.y;
+          preview.style.transform = `translate3d(${current.x}px, ${current.y}px, 0)`;
+        }
+        shots[active]?.classList.remove('is-active');
+        shots[index]?.classList.add('is-active');
+        active = index;
+        this.classList.add('is-staging');
+        rows[index]?.classList.add('is-staged');
+      };
+
+      const hide = (index: number) => {
+        rows[index]?.classList.remove('is-staged');
+      };
+
+      rows.forEach((row, index) => {
+        row.addEventListener('pointerenter', (event) => show(index, event), { signal });
+        row.addEventListener('pointermove', follow, { signal });
+        row.addEventListener('pointerleave', () => hide(index), { signal });
+      });
+
+      this.querySelector('.reel-list')?.addEventListener('pointerleave', () => {
+        this.classList.remove('is-staging');
+        shots[active]?.classList.remove('is-active');
+        active = -1;
+      }, { signal });
+    }
+
+    disconnectedCallback() {
+      this.controller?.abort();
+      cancelAnimationFrame(this.frame);
+    }
+  }
+
+  if (!customElements.get('work-reel')) customElements.define('work-reel', WorkReel);
+</script>
+
+<style>
+  .reel {
+    display: block;
+  }
+
+  .reel-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .reel-row {
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 1.5rem;
+    padding-block: clamp(1.25rem, 3vw, 2.25rem);
+    border-top: 1px solid var(--line);
+    color: var(--chalk);
+    text-decoration: none;
+    transition: opacity 300ms ease;
+  }
+
+  .reel-num {
+    color: var(--dim);
+    transition: color 200ms ease;
+  }
+
+  .reel-title {
+    font-size: clamp(2.25rem, 6.4vw, 6rem);
+    overflow-wrap: anywhere;
+    transition: transform 500ms var(--ease-out), font-stretch 500ms var(--ease-out);
+  }
+
+  .reel-meta {
+    display: grid;
+    justify-items: end;
+    gap: 0.125rem;
+    color: var(--dim);
+    text-align: end;
+  }
+
+  .reel-thumb {
+    display: none;
+  }
+
+  /* Staging: one row speaks, the rest step back. */
+  .is-staging .reel-row:not(.is-staged) {
+    opacity: 0.32;
+  }
+
+  .reel-row.is-staged .reel-num {
+    color: var(--signal);
+  }
+
+  .reel-row.is-staged .reel-title {
+    transform: translateX(1.5rem);
+    font-stretch: 125%;
+  }
+
+  .reel-row:focus-visible {
+    outline-offset: -2px;
+  }
+
+  .reel-row:focus-visible .reel-num {
+    color: var(--signal);
+  }
+
+  .reel-row:active .reel-title {
+    opacity: 0.75;
+  }
+
+  /* The trailing preview frame. Positioned by transform only. */
+  .reel-preview {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 30;
+    width: 20rem;
+    aspect-ratio: 4 / 3;
+    pointer-events: none;
+    will-change: transform;
+  }
+
+  .reel :global(.reel-shot) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    scale: 0.92;
+    clip-path: inset(100% 0 0 0);
+    transition:
+      opacity 200ms ease,
+      scale 450ms var(--ease-out),
+      clip-path 450ms var(--ease-out);
+  }
+
+  .reel :global(.reel-shot.is-active) {
+    opacity: 1;
+    scale: 1;
+    clip-path: inset(0 0 0 0);
+  }
+
+  .reel-shot-empty {
+    display: grid;
+    place-items: center;
+    background: var(--signal);
+    color: var(--ink);
+    font-size: 6rem;
+  }
+
+  @media (hover: none), (pointer: coarse) {
+    .reel-preview {
+      display: none;
+    }
+  }
+
+  @media (max-width: 47.9375rem) {
+    .reel-row {
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 0.75rem 1rem;
+    }
+
+    .reel-title {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
+
+    .reel-meta {
+      grid-column: 2;
+      grid-row: 1;
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .reel-meta span:first-child {
+      display: none;
+    }
+
+    .reel-thumb {
+      display: block;
+      grid-column: 1 / -1;
+      aspect-ratio: 16 / 9;
+      overflow: clip;
+    }
+
+    .reel-thumb :global(img) {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .reel-preview {
+      display: none;
+    }
+  }
+</style>

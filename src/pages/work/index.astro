@@ -4,121 +4,91 @@ import { visibleNewestFirst } from '../../lib/content';
 import { site } from '../../config/site';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import EmptyState from '../../components/EmptyState.astro';
-import ProjectIndex from '../../components/ProjectIndex.astro';
+import KineticText from '../../components/KineticText.astro';
+import WorkReel from '../../components/WorkReel.astro';
 
 const production = import.meta.env.PROD;
 const work = visibleNewestFirst(await getCollection('work'), production);
+const count = String(work.length).padStart(2, '0');
 ---
 
 <BaseLayout title={`Work | ${site.name}`} path="/work/">
   <div class="shell">
-    <section class="header" aria-labelledby="work-title" data-reveal>
-      <h1 class="giant poster" id="work-title">Work<br />Index</h1>
-      <div class="context">
-        <p class="kicker">Index / {new Date().getUTCFullYear()}</p>
-        <p class="serif-lede">Projects I am building and the questions they leave behind.</p>
-      </div>
+    <section class="title-card" data-scene="Title" aria-labelledby="work-title">
+      <p class="card-line label dim">
+        <span>Index / {new Date().getUTCFullYear()}</span>
+        <span class="keyframe" aria-hidden="true"></span>
+        <span>{count} clips</span>
+      </p>
+      <KineticText as="h1" id="work-title" split="chars" text="Work" delay={80} class="card-title display" />
+      <p class="card-lede serif">Projects I am building and the questions they leave behind.</p>
     </section>
 
-    <section class="catalogue" aria-label="Project index" data-reveal>
+    <section class="catalogue" data-scene="Reel" aria-label="Project index">
       {
         work.length > 0 ? (
-          <ProjectIndex entries={work} />
+          <WorkReel entries={work} />
         ) : (
           <EmptyState message="Nothing published here yet. I'm still building." />
         )
       }
     </section>
 
-    <section class="statement" aria-label="Statement" data-reveal>
-      <p class="poster">The index changes as the work does.</p>
+    <section class="statement" data-scene="Out" aria-label="Statement">
+      <KineticText
+        as="p"
+        split="words"
+        play="view"
+        text="The index changes as the work does."
+        class="statement-text display"
+      />
     </section>
   </div>
 </BaseLayout>
 
 <style>
-  .header {
+  .title-card {
     display: grid;
-    grid-template-columns: minmax(0, 980fr) minmax(0, 348fr);
-    min-height: 18.125rem;
-    border-bottom: 3px solid var(--ink);
+    gap: 1.5rem;
+    padding-block: 2rem clamp(3rem, 8vw, 6rem);
+    container-type: inline-size;
   }
 
-  .giant {
-    margin: 0;
-    padding-block: 1.75rem;
-    font-size: clamp(4.125rem, 7.36vw, 6.625rem);
-    line-height: 0.83;
-    letter-spacing: -0.047em;
-  }
-
-  .context {
+  .card-line {
     display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 2rem;
-    padding: 1.5rem;
-    background: var(--red);
-  }
-
-  .context p {
+    align-items: center;
+    gap: 0.75rem;
     margin: 0;
   }
 
-  .context .kicker {
-    color: var(--ink-on-red);
+  .title-card :global(.card-title) {
+    margin: 0;
+    font-size: 27cqi;
+    line-height: 0.8;
+    letter-spacing: -0.05em;
   }
 
-  .context .serif-lede {
-    color: var(--surface);
-    font-size: 1.5rem;
+  .card-lede {
+    max-width: 28ch;
+    margin: 0;
+    justify-self: end;
+    font-size: clamp(1.25rem, 2.2vw, 1.875rem);
+    line-height: 1.25;
   }
 
   .statement {
-    display: flex;
-    align-items: center;
-    min-height: 16.875rem;
-    padding-block: 3rem;
+    padding-block: clamp(4rem, 14svh, 9rem);
   }
 
-  .statement p {
-    max-width: 51rem;
+  .statement :global(.statement-text) {
+    max-width: 16ch;
     margin: 0;
-    font-size: clamp(2.5rem, 3.34vw, 3rem);
-    line-height: 0.95;
-    letter-spacing: -0.042em;
+    font-size: clamp(2.25rem, 6vw, 5.5rem);
   }
 
   @media (max-width: 47.9375rem) {
-    .header {
-      display: block;
-      border-bottom: 0;
-      padding-block: 1.5rem;
-    }
-
-    .giant {
-      padding: 0;
-      font-size: 4.125rem;
-    }
-
-    .context {
-      padding: 1.5rem 0 0;
-      background: transparent;
-    }
-
-    .context .kicker {
-      display: none;
-    }
-
-    .context .serif-lede {
-      color: var(--muted);
-      font-size: 1.125rem;
-      line-height: 1.35;
-    }
-
-    .statement {
-      min-height: 0;
-      padding-block: 2rem;
+    .card-lede {
+      justify-self: start;
     }
   }
 </style>

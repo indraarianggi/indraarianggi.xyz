@@ -1,0 +1,107 @@
+---
+/*
+  Page changes are cuts between scenes: a signal-red panel wipes across,
+  names the destination, and wipes off to reveal it. The cover runs while
+  the next page is fetched, so on a fast connection it costs one gesture,
+  not a loading screen. Reduced motion skips it entirely.
+*/
+---
+
+<div class="wipe" data-wipe aria-hidden="true" transition:persist="scene-wipe">
+  <p class="wipe-label display" data-wipe-label></p>
+  <p class="wipe-tc label" data-wipe-path></p>
+</div>
+
+<script>
+  import { labelForPath } from '../lib/timecode';
+
+  const COVER_MS = 380;
+  const UNCOVER_MS = 520;
+  const curve = 'cubic-bezier(0.77, 0, 0.175, 1)';
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  let covering: Animation | undefined;
+  let covered = false;
+
+  const parts = () => {
+    const wipe = document.querySelector<HTMLElement>('[data-wipe]');
+    return {
+      wipe,
+      label: wipe?.querySelector<HTMLElement>('[data-wipe-label]'),
+      path: wipe?.querySelector<HTMLElement>('[data-wipe-path]'),
+    };
+  };
+
+  document.addEventListener('astro:before-preparation', (event) => {
+    if (reducedMotion.matches) return;
+    const { wipe, label, path } = parts();
+    if (!wipe || !label || !path) return;
+
+    const source = event.sourceElement?.closest<HTMLElement>('[data-wipe-label]');
+    label.textContent = source?.dataset.wipeLabel ?? labelForPath(event.to.pathname);
+    path.textContent = event.to.pathname;
+
+    covering?.cancel();
+    wipe.style.visibility = 'visible';
+    covering = wipe.animate(
+      [{ clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0 0 0)' }],
+      { duration: COVER_MS, easing: curve, fill: 'forwards' },
+    );
+    label.animate(
+      [{ transform: 'translateX(-12%)', opacity: 0 }, { transform: 'none', opacity: 1 }],
+      { duration: COVER_MS + 120, easing: 'cubic-bezier(0.23, 1, 0.32, 1)', fill: 'both' },
+    );
+    covered = true;
+
+    const load = event.loader;
+    event.loader = async () => {
+      await Promise.all([load(), covering?.finished.catch(() => undefined)]);
+    };
+  });
+
+  document.addEventListener('astro:after-swap', () => {
+    if (!covered) return;
+    covered = false;
+    const { wipe } = parts();
+    if (!wipe) return;
+    const uncover = wipe.animate(
+      [{ clipPath: 'inset(0 0 0 0)' }, { clipPath: 'inset(0 0 0 100%)' }],
+      { duration: UNCOVER_MS, easing: curve, fill: 'forwards' },
+    );
+    uncover.finished
+      .then(() => {
+        wipe.style.visibility = 'hidden';
+        covering?.cancel();
+        uncover.cancel();
+      })
+      .catch(() => undefined);
+  });
+</script>
+
+<style>
+  .wipe {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: max(1.5rem, env(safe-area-inset-top)) var(--page-gutter) calc(var(--hud-h) + 1.5rem);
+    background: var(--signal);
+    color: var(--ink);
+    visibility: hidden;
+    clip-path: inset(0 100% 0 0);
+    pointer-events: none;
+  }
+
+  .wipe-label {
+    margin: 0;
+    font-size: clamp(3.5rem, 13vw, 12rem);
+    overflow-wrap: anywhere;
+  }
+
+  .wipe-tc {
+    order: -1;
+    margin: 0;
+  }
+</style>

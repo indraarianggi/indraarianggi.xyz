@@ -4,6 +4,8 @@ import { visibleNewestFirst } from '../../lib/content';
 import { site } from '../../config/site';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import EmptyState from '../../components/EmptyState.astro';
+import KineticText from '../../components/KineticText.astro';
+import SceneSlate from '../../components/SceneSlate.astro';
 import ArticleLead from '../../components/ArticleLead.astro';
 import ArticleRow from '../../components/ArticleRow.astro';
 
@@ -14,26 +16,28 @@ const [lead, ...older] = articles;
 ---
 
 <BaseLayout title={`Blog | ${site.name}`} path="/blog/">
-  <div class="shell">
-    <section class="header" aria-labelledby="blog-title" data-reveal>
-      <h1 class="giant poster" id="blog-title">Blog /<br />Field notes</h1>
-      <div class="context">
-        <p class="kicker">Archive / open</p>
-        <p class="serif-lede">Making software. Learning as I go.</p>
-      </div>
-    </section>
+  <section class="title-card shell" data-scene="Title" aria-labelledby="blog-title">
+    <p class="card-line label dim">
+      <span>Archive / open</span>
+      <span class="keyframe" aria-hidden="true"></span>
+      <span>{String(articles.length).padStart(2, '0')} notes</span>
+    </p>
+    <KineticText as="h1" id="blog-title" split="chars" text={['Field', 'notes.']} delay={80} class="card-title display" />
+    <p class="card-lede serif">Making software. Learning as I go. Written down so it stays learned.</p>
+  </section>
 
-    <section class="lead-band" aria-label="Latest article" data-reveal>
+  <div class="sheet paper" data-frame>
+    <section class="shell lead-band" data-scene="Latest" aria-label="Latest note">
       {lead ? <ArticleLead entry={lead} /> : <EmptyState message="No articles yet. Notes are being shaped." />}
     </section>
 
     {
       older.length > 0 && (
-        <section class="archive" aria-labelledby="archive-title">
-          <h2 class="archive-title poster-section" id="archive-title" data-reveal>Older notes / Still useful</h2>
-          <ul class="archive-list">
-            {older.map((entry) => (
-              <ArticleRow entry={entry} />
+        <section class="shell archive" data-scene="Archive" aria-labelledby="archive-title">
+          <SceneSlate scene={2} label="Archive" title="Older notes, still useful" id="archive-title" />
+          <ul class="takes" data-play>
+            {older.map((entry, i) => (
+              <ArticleRow entry={entry} index={i} />
             ))}
           </ul>
         </section>
@@ -43,99 +47,49 @@ const [lead, ...older] = articles;
 </BaseLayout>
 
 <style>
-  .header {
+  .title-card {
     display: grid;
-    grid-template-columns: minmax(0, 930fr) minmax(0, 398fr);
-    min-height: 18.75rem;
+    gap: 1.5rem;
+    padding-block: 2rem clamp(3rem, 8vw, 6rem);
+    container-type: inline-size;
   }
 
-  .giant {
-    margin: 0;
-    padding-block-start: 0.125rem;
-    font-size: clamp(3.25rem, 6.25vw, 5.625rem);
-    line-height: 0.84;
-    letter-spacing: -0.044em;
-  }
-
-  .context {
+  .card-line {
     display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 2rem;
-    padding: 1.5rem;
-    background: var(--red);
-  }
-
-  .context p {
+    align-items: center;
+    gap: 0.75rem;
     margin: 0;
   }
 
-  .context .kicker {
-    color: var(--ink-on-red);
+  .title-card :global(.card-title) {
+    margin: 0;
+    font-size: min(22cqi, 30svh);
+    line-height: 0.82;
+    letter-spacing: -0.045em;
   }
 
-  .context .serif-lede {
-    color: var(--surface);
-    font-size: 1.625rem;
+  .title-card :global(.card-title .k-line:nth-child(even)) {
+    text-align: end;
+  }
+
+  .card-lede {
+    max-width: 30ch;
+    margin: 0;
+    font-size: clamp(1.25rem, 2.2vw, 1.875rem);
     line-height: 1.25;
   }
 
-  .lead-band {
-    min-width: 0;
+  .sheet {
+    padding-block: clamp(2.5rem, 6vw, 4.5rem);
   }
 
   .archive {
-    padding-block: 2.25rem 3.5rem;
+    padding-block-start: clamp(3rem, 8vw, 6rem);
   }
 
-  .archive-title {
-    margin: 0 0 1.25rem;
-    font-size: 2.125rem;
-    line-height: 1.1;
-  }
-
-  .archive-list {
+  .takes {
     margin: 0;
     padding: 0;
     list-style: none;
-  }
-
-  @media (max-width: 47.9375rem) {
-    .header {
-      grid-template-columns: 1fr;
-      min-height: 0;
-      gap: 0.75rem;
-      margin-block: 0.75rem;
-    }
-
-    .giant {
-      font-size: clamp(2.8125rem, 14.6vw, 3.5625rem);
-      line-height: 0.86;
-      letter-spacing: -0.045em;
-    }
-
-    .context {
-      gap: 0.5rem;
-      padding: 0.5rem 0;
-      background: transparent;
-    }
-
-    .context .kicker {
-      color: var(--red-text);
-    }
-
-    .context .serif-lede {
-      color: var(--muted);
-      font-size: 1.1875rem;
-      line-height: 1.35;
-    }
-
-    .archive {
-      padding-block: 1.5rem 2.5rem;
-    }
-
-    .archive-title {
-      font-size: 2rem;
-    }
   }
 </style>
