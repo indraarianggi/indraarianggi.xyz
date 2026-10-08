@@ -1,103 +1,165 @@
 ---
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
 import BaseLayout from './BaseLayout.astro';
+import KineticText from '../components/KineticText.astro';
 import TableOfContents from '../components/TableOfContents.astro';
 import { site } from '../config/site';
 import type { TocItem } from '../lib/toc';
 
+/*
+  Detail pages in two acts. The title plays on the stage; then a paper
+  sheet rolls up over it for the reading. Where the title card fits on
+  screen it stays pinned while the sheet covers it, receding as it goes.
+*/
 type Props = {
   title: string;
   summary: string;
   path: string;
   variant?: 'project' | 'article';
   toc?: TocItem[];
+  cover?: ImageMetadata;
+  coverAlt?: string;
+  runtimeMinutes?: number;
 };
 
-const { title, summary, path, variant = 'project', toc } = Astro.props;
+const { title, summary, path, variant = 'project', toc, cover, coverAlt, runtimeMinutes } = Astro.props;
 const hasToc = toc !== undefined && toc.length >= 2;
+const back = variant === 'article'
+  ? { href: '/blog/', label: 'Field notes' }
+  : { href: '/work/', label: 'Work index' };
 ---
 
-<BaseLayout title={`${title} | ${site.name}`} path={path}>
-  <div class="shell">
-    <header class:list={['detail-header', `detail-${variant}`]} data-reveal>
-      <div class="header-main">
-        <p class="detail-kicker kicker kicker-red">{variant === 'article' ? 'Article / Field notes' : 'Project / Selected work'}</p>
-        <h1 class="detail-title">{title}</h1>
-        <p class="detail-summary">{summary}</p>
+<BaseLayout
+  title={`${title} | ${site.name}`}
+  description={summary}
+  path={path}
+  image={cover ? { src: cover.src, alt: coverAlt ?? '' } : undefined}
+  runtimeMinutes={runtimeMinutes}
+>
+  <div class="detail">
+    <header class="stage-head shell" data-scene="Title">
+      <div class="head-copy">
+        <p class="head-line label">
+          <a class="back text-link" href={back.href}>{back.label}</a>
+          <span class="keyframe" aria-hidden="true"></span>
+          <span class="dim">{variant === 'article' ? 'Field note' : 'Case study'}</span>
+        </p>
+        <KineticText as="h1" split="words" text={title} delay={60} class="detail-title display" />
+        <p class="head-summary serif">{summary}</p>
       </div>
       <slot name="metadata" />
     </header>
 
-    {
-      hasToc ? (
-        <div class="detail-grid">
-          <div class="detail-reading">
-            <div class="toc-sentinel" data-toc-sentinel aria-hidden="true" />
-            <slot />
-            <slot name="after-content" />
+    <div class="sheet paper">
+      {
+        cover && (
+          <div class="shell">
+            <figure class="cover">
+              <Image src={cover} alt={coverAlt ?? ''} widths={[720, 1200, 1800]} sizes="(min-width: 90rem) 84rem, 100vw" loading="eager" data-drift />
+            </figure>
           </div>
-          <div class="detail-rail">
-            <TableOfContents tree={toc} />
-          </div>
-        </div>
-      ) : (
-        <div class="detail-reading">
-          <slot />
-          <slot name="after-content" />
-        </div>
-      )
-    }
+        )
+      }
+      <div class="shell">
+        {
+          hasToc ? (
+            <div class="detail-grid">
+              <div class="detail-reading">
+                <div class="toc-sentinel" data-toc-sentinel aria-hidden="true" />
+                <slot />
+              </div>
+              <div class="detail-rail">
+                <TableOfContents tree={toc} />
+              </div>
+            </div>
+          ) : (
+            <div class="detail-reading detail-reading-solo">
+              <slot />
+            </div>
+          )
+        }
+      </div>
+      <slot name="after-content" />
+    </div>
   </div>
 </BaseLayout>
 
-
 <style>
-  .detail-header {
+  .detail {
+    timeline-scope: --sheet;
+  }
+
+  .stage-head {
     display: grid;
-    grid-template-columns: minmax(0, 920fr) minmax(0, 408fr);
-    min-height: 21.875rem;
-    border-block-end: 3px solid var(--ink);
+    grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem);
+    gap: 2rem 3rem;
+    align-items: end;
+    padding-block: 2rem clamp(3rem, 8vw, 5rem);
+    transform-origin: 50% 0;
   }
 
-  .header-main {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    min-width: 0;
+  .head-copy {
+    display: grid;
     gap: 1.5rem;
-    padding: 1.75rem 1.5rem 1.75rem 0;
-    color: var(--ink);
+    min-width: 0;
   }
 
-  .detail-kicker {
+  .head-line {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
     margin: 0;
-    font-size: 0.625rem;
   }
 
-  .detail-title {
+  .back {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+  }
+
+  .stage-head :global(.detail-title) {
     margin: 0;
-    font-family: var(--font-poster);
-    font-weight: 400;
-    text-transform: uppercase;
-    font-size: clamp(2.75rem, 5vw, 4.5rem);
-    line-height: 0.92;
-    letter-spacing: -0.045em;
+    font-size: clamp(2.75rem, 7.2vw, 7rem);
     overflow-wrap: anywhere;
   }
 
-  .detail-article .detail-title {
-    font-family: var(--font-serif);
-    font-weight: 700;
-    letter-spacing: -0.03em;
-    font-size: clamp(2.5rem, 4.75vw, 4.25rem);
+  .head-summary {
+    max-width: 40ch;
+    margin: 0;
+    color: var(--dim);
+    font-size: clamp(1.125rem, 1.6vw, 1.4375rem);
+    line-height: 1.4;
   }
 
-  .detail-summary {
-    max-width: 47.5rem;
-    margin: 0;
-    font-family: var(--font-serif);
-    font-size: 1.1875rem;
-    line-height: 1.35;
-    text-wrap: pretty;
+  @media (prefers-reduced-motion: no-preference) {
+    .head-summary,
+    .stage-head > :global(.clapper) {
+      animation: rise var(--dur-std) var(--ease-out) backwards;
+      animation-delay: 380ms;
+    }
+  }
+
+  .sheet {
+    position: relative;
+    z-index: 1;
+    padding-block: clamp(1.5rem, 4vw, 3rem) 0;
+    view-timeline: --sheet block;
+  }
+
+  .cover {
+    margin: 0 0 clamp(2rem, 5vw, 3.5rem);
+    aspect-ratio: 21 / 9;
+    overflow: clip;
+    background: var(--ink);
+  }
+
+  .cover :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    outline: none;
   }
 
   .detail-grid {
@@ -105,22 +167,22 @@ const hasToc = toc !== undefined && toc.length >= 2;
     grid-template-columns: minmax(0, 56.25rem) 17.5rem;
     gap: 2.125rem;
     align-items: stretch;
-    margin-block: 2.75rem 4rem;
+    padding-block-end: 4rem;
   }
 
   .detail-reading {
     min-width: 0;
   }
 
-  .detail-header + .detail-reading {
+  .detail-reading-solo {
     max-width: 56.25rem;
-    margin-block: 2.75rem 4rem;
+    padding-block-end: 4rem;
   }
 
   .detail-reading :global(.prose) {
     max-width: none;
     font-size: 1.25rem;
-    line-height: 1.55;
+    line-height: 1.6;
   }
 
   .detail-reading :global(.prose > p),
@@ -143,7 +205,34 @@ const hasToc = toc !== undefined && toc.length >= 2;
   }
 
   .detail-rail {
+    display: grid;
     min-width: 0;
+  }
+
+  /* Pin the title card while the sheet rolls over it: wide, tall screens only. */
+  @media (min-width: 64rem) and (min-height: 46rem) {
+    .stage-head {
+      position: sticky;
+      top: 0;
+      min-height: calc(100svh - 4.5rem - var(--hud-h));
+    }
+  }
+
+  @supports (animation-timeline: view()) {
+    @media (min-width: 64rem) and (min-height: 46rem) and (prefers-reduced-motion: no-preference) {
+      .stage-head {
+        animation: stage-recede linear both;
+        animation-timeline: --sheet;
+        animation-range: entry 0% entry 100%;
+      }
+    }
+  }
+
+  @keyframes stage-recede {
+    to {
+      transform: scale(0.94);
+      opacity: 0.25;
+    }
   }
 
   @media (min-width: 48rem) and (max-width: 63.9375rem) {
@@ -153,40 +242,29 @@ const hasToc = toc !== undefined && toc.length >= 2;
     }
   }
 
-  @media (max-width: 47.9375rem) {
-    .detail-header {
+  @media (max-width: 63.9375rem) {
+    .stage-head {
       grid-template-columns: 1fr;
-      min-height: 0;
-      border-block-end: 0;
+    }
+  }
+
+  @media (max-width: 47.9375rem) {
+    .stage-head {
+      padding-block: 1rem 2.5rem;
     }
 
-    .header-main {
-      gap: 1rem;
-      padding: 1rem 0;
-    }
-
-    .detail-title {
-      font-size: clamp(2.125rem, 11.3vw, 2.75rem);
-      line-height: 0.95;
-    }
-
-    .detail-article .detail-title {
-      font-size: clamp(2rem, 10.3vw, 2.5rem);
-    }
-
-    .detail-summary {
-      font-size: 1.0625rem;
-      line-height: 1.5;
+    .cover {
+      aspect-ratio: 4 / 3;
     }
 
     .detail-grid {
       grid-template-columns: 1fr;
       gap: 0;
-      margin-block: 1.5rem 2.5rem;
+      padding-block-end: 2.5rem;
     }
 
-    .detail-header + .detail-reading {
-      margin-block: 1.5rem 2.5rem;
+    .detail-reading-solo {
+      padding-block-end: 2.5rem;
     }
 
     .detail-reading :global(.prose) {

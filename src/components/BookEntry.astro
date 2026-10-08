@@ -3,6 +3,8 @@ import type { CollectionEntry } from 'astro:content';
 import { render } from 'astro:content';
 import { Image } from 'astro:assets';
 
+/* One book on a shelf. Lives on paper. The spine colour marks the shelf:
+   signal for what is being read now, ink for everything else. */
 type Props = {
   book: CollectionEntry<'books'>;
   shelf: 'red' | 'black';
@@ -13,10 +15,8 @@ const { book, shelf, statusLabel } = Astro.props;
 const { Content } = book.body ? await render(book) : { Content: null };
 ---
 
-<li class="book">
-  <div class:list={['spine', `spine-${shelf}`]} aria-hidden="true">
-    <span class="spine-status kicker">{statusLabel}</span>
-  </div>
+<li class="book" data-rise>
+  <span class:list={['spine', `spine-${shelf}`]} aria-hidden="true"></span>
   <div class="book-main">
     {
       book.data.cover && book.data.coverAlt && (
@@ -31,7 +31,7 @@ const { Content } = book.body ? await render(book) : { Content: null };
       )
     }
     <div class="book-copy">
-      <p class="book-status kicker kicker-red">{statusLabel}</p>
+      <p class="book-status label">{statusLabel}</p>
       <p class="book-title">{book.data.title}</p>
       <p class="book-author">{book.data.author}</p>
     </div>
@@ -42,130 +42,56 @@ const { Content } = book.body ? await render(book) : { Content: null };
 <style>
   .book {
     display: grid;
-    grid-template-columns: 3.375rem minmax(0, 1fr);
-    min-width: 0;
-    min-height: 16.625rem;
+    grid-template-columns: 0.5rem minmax(0, 1fr);
     background: var(--surface);
     border: 1px solid var(--rule);
   }
 
-  .spine {
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    padding: 1.125rem 0.25rem;
-  }
-
   .spine-red {
-    background: var(--red);
+    background: var(--signal);
   }
 
   .spine-black {
     background: var(--ink);
   }
 
-  .spine-status {
-    color: var(--surface);
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
-    font-size: 0.625rem;
-    letter-spacing: 0.12em;
-  }
-
-  .spine-red .spine-status {
-    color: var(--ink-on-red);
-  }
-
   .book-main {
     display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    align-content: start;
-    gap: 1.125rem;
-    padding: 1.125rem;
-    min-width: 0;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 1rem 1.25rem;
+    padding: 1.25rem;
   }
 
-  .book-copy {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 1.25rem;
-    min-width: 0;
-    min-height: 14.25rem;
-  }
-
-  .book-status {
-    margin: 0;
-  }
-
-  .book-title {
-    margin: 0;
-    font-family: var(--font-poster);
-    font-weight: 400;
-    letter-spacing: -0.031em;
-    text-transform: uppercase;
-    overflow-wrap: anywhere;
-    font-size: 1.4375rem;
-    line-height: 1.15;
-  }
-
-  .book-author {
-    margin: 0;
-    font-family: var(--font-mono);
-    font-size: 0.6875rem;
-    letter-spacing: 0.05em;
-    color: var(--muted);
-  }
-
-  .book-cover {
-    width: 6rem;
-    max-width: 100%;
+  .book-main :global(.book-cover) {
+    width: 5rem;
     height: auto;
   }
 
-  .book-main:has(.book-cover) .book-copy {
-    min-height: 0;
+  .book-copy p {
+    margin: 0;
+  }
+
+  .book-status {
+    color: var(--red-text);
+    margin-bottom: 0.5rem !important;
+  }
+
+  .book-title {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-stretch: 106%;
+    font-size: 1.25rem;
+    line-height: 1.1;
+    text-transform: uppercase;
+  }
+
+  .book-author {
+    font-family: var(--font-serif);
+    color: var(--muted);
   }
 
   .book-note {
-    min-width: 0;
-    overflow-wrap: anywhere;
-    font-size: 0.9375rem;
-    line-height: 1.5;
-  }
-
-  .book-note :global(:last-child) {
-    margin-block-end: 0;
-  }
-
-  .book-note :global(a:active) {
-    opacity: 0.7;
-  }
-
-  @media (max-width: 47.9375rem) {
-    .book {
-      grid-template-columns: 1fr;
-      min-height: 7.5rem;
-      border-width: 0 0 1px;
-      border-color: var(--ink);
-    }
-
-    .spine {
-      display: none;
-    }
-
-    .book-main {
-      padding: 0.875rem;
-      gap: 0.875rem;
-    }
-
-    .book-copy {
-      min-height: 5.75rem;
-      gap: 0.5rem;
-    }
-
-    .book-title {
-      font-size: 1.3125rem;
-    }
+    grid-column: 1 / -1;
+    font-size: 1rem;
   }
 </style>

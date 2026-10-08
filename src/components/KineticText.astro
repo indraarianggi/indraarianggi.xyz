@@ -1,0 +1,151 @@
+---
+/*
+  Splits text at build time so there is no flash of unsplit copy.
+  - split="chars": one line per array item, never wraps; each letter rises
+    from a mask while the width axis opens from condensed. Hero use only.
+  - split="words": wraps normally; each word rises from its own mask.
+  play="load" runs on arrival; play="view" waits for the player script to
+  mark it on screen. Assistive tech reads the sr-only sentence, never the
+  fragments.
+*/
+type Props = {
+  text: string | string[];
+  as?: 'h1' | 'h2' | 'h3' | 'p' | 'span';
+  split?: 'chars' | 'words';
+  play?: 'load' | 'view';
+  delay?: number;
+  id?: string;
+  class?: string;
+};
+
+const { text, as: Tag = 'span', split = 'words', play = 'load', delay = 0, id, class: className } = Astro.props;
+
+const lines = (Array.isArray(text) ? text : [text]).map((line) => line.split(/\s+/).filter(Boolean));
+const sentence = lines.map((words) => words.join(' ')).join(' ');
+let index = 0;
+const next = () => index++;
+---
+
+<Tag
+  class:list={['kinetic', `kinetic-${split}`, className]}
+  id={id}
+  style={`--kd: ${delay}ms`}
+  data-play={play === 'view' ? '' : undefined}
+>
+  <span class="sr-only">{sentence}</span>
+  <span class="k-lines" aria-hidden="true">
+    {
+      lines.map((words) => (
+        <span class="k-line">
+          {words.map((word, wordIndex) => (
+            <Fragment>
+              {split === 'chars' ? (
+                <span class="k-word">
+                  {[...word].map((char) => (
+                    <span class:list={['k-ch', { 'k-mark': /[.?!]/.test(char) }]} style={`--i: ${next()}`}>
+                      {char}
+                    </span>
+                  ))}
+                </span>
+              ) : (
+                <span class="k-word">
+                  <span class="k-in" style={`--i: ${next()}`}>
+                    {/[.?!]$/.test(word) ? (
+                      <Fragment>{word.slice(0, -1)}<span class="k-mark">{word.slice(-1)}</span></Fragment>
+                    ) : (
+                      word
+                    )}
+                  </span>
+                </span>
+              )}
+              {wordIndex < words.length - 1 && ' '}
+            </Fragment>
+          ))}
+        </span>
+      ))
+    }
+  </span>
+</Tag>
+
+<style>
+  .kinetic {
+    display: block;
+  }
+
+  .k-lines,
+  .k-line {
+    display: block;
+  }
+
+  .k-word,
+  .k-ch,
+  .k-in {
+    display: inline-block;
+  }
+
+  /* Masks. Padding keeps descenders and accents inside the clip. */
+  .kinetic-chars .k-line {
+    white-space: nowrap;
+    overflow: clip;
+    padding-block: 0.1em 0.06em;
+    margin-block: -0.1em -0.06em;
+  }
+
+  .kinetic-words .k-word {
+    overflow: clip;
+    padding-block: 0.1em 0.08em;
+    margin-block: -0.1em -0.08em;
+    vertical-align: top;
+  }
+
+  /* Sentence-ending marks carry the signal colour: the only accent in a
+     headline, and it lands on the beat where the line resolves. */
+  .k-mark {
+    color: var(--signal);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .kinetic-chars:not([data-play]) .k-ch,
+    .kinetic-chars.is-playing .k-ch {
+      animation: k-stretch-rise var(--dur-slow) var(--ease-out) backwards;
+      animation-delay: calc(var(--kd) + var(--i) * 16ms);
+    }
+
+    .kinetic-words:not([data-play]) .k-in,
+    .kinetic-words.is-playing .k-in {
+      animation: k-rise 760ms var(--ease-out) backwards;
+      animation-delay: calc(var(--kd) + var(--i) * 45ms);
+    }
+
+    :global(.js) .kinetic[data-play]:not(.is-playing) .k-ch,
+    :global(.js) .kinetic[data-play]:not(.is-playing) .k-in {
+      transform: translateY(110%);
+    }
+
+    /* Touching a letter thins it, then it recovers slowly. Decorative, so
+       fine pointers only. */
+    @media (hover: hover) and (pointer: fine) {
+      .kinetic-chars .k-ch {
+        transition: font-weight 700ms var(--ease-out);
+      }
+
+      .kinetic-chars .k-ch:hover {
+        font-weight: 200;
+        transition-duration: 160ms;
+      }
+    }
+  }
+
+  @keyframes k-stretch-rise {
+    from {
+      transform: translateY(110%);
+      font-stretch: 62%;
+    }
+  }
+
+  @keyframes k-rise {
+    from {
+      transform: translateY(110%);
+    }
+  }
+</style>

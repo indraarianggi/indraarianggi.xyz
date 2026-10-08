@@ -2,119 +2,111 @@
 import type { CollectionEntry } from 'astro:content';
 import { formatDate } from '../lib/content';
 
+/* One take in the archive. Hover selects it the way a clip is selected on
+   a track: an ink fill wipes across from the left. Lives on paper. */
 type Props = {
   entry: CollectionEntry<'blog'>;
+  index?: number;
   showTopic?: boolean;
 };
 
-const { entry, showTopic = true } = Astro.props;
+const { entry, index = 0, showTopic = true } = Astro.props;
 ---
 
-<li class:list={['article-row', { 'without-topic': !showTopic }]}>
-  <p class="row-date kicker">{formatDate(entry.data.date)}</p>
-  <h3 class="row-title-small">
-    <a class="link-underline" href={`/blog/${entry.id}/`}>{entry.data.title}</a>
-  </h3>
-  {showTopic && entry.data.topics.length > 0 && <p class="row-topic kicker kicker-red">{entry.data.topics[0]}</p>}
+<li class="take" data-rise style={`--rd: ${index}`}>
+  <a class="take-link" href={`/blog/${entry.id}/`} data-wipe-label={entry.data.title}>
+    <span class="take-date label">{formatDate(entry.data.date)}</span>
+    <span class="take-title">{entry.data.title}</span>
+    {showTopic && entry.data.topics.length > 0 && <span class="take-topic label">{entry.data.topics[0]}</span>}
+  </a>
 </li>
 
 <style>
-  .article-row {
-    display: grid;
-    grid-template-columns: 6.5rem minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 1.5rem;
-    min-height: 5.5rem;
+  .take {
     border-top: 1px solid var(--ink);
-    padding-block: 1rem;
   }
 
-  .article-row:last-child {
+  .take:last-child {
     border-bottom: 1px solid var(--ink);
   }
 
-  .article-row.without-topic {
-    grid-template-columns: 6.5rem minmax(0, 1fr);
-  }
-
-  .article-row > * {
-    min-width: 0;
-  }
-
-  .row-date {
-    margin: 0;
-    color: var(--muted);
-  }
-
-  .row-title-small {
-    margin: 0;
-    font-family: var(--font-poster);
-    font-weight: 400;
-    letter-spacing: -0.031em;
-    font-size: clamp(1.0625rem, 1.46vw, 1.3125rem);
-    line-height: 1.1;
-    text-transform: uppercase;
-    overflow-wrap: anywhere;
-  }
-
-  .row-title-small a {
-    display: flex;
+  .take-link {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    grid-template-columns: 8.5rem minmax(0, 1fr) auto;
     align-items: center;
-    min-height: 2.75rem;
+    gap: 1.5rem;
+    min-height: 5.5rem;
+    padding: 1rem 0.75rem;
     color: var(--ink);
     text-decoration: none;
-    transition: color 150ms var(--ease-out);
+    transition: color 260ms ease;
   }
 
-  .row-topic {
-    margin: 0;
-    justify-self: end;
-    color: var(--red-text);
+  .take-link::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--ink);
+    clip-path: inset(0 100% 0 0);
+    transition: clip-path 360ms var(--ease-out);
   }
 
-  .row-title-small a:focus-visible {
-    text-decoration: underline;
+  .take-date,
+  .take-topic {
+    color: var(--muted);
+    transition: color 260ms ease;
   }
 
-  .row-title-small a:active {
-    opacity: 0.7;
+  .take-title {
+    font-family: var(--font-display);
+    font-weight: 750;
+    font-stretch: 106%;
+    font-size: clamp(1.125rem, 1.7vw, 1.5rem);
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
+    transition: transform 360ms var(--ease-out);
   }
 
   @media (hover: hover) and (pointer: fine) {
-    .row-title-small a:hover {
-      color: var(--red-text);
-      text-decoration: underline;
-      text-decoration-thickness: 1px;
-      text-underline-offset: 0.15em;
+    .take-link:hover,
+    .take-link:hover .take-date,
+    .take-link:hover .take-topic {
+      color: var(--paper);
     }
+
+    .take-link:hover::before {
+      clip-path: inset(0 0 0 0);
+    }
+
+    .take-link:hover .take-title {
+      transform: translateX(0.75rem);
+    }
+  }
+
+  .take-link:focus-visible {
+    outline-offset: -2px;
+  }
+
+  .take-link:active .take-title {
+    opacity: 0.7;
   }
 
   @media (max-width: 47.9375rem) {
-    .article-row,
-    .article-row.without-topic {
-      grid-template-columns: minmax(0, 1fr);
-      align-content: center;
-      gap: 0.5rem;
-      min-height: 7.5rem;
-      padding-block: 1.25rem;
+    .take-link {
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 0.5rem 1rem;
+      padding-inline: 0;
     }
 
-    .row-date {
-      color: var(--red-text);
-    }
-
-    .row-title-small {
+    .take-title {
+      grid-column: 1 / -1;
+      grid-row: 2;
       font-size: 1.1875rem;
-    }
-
-    .row-topic {
-      font-size: 0.625rem;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .row-title-small a {
-      transition: none;
     }
   }
 </style>

@@ -1,0 +1,295 @@
+---
+/*
+  The page as a timeline. The playhead tracks scroll, the timecode reads it
+  out, and each scene on the page is a keyframe you can jump to.
+  Scenes come from [data-scene] sections and article h2 headings.
+  The full scroll maps onto runtimeSeconds: an article's reading time, or
+  the default one-minute reel.
+*/
+type Props = {
+  runtimeSeconds?: number;
+};
+
+const { runtimeSeconds } = Astro.props;
+---
+
+<div class="hud" data-hud data-runtime={runtimeSeconds}>
+  <p class="hud-tc label" aria-hidden="true">
+    <span class="hud-tc-tag">TC</span>
+    <span data-hud-timecode>00:00:00:00</span>
+  </p>
+  <nav class="hud-track" aria-label="Scenes on this page">
+    <span class="hud-ruler" aria-hidden="true"></span>
+    <span class="hud-played" data-hud-played aria-hidden="true"></span>
+    <ol class="hud-markers" data-hud-markers></ol>
+  </nav>
+  <p class="hud-scene label" aria-hidden="true">
+    <span data-hud-scene-number>SC 00</span>
+    <span class="hud-scene-name" data-hud-scene-name></span>
+  </p>
+</div>
+<div class="hud-mobile" aria-hidden="true"><span data-hud-mobile-played></span></div>
+
+<script>
+  import { formatTimecode, framesForScroll } from '../lib/timecode';
+
+  type Scene = { el: HTMLElement; label: string; marker: HTMLButtonElement };
+
+  let teardown: (() => void) | undefined;
+
+  function mount() {
+    teardown?.();
+    const hud = document.querySelector<HTMLElement>('[data-hud]');
+    if (!hud) return;
+
+    const timecode = hud.querySelector<HTMLElement>('[data-hud-timecode]')!;
+    const played = hud.querySelector<HTMLElement>('[data-hud-played]')!;
+    const markerList = hud.querySelector<HTMLOListElement>('[data-hud-markers]')!;
+    const sceneNumber = hud.querySelector<HTMLElement>('[data-hud-scene-number]')!;
+    const sceneName = hud.querySelector<HTMLElement>('[data-hud-scene-name]')!;
+    const mobilePlayed = document.querySelector<HTMLElement>('[data-hud-mobile-played]');
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const runtime = Number(hud.dataset.runtime) || undefined;
+    const controller = new AbortController();
+    const { signal } = controller;
+
+    const sources = Array.from(
+      document.querySelectorAll<HTMLElement>('main [data-scene], main .prose h2[id]'),
+    );
+
+    markerList.replaceChildren();
+    const scenes: Scene[] = sources.map((el, index) => {
+      const label = el.dataset.scene ?? el.textContent?.trim() ?? `Scene ${index + 1}`;
+      const item = document.createElement('li');
+      const marker = document.createElement('button');
+      marker.type = 'button';
+      marker.className = 'hud-marker';
+      marker.setAttribute('aria-label', `Jump to ${label}`);
+      marker.title = label;
+      marker.addEventListener('click', () => {
+        el.scrollIntoView({ behavior: reducedMotion.matches ? 'auto' : 'smooth', block: 'start' });
+        if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex', '-1');
+        el.focus({ preventScroll: true });
+      }, { signal });
+      item.append(marker);
+      markerList.append(item);
+      return { el, label, marker };
+    });
+
+    let maxScroll = 1;
+    let offsets: number[] = [];
+
+    // Layout is read once per resize, never per scroll frame.
+    const measure = () => {
+      maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+      offsets = scenes.map(({ el }) => el.getBoundingClientRect().top + window.scrollY);
+      scenes.forEach(({ marker }, i) => {
+        const at = maxScroll > 0 ? Math.min(1, offsets[i] / maxScroll) : 0;
+        marker.parentElement!.style.left = `${(at * 100).toFixed(3)}%`;
+      });
+      render();
+    };
+
+    let active = -1;
+    const render = () => {
+      const y = window.scrollY;
+      const progress = maxScroll > 0 ? Math.min(1, y / maxScroll) : 0;
+      played.style.transform = `scaleX(${progress})`;
+      if (mobilePlayed) mobilePlayed.style.transform = `scaleX(${progress})`;
+      timecode.textContent = formatTimecode(framesForScroll(y, maxScroll, runtime));
+
+      const probe = y + window.innerHeight * 0.4;
+      let current = -1;
+      offsets.forEach((top, i) => {
+        if (top <= probe) current = i;
+      });
+      if (current === active) return;
+      scenes[active]?.marker.removeAttribute('aria-current');
+      active = current;
+      const scene = scenes[active];
+      scene?.marker.setAttribute('aria-current', 'step');
+      sceneNumber.textContent = `SC ${String(Math.max(0, active)).padStart(2, '0')}`;
+      sceneName.textContent = scene?.label ?? '';
+    };
+
+    let frame = 0;
+    const onScroll = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        render();
+      });
+    };
+
+    const resizeObserver = new ResizeObserver(measure);
+    resizeObserver.observe(document.body);
+    window.addEventListener('scroll', onScroll, { passive: true, signal });
+    measure();
+
+    teardown = () => {
+      controller.abort();
+      resizeObserver.disconnect();
+      cancelAnimationFrame(frame);
+    };
+  }
+
+  document.addEventListener('astro:page-load', mount);
+  document.addEventListener('astro:before-swap', () => {
+    teardown?.();
+    teardown = undefined;
+  });
+</script>
+
+<style>
+  .hud {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 40;
+    display: grid;
+    grid-template-columns: 11rem minmax(0, 1fr) minmax(11rem, 16rem);
+    align-items: stretch;
+    height: var(--hud-h);
+    padding-inline: max(var(--page-gutter), env(safe-area-inset-left)) max(var(--page-gutter), env(safe-area-inset-right));
+    background: var(--stage);
+    border-top: 1px solid var(--line);
+    color: var(--chalk);
+  }
+
+  .hud-tc,
+  .hud-scene {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    margin: 0;
+    white-space: nowrap;
+  }
+
+  .hud-tc-tag {
+    color: var(--signal);
+  }
+
+  .hud-scene {
+    justify-content: flex-end;
+    min-width: 0;
+    color: var(--dim);
+  }
+
+  .hud-scene-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--chalk);
+  }
+
+  .hud-track {
+    position: relative;
+    margin-inline: 1.5rem;
+  }
+
+  /* A ruler is the one place tick marks earn their keep: it is a scale. */
+  .hud-ruler {
+    position: absolute;
+    inset: auto 0 0.75rem;
+    height: 0.375rem;
+    background: repeating-linear-gradient(to right, var(--line) 0 1px, transparent 1px 2.5%);
+  }
+
+  .hud-played {
+    position: absolute;
+    inset: 0;
+    transform: scaleX(0);
+    transform-origin: left;
+    background: linear-gradient(to right, transparent, rgb(255 82 51 / 0.1));
+    border-right: 2px solid var(--signal);
+    will-change: transform;
+  }
+
+  .hud-markers {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .hud-markers :global(li) {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    translate: -50% 0;
+  }
+
+  .hud-markers :global(.hud-marker) {
+    display: grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  .hud-markers :global(.hud-marker)::before {
+    content: '';
+    width: 0.5rem;
+    height: 0.5rem;
+    rotate: 45deg;
+    border: 1px solid var(--chalk);
+    background: var(--stage);
+    transition: background-color var(--dur-quick) ease, border-color var(--dur-quick) ease, scale var(--dur-quick) var(--ease-out);
+  }
+
+  .hud-markers :global(.hud-marker[aria-current])::before {
+    background: var(--signal);
+    border-color: var(--signal);
+  }
+
+  .hud-markers :global(.hud-marker:active)::before {
+    scale: 0.8;
+  }
+
+  .hud-markers :global(.hud-marker:focus-visible) {
+    outline-offset: -4px;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .hud-markers :global(.hud-marker:hover)::before {
+      scale: 1.4;
+      border-color: var(--signal);
+    }
+  }
+
+  .hud-mobile {
+    display: none;
+  }
+
+  @media (max-width: 47.9375rem) {
+    .hud {
+      display: none;
+    }
+
+    .hud-mobile {
+      position: fixed;
+      inset: 0 0 auto;
+      z-index: 40;
+      display: block;
+      height: 3px;
+      pointer-events: none;
+    }
+
+    .hud-mobile span {
+      display: block;
+      height: 100%;
+      background: var(--signal);
+      transform: scaleX(0);
+      transform-origin: left;
+    }
+  }
+
+  @media print {
+    .hud,
+    .hud-mobile {
+      display: none;
+    }
+  }
+</style>

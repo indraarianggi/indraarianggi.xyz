@@ -1,227 +1,228 @@
 ---
 import { site } from '../config/site';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import AnalogNote from '../components/AnalogNote.astro';
+import KineticText from '../components/KineticText.astro';
+import SceneSlate from '../components/SceneSlate.astro';
+
+const principles = ['Make the question smaller.', 'Keep failure visible.', 'Write down what changed.'];
 ---
 
 <BaseLayout title={`About | ${site.name}`} path="/about/">
-  <div class="shell">
-    <section class="poster-header" aria-labelledby="about-title" data-reveal>
-      <div class="poster-field">
-        <p class="kicker kicker-red">About / Statement</p>
-        <h1 class="poster-headline poster" id="about-title">I learn<br />by making<br />things.</h1>
-        <p class="poster-name kicker">{site.name}</p>
-      </div>
-      <div class="poster-panel">
-        <p class="panel-name kicker">{site.name}</p>
-        <p class="panel-copy serif-lede">Software engineer. Learning through projects, questions, writing, and books from many fields.</p>
-      </div>
-    </section>
+  <section class="title-card shell" data-scene="Title" aria-labelledby="about-title">
+    <p class="card-line label dim">
+      <span>About / Statement</span>
+      <span class="keyframe" aria-hidden="true"></span>
+      <span>{site.name}</span>
+    </p>
+    <KineticText
+      as="h1"
+      id="about-title"
+      split="chars"
+      delay={80}
+      text={['I learn', 'by making', 'things.']}
+      class="card-title display"
+    />
+    <p class="card-lede serif">Software engineer. Learning through projects, questions, writing, and books from many fields.</p>
+  </section>
 
-    <section class="practice" aria-labelledby="practice-title">
-      <div class="practice-copy">
-        <h2 class="practice-title poster-section" id="practice-title" data-reveal>The practice</h2>
-        <p>
+  <section class="practice paper" data-scene="Practice" data-frame aria-labelledby="practice-title">
+    <div class="shell practice-grid">
+      <SceneSlate scene={1} label="Practice" title="The practice" id="practice-title" />
+      <div class="practice-copy serif" data-play>
+        <p data-rise>
           Indra is a software engineer. He learns by making things and reflecting through projects, questions,
           writing, and books from many fields.
         </p>
-        <p>This site records work in progress and the lessons kept near the work.</p>
+        <p data-rise style="--rd: 1">This site records work in progress and the lessons kept near the work.</p>
       </div>
+    </div>
+  </section>
 
-      <div class="principles" aria-label="Principles" data-reveal>
-        <AnalogNote label="Principle / 01">
-          <p>Make the question smaller.</p>
-        </AnalogNote>
-        <AnalogNote label="Principle / 02">
-          <p>Keep failure visible.</p>
-        </AnalogNote>
-        <AnalogNote label="Principle / 03">
-          <p>Write down what changed.</p>
-        </AnalogNote>
-      </div>
-    </section>
-  </div>
+  <section class="principles shell" data-scene="Principles" aria-labelledby="principles-title">
+    <SceneSlate scene={2} label="Principles" title="Three keyframes" id="principles-title" />
+    <ol class="track">
+      {
+        principles.map((principle, i) => (
+          <li class="key" style={`--k: ${i}`}>
+            <span class="key-mark" aria-hidden="true"></span>
+            <span class="key-number label dim">Principle {String(i + 1).padStart(2, '0')}</span>
+            <span class="key-text display">{principle}</span>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
 </BaseLayout>
 
 <style>
-  .poster-header {
+  .title-card {
     display: grid;
-    grid-template-columns: minmax(0, 900fr) minmax(0, 428fr);
-    min-height: 29.375rem;
+    gap: 1.5rem;
+    padding-block: 2rem clamp(3rem, 8vw, 6rem);
+    container-type: inline-size;
   }
 
-  .poster-field {
+  .card-line {
     display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 3rem;
-    padding: 1.75rem;
-    background: var(--ink);
-  }
-
-  .poster-field p {
-    margin: 0;
-    color: var(--red-on-ink);
-  }
-
-  .poster-headline {
-    margin: 0;
-    color: var(--surface);
-    font-size: clamp(3rem, 5.28vw, 4.75rem);
-    line-height: 0.86;
-    letter-spacing: -0.047em;
-  }
-
-  .poster-panel {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 2rem;
-    padding: 1.75rem;
-    background: var(--red);
-  }
-
-  .poster-panel p {
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
     margin: 0;
   }
 
-  .panel-name {
-    color: var(--surface);
-    font-family: var(--font-poster);
-    font-size: 1.875rem;
-    line-height: 1.1;
-    letter-spacing: -0.03em;
+  .title-card :global(.card-title) {
+    margin: 0;
+    font-size: min(15cqi, 22svh);
+    line-height: 0.84;
+    letter-spacing: -0.04em;
   }
 
-  .panel-copy {
-    color: var(--surface);
-    font-size: 1.5625rem;
+  .title-card :global(.card-title .k-line:nth-child(2)) {
+    text-align: center;
+  }
+
+  .title-card :global(.card-title .k-line:nth-child(3)) {
+    text-align: end;
+  }
+
+  .card-lede {
+    max-width: 30ch;
+    margin: 0;
+    font-size: clamp(1.25rem, 2.2vw, 1.875rem);
     line-height: 1.25;
   }
 
   .practice {
+    padding-block: clamp(3rem, 8vw, 6rem);
+  }
+
+  .practice-grid {
     display: grid;
-    grid-template-columns: minmax(0, 760fr) minmax(0, 522fr);
-    gap: 2.875rem;
-    padding-block: 2.75rem 4rem;
+    gap: 1rem;
   }
 
   .practice-copy {
-    min-width: 0;
-    font-family: var(--font-serif);
-    font-size: 1.375rem;
-    line-height: 1.55;
-  }
-
-  .practice-title {
-    margin: 0 0 1.375rem;
-    font-size: 2.625rem;
-    line-height: 1.1;
-  }
-
-  .practice-copy p {
-    margin: 0 0 1.375rem;
+    max-width: 38ch;
+    font-size: clamp(1.25rem, 2vw, 1.75rem);
+    line-height: 1.4;
   }
 
   .principles {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 1.125rem;
-    min-width: 0;
+    padding-block: clamp(4rem, 12vw, 8rem);
+    view-timeline: --track block;
   }
 
-  .principles :global(.analog-note) {
-    max-width: none;
-    min-height: 9.6875rem;
-    gap: 1.125rem;
+  /* The track: a line with three keyframes on it. On wide screens it runs
+     across; on narrow ones it runs down. */
+  .track {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2rem;
+    margin: 2rem 0 0;
+    padding: 2.5rem 0 0;
+    list-style: none;
   }
 
-  .principles :global(.note-body) {
-    font-family: var(--font-poster);
-    font-size: 1.3125rem;
-    line-height: 1.05;
-    text-transform: uppercase;
-    letter-spacing: -0.025em;
+  .track::before {
+    content: '';
+    position: absolute;
+    inset: 0.5rem 0 auto;
+    height: 1px;
+    background: var(--chalk);
+    transform-origin: left;
   }
 
-  .principles :global(.note-mark) {
-    margin-block-start: auto;
+  .key {
+    position: relative;
+    display: grid;
+    gap: 1rem;
+    align-content: start;
   }
 
-  .principles :global(.analog-note:nth-child(2)) {
-    rotate: 0.6deg;
-    background: var(--red-soft);
+  .key-mark {
+    position: absolute;
+    top: calc(-2.5rem + 0.5rem - 0.4375rem);
+    left: 0;
+    width: 0.875rem;
+    height: 0.875rem;
+    rotate: 45deg;
+    background: var(--signal);
   }
 
-  .principles :global(.analog-note:nth-child(3)) {
-    rotate: -0.4deg;
+  .key-text {
+    font-size: clamp(1.75rem, 3.2vw, 3rem);
+    line-height: 0.95;
+  }
+
+  /* As the section crosses the screen the line draws and each keyframe
+     lands in turn, at its own third of the scroll. */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .track::before {
+        animation: draw linear both;
+        animation-timeline: --track;
+        animation-range: entry 40% cover 55%;
+      }
+
+      .key-mark {
+        animation: land var(--ease-out) both;
+        animation-timeline: --track;
+        animation-range: entry calc(40% + var(--k) * 18%) entry calc(55% + var(--k) * 18%);
+      }
+
+      .key-number,
+      .key-text {
+        animation: settle var(--ease-out) both;
+        animation-timeline: --track;
+        animation-range: entry calc(45% + var(--k) * 18%) entry calc(70% + var(--k) * 18%);
+      }
+    }
+  }
+
+  @keyframes draw {
+    from {
+      transform: scaleX(0);
+    }
+  }
+
+  @keyframes land {
+    from {
+      scale: 0.4;
+      opacity: 0;
+    }
+  }
+
+  @keyframes settle {
+    from {
+      opacity: 0;
+      transform: translateY(1.5rem);
+    }
   }
 
   @media (max-width: 47.9375rem) {
-    .poster-header {
+    .track {
       grid-template-columns: 1fr;
-      min-height: 0;
-      gap: 0.75rem;
-      margin-block-start: 0.75rem;
+      gap: 2.5rem;
+      padding: 0 0 0 2rem;
     }
 
-    .poster-field {
-      min-height: 26.875rem;
-      padding: 1.125rem;
+    .track::before {
+      inset: 0 auto 0 0.375rem;
+      width: 1px;
+      height: auto;
+      transform-origin: top;
     }
 
-    .poster-headline {
-      font-size: clamp(2.5rem, 12.82vw, 3.125rem);
-      line-height: 0.9;
+    .key-mark {
+      top: 0.25rem;
+      left: calc(-2rem + 0.375rem - 0.4375rem);
     }
 
-    .poster-panel {
-      padding: 0;
-      background: transparent;
-    }
-
-    .panel-name {
-      display: none;
-    }
-
-    .panel-copy {
-      color: var(--ink);
-      font-size: 1.25rem;
-      line-height: 1.4;
-    }
-
-    .practice {
-      grid-template-columns: 1fr;
-      gap: 1.5rem;
-      padding-block: 1.5rem 2.5rem;
-    }
-
-    .practice-copy {
-      font-size: 1.1875rem;
-    }
-
-    .practice-title {
-      font-size: 2rem;
-    }
-
-    .principles {
-      gap: 0.75rem;
-    }
-
-    .principles :global(.analog-note) {
-      min-height: 8.75rem;
-      padding: 1rem;
-    }
-
-    .principles :global(.note-body) {
-      font-size: 1.25rem;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .principles :global(.analog-note) {
-      rotate: none;
+    @keyframes draw {
+      from {
+        transform: scaleY(0);
+      }
     }
   }
 </style>

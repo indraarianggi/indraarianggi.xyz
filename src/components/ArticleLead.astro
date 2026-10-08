@@ -3,196 +3,116 @@ import type { CollectionEntry } from 'astro:content';
 import { Image } from 'astro:assets';
 import { formatDate } from '../lib/content';
 
+/* The newest note, given the big frame. Lives on paper. */
 type Props = {
   entry: CollectionEntry<'blog'>;
 };
 
 const { entry } = Astro.props;
+const href = `/blog/${entry.id}/`;
 ---
 
-<article class="lead">
-  <div class="lead-visual">
+<article class="lead" data-play>
+  <a class="lead-frame" href={href} tabindex="-1" aria-hidden="true" data-wipe-label={entry.data.title}>
     {
       entry.data.image ? (
-        <Image
-          src={entry.data.image}
-          alt={entry.data.imageAlt ?? ''}
-          widths={[560, 840]}
-          sizes="(min-width: 48rem) 37.5rem, 100vw"
-        />
+        <Image src={entry.data.image} alt="" widths={[640, 960, 1280]} sizes="(min-width: 64rem) 55vw, 100vw" data-drift />
       ) : (
-        <p class="lead-graphic poster" aria-hidden="true">?</p>
+        <span class="lead-mark display">Latest</span>
       )
     }
-  </div>
+  </a>
   <div class="lead-copy">
-    <p class="lead-meta kicker kicker-red">
-      {formatDate(entry.data.date)}
-      {entry.data.topics.length > 0 && <span aria-hidden="true"> / </span>}
-      {entry.data.topics[0]}
+    <p class="lead-meta label" data-rise>
+      <span class="keyframe" aria-hidden="true"></span>
+      <span>Latest / {formatDate(entry.data.date)}</span>
+      {entry.data.topics[0] && <span class="dim">{entry.data.topics[0]}</span>}
     </p>
-    <h2 class="lead-title"><a class="link-underline" href={`/blog/${entry.id}/`}>{entry.data.title}</a></h2>
-    <p class="lead-summary">{entry.data.description}</p>
-    <p class="lead-link kicker kicker-red"><a class="link-underline" href={`/blog/${entry.id}/`}>Read article ↗</a></p>
+    <h2 class="lead-title display" data-rise style="--rd: 1">
+      <a href={href} data-wipe-label={entry.data.title}>{entry.data.title}</a>
+    </h2>
+    <p class="lead-summary serif" data-rise style="--rd: 2">{entry.data.description}</p>
   </div>
 </article>
 
 <style>
   .lead {
     display: grid;
-    grid-template-columns: minmax(0, 600fr) minmax(0, 728fr);
-    min-height: 24.375rem;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: clamp(1.5rem, 3vw, 3rem);
+    align-items: end;
   }
 
-  .lead-visual {
-    display: grid;
+  .lead-frame {
     position: relative;
-    place-items: center;
-    min-width: 0;
-    min-height: 24.375rem;
-    overflow: hidden;
+    display: block;
+    aspect-ratio: 4 / 3;
+    overflow: clip;
     background: var(--ink);
   }
 
-  .lead-visual :global(img) {
-    position: absolute;
-    inset: 0;
+  .lead-frame :global(img) {
+    display: block;
     width: 100%;
     height: 100%;
-    display: block;
     object-fit: cover;
+    outline: none;
   }
 
-  .lead-graphic {
-    margin: 0;
-    font-size: 13.75rem;
-    line-height: 0.8;
-    color: var(--surface);
+  .lead-mark {
+    position: absolute;
+    inset: auto auto 1rem 1.25rem;
+    color: var(--paper);
+    font-size: 5rem;
   }
 
   .lead-copy {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 1.5rem;
+    display: grid;
+    gap: 1.25rem;
     min-width: 0;
-    padding: 1.75rem;
   }
 
   .lead-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.625rem;
     margin: 0;
-    color: var(--red-text);
   }
 
   .lead-title {
     margin: 0;
-    font-family: var(--font-serif);
-    font-weight: 700;
-    font-size: clamp(1.75rem, 2.99vw, 2.6875rem);
-    line-height: 1.05;
-    letter-spacing: -0.033em;
-    text-transform: uppercase;
+    font-size: clamp(2.25rem, 4.6vw, 4.25rem);
     overflow-wrap: anywhere;
   }
 
   .lead-title a {
     color: var(--ink);
-    text-decoration: none;
-    transition: color 150ms var(--ease-out);
-  }
-
-  .lead-summary {
-    max-width: 44ch;
-    margin: 0;
-    font-family: var(--font-serif);
-    font-size: 1.125rem;
-    line-height: 1.45;
-    color: var(--muted);
-  }
-
-  .lead-link {
-    margin: 0;
-  }
-
-  .lead-link a {
-    display: inline-flex;
-    align-items: center;
-    min-height: 2.75rem;
-    color: var(--red-text);
-    text-decoration: none;
-  }
-
-  .lead-title a:focus-visible,
-  .lead-link a:focus-visible {
-    outline-offset: 5px;
     text-decoration: underline;
-  }
-
-  .lead-title a:active,
-  .lead-link a:active {
-    opacity: 0.7;
+    text-decoration-color: transparent;
+    text-decoration-thickness: 0.06em;
+    text-underline-offset: 0.1em;
+    transition: text-decoration-color var(--dur-quick) ease;
   }
 
   @media (hover: hover) and (pointer: fine) {
     .lead-title a:hover,
-    .lead-link a:hover {
-      color: var(--red-text);
-      text-decoration: underline;
-      text-decoration-thickness: 1px;
-      text-underline-offset: 0.12em;
+    .lead:has(.lead-frame:hover) .lead-title a {
+      text-decoration-color: var(--red-text);
     }
   }
 
-  @media (max-width: 47.9375rem) {
+  .lead-summary {
+    max-width: 40ch;
+    margin: 0;
+    color: var(--muted);
+    font-size: 1.1875rem;
+    line-height: 1.45;
+  }
+
+  @media (max-width: 63.9375rem) {
     .lead {
       grid-template-columns: 1fr;
-      background: var(--ink);
-    }
-
-    .lead-visual {
-      min-height: 0;
-      aspect-ratio: 16 / 10;
-    }
-
-    .lead-graphic {
-      font-size: 7.8125rem;
-    }
-
-    .lead-copy {
-      gap: 1.25rem;
-      padding: 1.125rem;
-    }
-
-    .lead-title {
-      font-size: 1.75rem;
-      line-height: 1.06;
-    }
-
-    .lead-title a,
-    .lead-summary {
-      color: var(--surface);
-    }
-
-    .lead-meta,
-    .lead-link a {
-      color: var(--red-on-ink);
-    }
-
-    .lead-summary {
-      font-size: 1rem;
-    }
-
-    @media (hover: hover) and (pointer: fine) {
-      .lead-title a:hover,
-      .lead-link a:hover {
-        color: var(--red-on-ink);
-      }
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .lead-title a {
-      transition: none;
     }
   }
 </style>

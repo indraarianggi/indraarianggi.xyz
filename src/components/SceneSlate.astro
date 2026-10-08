@@ -1,0 +1,61 @@
+---
+import KineticText from './KineticText.astro';
+
+/* Section header written as a scene slate: number, keyframe, title.
+   The title plays when it reaches the screen. */
+type Props = {
+  scene: number;
+  label: string;
+  title: string;
+  id: string;
+  aside?: string;
+};
+
+const { scene, label, title, id, aside } = Astro.props;
+const sceneNumber = `SC ${String(scene).padStart(2, '0')}`;
+---
+
+<header class="slate" data-play>
+  <p class="slate-line label" data-rise>
+    <span>{sceneNumber}</span>
+    <span class="keyframe" aria-hidden="true"></span>
+    <span>{label}</span>
+    {aside && <span class="slate-aside">{aside}</span>}
+  </p>
+  <KineticText as="h2" id={id} text={title} split="words" play="view" class="slate-title display" />
+  <slot />
+</header>
+
+<style>
+  .slate {
+    display: grid;
+    gap: 1.25rem;
+    padding-block: 1.25rem 2rem;
+    border-top: 1px solid var(--line);
+  }
+
+  :global(.paper) .slate {
+    border-top-color: var(--ink);
+  }
+
+  .slate-line {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0;
+    color: var(--dim);
+  }
+
+  :global(.paper) .slate-line {
+    color: var(--muted);
+  }
+
+  .slate-aside {
+    margin-inline-start: auto;
+  }
+
+  .slate :global(.slate-title) {
+    margin: 0;
+    font-size: clamp(2.5rem, 7vw, 6.5rem);
+  }
+</style>
