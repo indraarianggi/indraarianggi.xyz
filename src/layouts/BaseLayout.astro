@@ -18,9 +18,11 @@ type Props = {
     modifiedTime?: Date;
     tags?: string[];
   };
+  /** Reading time in minutes; the HUD timecode runs to it. */
+  runtimeMinutes?: number;
 };
 
-const { title, description, path, image, article } = Astro.props;
+const { title, description, path, image, article, runtimeMinutes } = Astro.props;
 ---
 
 <!doctype html>
@@ -50,7 +52,7 @@ const { title, description, path, image, article } = Astro.props;
     </main>
 
     <SiteFooter />
-    <TimelineHud />
+    <TimelineHud runtimeSeconds={runtimeMinutes ? runtimeMinutes * 60 : undefined} />
     <SceneWipe />
   </body>
 </html>
@@ -82,5 +84,46 @@ const { title, description, path, image, article } = Astro.props;
       observer.observe(target);
     }
     stopPlayer = () => observer.disconnect();
+  });
+
+  // Copy buttons on code blocks (added at build time by the Shiki
+  // transformer). One delegated listener covers every page the router swaps in.
+  const copyResets = new WeakMap<HTMLElement, number>();
+
+  document.addEventListener('click', async (event) => {
+    const button = (event.target as Element | null)?.closest<HTMLButtonElement>('[data-code-copy]');
+    const block = button?.closest('.code-block');
+    const code = block?.querySelector('pre code');
+    if (!button || !code) return;
+    const status = block!.querySelector<HTMLElement>('[data-code-status]');
+
+    let state: 'copied' | 'selected';
+    try {
+      await navigator.clipboard.writeText(code.textContent ?? '');
+      state = 'copied';
+    } catch {
+      // No clipboard access (plain http, denied permission): select the code
+      // so a keyboard copy still works, and say so.
+      const range = document.createRange();
+      range.selectNodeContents(code);
+      const selection = window.getSelection();
+      selection?.removeAllRanges();
+      selection?.addRange(range);
+      state = 'selected';
+    }
+
+    button.dataset.state = state;
+    if (status) {
+      status.textContent =
+        state === 'copied' ? 'Code copied' : 'Could not copy. The code is selected; press Control C or Command C.';
+    }
+    window.clearTimeout(copyResets.get(button));
+    copyResets.set(
+      button,
+      window.setTimeout(() => {
+        delete button.dataset.state;
+        if (status) status.textContent = '';
+      }, 2000),
+    );
   });
 </script>

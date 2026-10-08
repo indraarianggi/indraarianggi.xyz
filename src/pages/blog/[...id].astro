@@ -19,11 +19,12 @@ const { entry, next } = Astro.props;
 const { Content, headings } = await render(entry);
 const tree = buildTocTree(headings);
 const toc = tree.length >= 2 ? tree : undefined;
+const runtime = readingMinutes(entry.body);
 
 const rows = [
   { label: 'Published', value: formatDate(entry.data.date) },
   ...(entry.data.updatedDate ? [{ label: 'Updated', value: formatDate(entry.data.updatedDate) }] : []),
-  { label: 'Runtime', value: `${readingMinutes(entry.body)} min read` },
+  { label: 'Runtime', value: `${runtime} min read` },
   ...(entry.data.topics.length > 0 ? [{ label: 'Topics', value: entry.data.topics.join(' / ') }] : []),
 ];
 ---
@@ -36,6 +37,7 @@ const rows = [
   toc={toc}
   cover={entry.data.image}
   coverAlt={entry.data.imageAlt}
+  runtimeMinutes={runtime}
 >
   <Clapper slot="metadata" heading="Note slate" rows={rows} />
 

@@ -20,9 +20,10 @@ type Props = {
   toc?: TocItem[];
   cover?: ImageMetadata;
   coverAlt?: string;
+  runtimeMinutes?: number;
 };
 
-const { title, summary, path, variant = 'project', toc, cover, coverAlt } = Astro.props;
+const { title, summary, path, variant = 'project', toc, cover, coverAlt, runtimeMinutes } = Astro.props;
 const hasToc = toc !== undefined && toc.length >= 2;
 const back = variant === 'article'
   ? { href: '/blog/', label: 'Field notes' }
@@ -34,6 +35,7 @@ const back = variant === 'article'
   description={summary}
   path={path}
   image={cover ? { src: cover.src, alt: coverAlt ?? '' } : undefined}
+  runtimeMinutes={runtimeMinutes}
 >
   <div class="detail">
     <header class="stage-head shell" data-scene="Title">
@@ -203,6 +205,7 @@ const back = variant === 'article'
   }
 
   .detail-rail {
+    display: grid;
     min-width: 0;
   }
 

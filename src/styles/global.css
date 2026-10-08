@@ -286,6 +286,106 @@ button {
   font-size: inherit;
 }
 
+/* Code blocks carry a header slate: language on the left, copy on the right.
+   The wrapper owns the frame so header and code read as one surface. */
+.prose .code-block {
+  margin: 0 0 1.25em;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+}
+
+.prose .code-block pre {
+  margin: 0;
+  border: 0;
+}
+
+.code-head {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  /* No end padding: the copy button's hover fill runs to the frame. */
+  padding-inline: 1.25rem 0;
+  border-block-end: 1px solid var(--rule);
+}
+
+.code-lang {
+  color: var(--muted);
+}
+
+.code-copy {
+  display: grid;
+  place-items: center end;
+  min-width: 6rem;
+  min-height: 2.5rem;
+  margin-inline-start: auto;
+  padding-inline: 1rem;
+  background: none;
+  border: 0;
+  color: var(--ink);
+  cursor: pointer;
+  position: relative;
+  isolation: isolate;
+  transition: scale 160ms var(--ease-out);
+}
+
+.code-copy::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--red-soft);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 200ms var(--ease-out);
+}
+
+.code-copy:active {
+  scale: 0.96;
+}
+
+/* The labels share one cell and crossfade, so the swap never shifts width. */
+.code-copy-text {
+  grid-area: 1 / 1;
+  transition:
+    opacity 200ms cubic-bezier(0.2, 0, 0, 1),
+    filter 200ms cubic-bezier(0.2, 0, 0, 1),
+    translate 200ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+.code-copy-text:not([data-for='idle']),
+.code-copy[data-state] .code-copy-text[data-for='idle'] {
+  opacity: 0;
+  filter: blur(4px);
+  translate: 0 0.375rem;
+}
+
+.code-copy[data-state='copied'] .code-copy-text[data-for='copied'],
+.code-copy[data-state='selected'] .code-copy-text[data-for='selected'] {
+  opacity: 1;
+  filter: none;
+  translate: 0 0;
+}
+
+/* A confirmed copy marks the beat in the signal colour, like the keyframes. */
+.code-copy[data-state='copied'] {
+  color: var(--red-text);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .code-copy:hover::before {
+    transform: scaleX(1);
+    transition-duration: 360ms;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .code-copy,
+  .code-copy::before,
+  .code-copy-text {
+    transition: none;
+  }
+}
+
 .prose table {
   width: 100%;
   margin-block-end: 1.25em;
@@ -310,11 +410,37 @@ button {
 }
 
 .prose a {
+  /* The hover fill, at rest. A background (not a pseudo-element) because a
+     link can wrap: the fill runs along the first line, then the next, in
+     reading order. A hair of padding lets it breathe without moving text. */
+  margin-inline: -0.1em;
+  padding-inline: 0.1em;
+  background-image: linear-gradient(var(--red-soft), var(--red-soft));
+  background-position: left center;
+  background-repeat: no-repeat;
+  background-size: 0% 100%;
   color: var(--ink);
   text-decoration: underline;
   text-decoration-color: var(--red-text);
   text-decoration-thickness: 1px;
   text-underline-offset: 0.25em;
+}
+
+/* Same timing as the table of contents: fill in slower, drain faster. */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .prose a {
+    transition: background-size 200ms var(--ease-out);
+  }
+
+  .prose a:hover {
+    transition-duration: 360ms;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .prose a:hover {
+    background-size: 100% 100%;
+  }
 }
 
 .prose img {

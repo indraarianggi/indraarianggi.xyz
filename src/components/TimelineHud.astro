@@ -3,10 +3,17 @@
   The page as a timeline. The playhead tracks scroll, the timecode reads it
   out, and each scene on the page is a keyframe you can jump to.
   Scenes come from [data-scene] sections and article h2 headings.
+  The full scroll maps onto runtimeSeconds: an article's reading time, or
+  the default one-minute reel.
 */
+type Props = {
+  runtimeSeconds?: number;
+};
+
+const { runtimeSeconds } = Astro.props;
 ---
 
-<div class="hud" data-hud>
+<div class="hud" data-hud data-runtime={runtimeSeconds}>
   <p class="hud-tc label" aria-hidden="true">
     <span class="hud-tc-tag">TC</span>
     <span data-hud-timecode>00:00:00:00</span>
@@ -42,6 +49,7 @@
     const sceneName = hud.querySelector<HTMLElement>('[data-hud-scene-name]')!;
     const mobilePlayed = document.querySelector<HTMLElement>('[data-hud-mobile-played]');
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const runtime = Number(hud.dataset.runtime) || undefined;
     const controller = new AbortController();
     const { signal } = controller;
 
@@ -88,7 +96,7 @@
       const progress = maxScroll > 0 ? Math.min(1, y / maxScroll) : 0;
       played.style.transform = `scaleX(${progress})`;
       if (mobilePlayed) mobilePlayed.style.transform = `scaleX(${progress})`;
-      timecode.textContent = formatTimecode(framesForScroll(y, maxScroll));
+      timecode.textContent = formatTimecode(framesForScroll(y, maxScroll, runtime));
 
       const probe = y + window.innerHeight * 0.4;
       let current = -1;

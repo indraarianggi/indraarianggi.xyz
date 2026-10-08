@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatTimecode, labelForPath, readingMinutes } from '../src/lib/timecode';
+import { formatTimecode, framesForScroll, labelForPath, readingMinutes } from '../src/lib/timecode';
 
 describe('formatTimecode', () => {
   it('formats zero as an empty reel', () => {
@@ -16,6 +16,24 @@ describe('formatTimecode', () => {
   it('clamps negative and fractional input', () => {
     expect(formatTimecode(-40)).toBe('00:00:00:00');
     expect(formatTimecode(24.9)).toBe('00:00:01:00');
+  });
+});
+
+describe('framesForScroll', () => {
+  it('maps a full scroll onto the runtime', () => {
+    expect(formatTimecode(framesForScroll(0, 4000, 180))).toBe('00:00:00:00');
+    expect(formatTimecode(framesForScroll(2000, 4000, 180))).toBe('00:01:30:00');
+    expect(formatTimecode(framesForScroll(4000, 4000, 180))).toBe('00:03:00:00');
+  });
+
+  it('falls back to a one-minute reel', () => {
+    expect(formatTimecode(framesForScroll(4000, 4000))).toBe('00:01:00:00');
+  });
+
+  it('clamps overscroll and handles pages that do not scroll', () => {
+    expect(framesForScroll(-80, 4000, 180)).toBe(0);
+    expect(formatTimecode(framesForScroll(4200, 4000, 180))).toBe('00:03:00:00');
+    expect(framesForScroll(0, 0, 180)).toBe(0);
   });
 });
 

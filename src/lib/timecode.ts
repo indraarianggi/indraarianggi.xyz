@@ -12,19 +12,29 @@ export function formatTimecode(frames: number, fps: number = FPS): string {
   return [hh, mm, ss, ff].map((part) => String(part).padStart(2, '0')).join(':');
 }
 
+/** Runtime for pages without a reading time (home, indexes): a one-minute reel. */
+export const DEFAULT_RUNTIME_SECONDS = 60;
+
 /**
  * Maps the reader's scroll position to a frame number on the HUD timecode.
+ * The page's runtime is its reading time, so the end of an article reads the
+ * same runtime its slate promises, and the timecode says roughly how far in
+ * the reader is.
  *
- * @param scrollY   current vertical scroll offset in px (0 at the top)
- * @param maxScroll largest possible scroll offset in px (scrollHeight - innerHeight);
- *                  0 when the page does not scroll
+ * @param scrollY        current vertical scroll offset in px (0 at the top)
+ * @param maxScroll      largest possible scroll offset in px (scrollHeight - innerHeight);
+ *                       0 when the page does not scroll
+ * @param runtimeSeconds the length of the reel the full scroll maps onto
  * @returns a frame count, later formatted by formatTimecode()
  */
-export function framesForScroll(scrollY: number, maxScroll: number): number {
-  // TODO(you): decide what "time" means on this site. See the notes in the session.
-  void scrollY;
-  void maxScroll;
-  return 0;
+export function framesForScroll(
+  scrollY: number,
+  maxScroll: number,
+  runtimeSeconds: number = DEFAULT_RUNTIME_SECONDS,
+): number {
+  if (maxScroll <= 0) return 0;
+  const progress = Math.min(1, Math.max(0, scrollY / maxScroll));
+  return Math.round(progress * runtimeSeconds * FPS);
 }
 
 const sceneLabels: Record<string, string> = {

@@ -50,6 +50,9 @@ const { tree } = Astro.props;
     </ol>
   </nav>
 
+  <!-- Edge that traces the rail's outline while it folds -->
+  <span class="rail-edge" data-toc-edge aria-hidden="true" hidden></span>
+
   <!-- Desktop collapsed control -->
   <button
     type="button"
@@ -120,6 +123,32 @@ const { tree } = Astro.props;
 
   /* ---- Desktop rail (width managed by DetailLayout grid column) ---- */
 
+  /* The rail and its collapsed strip share one cell, so one can fold into
+     the other without the column ever changing size. */
+  .desktop-rail,
+  .collapsed-rail {
+    grid-area: 1 / 1;
+    align-self: start;
+  }
+
+  .desktop-rail {
+    z-index: 1;
+  }
+
+  /* The clip cuts the rail's own border away, so this frame carries the
+     outline during a fold. Sized by script, in step with the clip. */
+  .rail-edge {
+    position: sticky;
+    top: 1.5rem;
+    z-index: 2;
+    grid-area: 1 / 1;
+    align-self: start;
+    justify-self: start;
+    box-sizing: border-box;
+    border: 1px solid var(--ink);
+    pointer-events: none;
+  }
+
   .desktop-rail {
     position: sticky;
     top: 1.5rem;
@@ -183,8 +212,31 @@ const { tree } = Astro.props;
     text-decoration: none;
   }
 
-  .rail-link[data-toc-active] {
+  /* The red fill is a layer behind the text, so hover and active share one
+     surface and the fill can grow from the start edge on transform alone. */
+  .rail-link,
+  .rail-child {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .rail-link::before,
+  .rail-child::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
     background: var(--red-soft);
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+
+  .rail-link[data-toc-active]::before,
+  .rail-child[data-toc-active]::before {
+    transform: scaleX(1);
+  }
+
+  .rail-link[data-toc-active] {
     border-inline-start-color: var(--red);
     color: var(--ink);
     font-weight: 700;
@@ -209,7 +261,6 @@ const { tree } = Astro.props;
   }
 
   .rail-child[data-toc-active] {
-    background: var(--red-soft);
     border-inline-start-color: var(--red);
     color: var(--ink);
     font-weight: 600;
@@ -268,6 +319,8 @@ const { tree } = Astro.props;
     position: fixed;
     inset: auto 0 0 0;
     margin-inline: 0;
+    /* <dialog> defaults to fit-content; the sheet spans the screen. */
+    inline-size: 100%;
     max-inline-size: none;
     max-height: 70dvh;
     overflow-y: auto;
@@ -356,16 +409,32 @@ const { tree } = Astro.props;
     font-weight: 600;
   }
 
-  /* ---- Motion: dialog 220ms opacity + 8px rise ---- */
+  /* ---- Motion: the trigger scales in and out instead of popping. The
+     sheet itself is animated by the script (it grows out of the trigger). */
 
-  .mobile-dialog[open] {
-    animation: dialog-in 220ms var(--ease-out);
-  }
+  @media (max-width: 47.9375rem) and (prefers-reduced-motion: no-preference) {
+    .mobile-trigger {
+      transition:
+        opacity 200ms var(--ease-out),
+        scale 260ms var(--ease-out),
+        display 260ms allow-discrete;
+    }
 
-  @keyframes dialog-in {
-    from {
+    .mobile-trigger[hidden] {
       opacity: 0;
-      translate: 0 8px;
+      scale: 0.6;
+    }
+
+    @starting-style {
+      .mobile-trigger {
+        opacity: 0;
+        scale: 0.6;
+      }
+    }
+
+    .mobile-trigger:active {
+      scale: 0.96;
+      transition-duration: 120ms;
     }
   }
 
@@ -399,15 +468,25 @@ const { tree } = Astro.props;
     .rail-child {
       transition:
         color 150ms var(--ease-out),
-        background-color 150ms var(--ease-out),
         border-color 150ms var(--ease-out);
+    }
+
+    /* Drains quickly when the pointer leaves; fills a little slower on the
+       way in so the sweep from the start edge reads. */
+    .rail-link::before,
+    .rail-child::before {
+      transition: transform 200ms var(--ease-out);
     }
 
     .rail-link:hover,
     .rail-child:hover {
-      text-decoration: underline;
-      text-decoration-color: var(--red);
-      text-decoration-thickness: 1px;
+      border-inline-start-color: var(--red);
+    }
+
+    .rail-link:hover::before,
+    .rail-child:hover::before {
+      transform: scaleX(1);
+      transition-duration: 360ms;
     }
 
     .rail-collapse,
@@ -417,12 +496,10 @@ const { tree } = Astro.props;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .mobile-dialog[open] {
-      animation: none;
-    }
-
     .rail-link,
     .rail-child,
+    .rail-link::before,
+    .rail-child::before,
     .rail-collapse,
     .collapsed-rail {
       transition: none;
@@ -477,6 +554,7 @@ const { tree } = Astro.props;
     const expandButton = root.querySelector<HTMLButtonElement>('[data-toc-expand]');
     const links = [...root.querySelectorAll<HTMLAnchorElement>('[data-toc-link]')];
     const mobileViewport = window.matchMedia('(max-width: 47.9375rem)');
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
     if (links.length === 0) return;
 
@@ -523,16 +601,90 @@ const { tree } = Astro.props;
 
     // Desktop rail collapse/expand. The reserved grid column means the body
     // measure never changes; only the control inside the column changes width.
+    // The rail folds into the collapsed strip and unfolds out of it. Both
+    // share one grid cell with the rail on top, so during the move the rail
+    // is clipped down to the strip's corner and the strip shows beneath it.
+    // An edge frame follows the clip so the folding panel keeps its outline.
+    const edge = root.querySelector<HTMLElement>('[data-toc-edge]');
+    const easeInOut =
+      getComputedStyle(document.documentElement).getPropertyValue('--ease-in-out').trim() || 'ease-in-out';
+    let running: Animation[] = [];
+
+    // Only the right and bottom insets move; the top-left corner is fixed.
+    type Inset = { right: number; bottom: number };
+    const open: Inset = { right: 0, bottom: 0 };
+    const toClip = ({ right, bottom }: Inset) => `inset(0px ${right}px ${bottom}px 0px)`;
+    const fromClip = (clip: string): Inset => {
+      // Computed inset() drops repeated values: "inset(0px)", "inset(0px 5px)".
+      const [top = 0, right = top, bottom = top] = (clip.match(/-?[\d.]+/g) ?? []).map(Number);
+      return { right, bottom };
+    };
+
     const setCollapsed = (collapsed: boolean) => {
       collapseButton?.setAttribute('aria-expanded', String(!collapsed));
       expandButton?.setAttribute('aria-expanded', String(!collapsed));
-      if (collapsed) {
-        rail?.setAttribute('hidden', '');
-        expandButton?.removeAttribute('hidden');
-      } else {
-        rail?.removeAttribute('hidden');
-        expandButton?.setAttribute('hidden', '');
+      if (!rail || !expandButton) return;
+
+      // Interrupted mid-fold: start from where the clip is now.
+      const current = running.length > 0 ? getComputedStyle(rail).clipPath : 'none';
+      running.forEach((animation) => animation.cancel());
+      running = [];
+
+      rail.removeAttribute('hidden');
+      expandButton.removeAttribute('hidden');
+      const settle = () => {
+        (collapsed ? rail : expandButton).setAttribute('hidden', '');
+        edge?.setAttribute('hidden', '');
+      };
+      if (reducedMotion.matches) return settle();
+
+      // Strip width by header height: both ink, so the hand-off is seamless.
+      const box = rail.getBoundingClientRect();
+      const strip = expandButton.getBoundingClientRect();
+      const head = rail.querySelector('.rail-header')!.getBoundingClientRect();
+      const corner: Inset = { right: box.width - strip.width, bottom: box.height - head.height };
+      const from = current !== 'none' ? fromClip(current) : collapsed ? open : corner;
+      const to = collapsed ? corner : open;
+      const timing: KeyframeAnimationOptions = {
+        duration: collapsed ? 280 : 360,
+        easing: easeInOut,
+        fill: 'forwards',
+      };
+
+      const fold = rail.animate({ clipPath: [toClip(from), toClip(to)] }, timing);
+      running = [fold];
+
+      if (edge) {
+        edge.removeAttribute('hidden');
+        running.push(
+          edge.animate(
+            {
+              width: [`${box.width - from.right}px`, `${box.width - to.right}px`],
+              height: [`${box.height - from.bottom}px`, `${box.height - to.bottom}px`],
+            },
+            timing,
+          ),
+        );
       }
+
+      // The list clears before the fold reaches it, and returns once there is room.
+      const fade = rail.querySelector('.rail-list')?.animate(
+        { opacity: collapsed ? [1, 0] : [0, 1] },
+        collapsed
+          ? { duration: 140, easing: 'ease-out', fill: 'forwards' }
+          : { duration: 220, delay: 140, easing: 'ease-out', fill: 'backwards' },
+      );
+      if (fade) running.push(fade);
+
+      fold.finished
+        .then(() => {
+          settle();
+          running.forEach((animation) => animation.cancel());
+          running = [];
+        })
+        .catch(() => {
+          // Cancelled by a newer toggle, which owns the end state.
+        });
     };
 
     collapseButton?.addEventListener('click', () => {
@@ -551,27 +703,176 @@ const { tree } = Astro.props;
     // Focus returns to the control used to open the sheet. Opening scrolls the
     // page and can hide the trigger again, so remember the open context.
     let openedFromTrigger = false;
-    trigger?.addEventListener('click', () => {
+    // A jump moves focus to its heading, so closing must not pull it back.
+    let jumped = false;
+
+    // Section jumps glide instead of cutting. Astro's router would jump
+    // instantly; it skips clicks that are already prevented. Modified clicks
+    // (new tab, copy link) keep the browser default.
+    for (const link of links) {
+      link.addEventListener('click', (event) => {
+        if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        const target = document.getElementById(decodeURIComponent(link.hash.slice(1)));
+        if (!target) return;
+        event.preventDefault();
+
+        const focusTarget = () => {
+          if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1');
+          target.focus({ preventScroll: true });
+        };
+
+        history.pushState(history.state, '', link.hash);
+
+        // Unlock before scrolling: a late unlock from the close would
+        // interrupt the smooth scroll. The page stays inert until the sheet
+        // has folded away, so focus moves after the close.
+        if (dialog?.open) {
+          jumped = true;
+          lockScroll(false);
+          void closeSheet().then(focusTarget);
+        } else {
+          focusTarget();
+        }
+
+        target.scrollIntoView({ behavior: reducedMotion.matches ? 'auto' : 'smooth', block: 'start' });
+      });
+    }
+
+    // The sheet grows out of the trigger and folds back into it, so button and
+    // sheet read as one object: a red square the size of the trigger opens
+    // into the paper sheet, and closing lands it back on the button.
+    const cssVar = (name: string, fallback: string) =>
+      getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
+    const sheetEaseOut = cssVar('--ease-out', 'ease-out');
+    const sheetEaseInOut = cssVar('--ease-in-out', 'ease-in-out');
+    const sheetFull = 'inset(0px 0px 0px 0px)';
+    let sheetAnimations: Animation[] = [];
+    let closing: Promise<void> | undefined;
+
+    // The trigger's box in the sheet's coordinates. With no trigger on
+    // screen, the sheet folds down into the bottom edge instead.
+    const triggerClip = () => {
+      const sheet = dialog!.getBoundingClientRect();
+      const button = trigger?.getBoundingClientRect();
+      if (!button || button.width === 0) return 'inset(100% 0px 0px 0px)';
+      const top = Math.max(0, button.top - sheet.top);
+      const right = Math.max(0, sheet.right - button.right);
+      const bottom = Math.max(0, sheet.bottom - button.bottom);
+      const left = Math.max(0, button.left - sheet.left);
+      return `inset(${top}px ${right}px ${bottom}px ${left}px)`;
+    };
+
+    const sheetParts = () =>
+      dialog ? [...dialog.querySelectorAll<HTMLElement>('.dialog-header, .dialog-list > li')] : [];
+
+    // Safari may not animate ::backdrop from script; it then simply appears.
+    const animateBackdrop = (opacity: number[], options: KeyframeAnimationOptions) => {
+      try {
+        return dialog!.animate({ opacity }, { ...options, pseudoElement: '::backdrop' });
+      } catch {
+        return undefined;
+      }
+    };
+
+    const stopSheet = () => {
+      sheetAnimations.forEach((animation) => animation.cancel());
+      sheetAnimations = [];
+    };
+
+    const openSheet = () => {
+      if (!dialog || dialog.open) return;
       openedFromTrigger = true;
-      dialog?.showModal();
+      dialog.showModal();
       lockScroll(true);
-    });
+      if (reducedMotion.matches) return;
+
+      stopSheet();
+      const paper = getComputedStyle(dialog).backgroundColor;
+      const red = trigger ? getComputedStyle(trigger).backgroundColor : paper;
+      sheetAnimations = [
+        dialog.animate({ clipPath: [triggerClip(), sheetFull] }, { duration: 420, easing: sheetEaseOut }),
+        dialog.animate({ backgroundColor: [red, paper] }, { duration: 220, easing: 'ease-out' }),
+        ...sheetParts().map((part, i) =>
+          part.animate(
+            { opacity: [0, 1], translate: ['0 0.5rem', '0 0'] },
+            { duration: 280, delay: 160 + i * 35, easing: sheetEaseOut, fill: 'backwards' },
+          ),
+        ),
+      ];
+      const backdrop = animateBackdrop([0, 1], { duration: 300, easing: 'ease-out' });
+      if (backdrop) sheetAnimations.push(backdrop);
+    };
+
+    // Every way out (close button, backdrop, Escape, a link) runs through here,
+    // because dialog.close() alone would cut the sheet off instantly.
+    const closeSheet = (): Promise<void> => {
+      if (!dialog?.open) return Promise.resolve();
+      if (closing) return closing;
+      if (reducedMotion.matches) {
+        dialog.close();
+        return Promise.resolve();
+      }
+
+      // Closing mid-open folds back from wherever the sheet has reached.
+      const current = getComputedStyle(dialog).clipPath;
+      const from = current === 'none' ? sheetFull : current;
+      const paper = getComputedStyle(dialog).backgroundColor;
+      const red = trigger ? getComputedStyle(trigger).backgroundColor : paper;
+      stopSheet();
+
+      const fold = dialog.animate(
+        { clipPath: [from, triggerClip()] },
+        { duration: 300, easing: sheetEaseInOut, fill: 'forwards' },
+      );
+      sheetAnimations = [
+        fold,
+        dialog.animate({ backgroundColor: [paper, red] }, { duration: 140, delay: 160, easing: 'ease-in', fill: 'forwards' }),
+        ...sheetParts().map((part) =>
+          part.animate({ opacity: [1, 0] }, { duration: 120, easing: 'ease-out', fill: 'forwards' }),
+        ),
+      ];
+      const backdrop = animateBackdrop([1, 0], { duration: 300, easing: 'ease-out', fill: 'forwards' });
+      if (backdrop) sheetAnimations.push(backdrop);
+
+      closing = fold.finished
+        .then(() => {
+          dialog.close();
+          stopSheet();
+        })
+        .catch(() => {
+          // Cancelled by a cleanup that already closed the sheet.
+        })
+        .finally(() => {
+          closing = undefined;
+        });
+      return closing;
+    };
+
+    trigger?.addEventListener('click', openSheet);
 
     root.querySelector('[data-toc-close]')?.addEventListener('click', () => {
-      dialog?.close();
+      void closeSheet();
+    });
+
+    // Escape: hold the browser's instant close and fold the sheet instead.
+    dialog?.addEventListener('cancel', (event) => {
+      event.preventDefault();
+      void closeSheet();
     });
 
     // Backdrop interaction: a click on the dialog itself is outside the sheet.
     dialog?.addEventListener('click', (event) => {
       const target = event.target as HTMLElement;
       if (target === dialog || target.closest('a')) {
-        dialog?.close();
+        void closeSheet();
       }
     });
 
     dialog?.addEventListener('close', () => {
       lockScroll(false);
-      if (mobileViewport.matches && openedFromTrigger) {
+      if (jumped) {
+        jumped = false;
+      } else if (mobileViewport.matches && openedFromTrigger) {
         trigger?.focus();
       } else {
         (rail?.hidden ? expandButton : collapseButton)?.focus();
@@ -580,11 +881,15 @@ const { tree } = Astro.props;
     });
 
     const onViewportChange = () => {
-      if (!mobileViewport.matches && dialog?.open) dialog.close();
+      if (!mobileViewport.matches && dialog?.open) {
+        stopSheet();
+        dialog.close();
+      }
     };
     mobileViewport.addEventListener('change', onViewportChange);
     state.cleanup = () => {
       mobileViewport.removeEventListener('change', onViewportChange);
+      stopSheet();
       if (dialog?.open) dialog.close();
       lockScroll(false);
     };
