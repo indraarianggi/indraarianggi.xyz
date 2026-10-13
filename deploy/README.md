@@ -11,128 +11,147 @@ flowchart LR
   access --> sshd[sshd on the server]
   sshd --> rrsync["rrsync -wo<br/>/srv/indraarianggi.xyz/site"]
   rrsync --> files[/srv/indraarianggi.xyz/site/]
-  files --> caddy["Caddy container<br/>/srv mounted read-only"]
-  caddy --> tunnel[cloudflared tunnel]
+  files --> proxy["server reverse proxy<br/>serves the directory read-only"]
+  proxy --> tunnel[cloudflared tunnel]
   tunnel --> visitors[visitors]
 ```
 
 | File | Role |
 |---|---|
-| `.github/workflows/deploy.yml` | Build, then rsync the build to the server through the tunnel |
-| `deploy/compose.yaml` | Caddy container serving the deployed directory on `127.0.0.1:8080` |
-| `deploy/Caddyfile` | Static file serving, cache policy, `404.html` error handling |
-| `deploy/cloudflared/config.yml` | Tunnel ingress for the site and the SSH deploy channel |
+| `.github/workflows/deploy.yml` | Build, then rsync the build to the server through the tunnel, then verify the live site |
 | `deploy/ssh/authorized_keys.example` | Restricted key entry for the deploy user |
 
-Paths used throughout: site directory `/srv/indraarianggi.xyz/site`, deploy user `deploy`, tunnel hostname `ssh.indraarianggi.xyz`, public origin `https://indraarianggi.xyz`.
+The server itself (OS, Docker, the shared reverse proxy, and the tunnel) is provisioned outside this repository and hosts other projects as well. This document covers only what this site needs from it: the contract below, the GitHub configuration, and how deploys behave.
 
-## 1. Server packages
+Paths used throughout: site directory `/srv/indraarianggi.xyz/site`, deploy user `deploy`, deploy hostname `ssh.indraarianggi.xyz`, public origin `https://indraarianggi.xyz`.
 
-Docker with the Compose plugin, OpenSSH server, and rsync (which provides `/usr/bin/rrsync`):
+## 1. Server contract
 
-```bash
-sudo apt update
-sudo apt install -y docker.io docker-compose-v2 openssh-server rsync
-sudo systemctl enable --now docker ssh
-command -v rrsync      # must print /usr/bin/rrsync
+The workflow assumes the server provides the following. Each item is checked by the first deploy, which fails closed if anything is missing.
+
+### Tunnel routes
+
+The Cloudflare Tunnel must route both hostnames, with the SSH rule listed before any wildcard rule:
+
+```yaml
+ingress:
+  - hostname: ssh.indraarianggi.xyz
+    service: ssh://localhost:22
+  - hostname: indraarianggi.xyz
+    service: http://localhost:8080      # the server's reverse proxy
+  # ...other hostnames, then the required catch-all
+  - service: http_status:404
 ```
 
-On Debian the compose package is `docker-compose-plugin` from Docker's own repository. Any recent Docker Engine with `docker compose` available is fine.
+`www.indraarianggi.xyz` must also reach the reverse proxy, which redirects it to the apex.
 
-## 2. Cloudflare Tunnel
-
-Run these once, on any machine where you can complete a browser login:
-
-```bash
-cloudflared tunnel login                       # authorize the indraarianggi.xyz zone
-cloudflared tunnel create indraarianggi        # prints the tunnel UUID
-cloudflared tunnel route dns indraarianggi indraarianggi.xyz
-cloudflared tunnel route dns indraarianggi ssh.indraarianggi.xyz
-```
-
-Install the tunnel on the server:
-
-```bash
-sudo install -d -m 0755 /etc/cloudflared
-sudo install -m 0644 deploy/cloudflared/config.yml /etc/cloudflared/config.yml
-sudo install -m 0600 ~/.cloudflared/<TUNNEL_UUID>.json /etc/cloudflared/credentials.json
-sudo sed -i 's/TUNNEL_ID/<TUNNEL_UUID>/' /etc/cloudflared/config.yml
-
-cloudflared --config /etc/cloudflared/config.yml tunnel ingress validate
-sudo cloudflared --config /etc/cloudflared/config.yml service install
-sudo systemctl enable --now cloudflared
-cloudflared tunnel info indraarianggi          # expect two active connections
-```
-
-This repository tracks the tunnel as locally managed, so ingress lives in `deploy/cloudflared/config.yml` and is reviewable in git. If you instead create the tunnel from the Zero Trust dashboard, it becomes remotely managed and you run it with a token; this file is then unused and the ingress rules live in the dashboard.
-
-## 3. Cloudflare Access for the deploy channel
+### Cloudflare Access on the deploy hostname
 
 The deploy hostname must not accept anonymous SSH, so it sits behind an Access application that only a service token can satisfy.
 
-1. Zero Trust, Access, Service Auth, Service Tokens: create a token named `github-actions-deploy`. Copy the Client ID and Client Secret.
-2. Zero Trust, Access, Applications: add a self-hosted application for `ssh.indraarianggi.xyz`.
-3. Add one policy: Action `Service Auth`, Include `Service Token` equal to the token from step 1.
+1. Zero Trust, Access controls, Service credentials, Service Tokens: create a token for this repository, for example `github-indraarianggi.xyz`. The Client Secret is shown only once.
+2. Zero Trust, Access controls, Applications: create a self-hosted application for `ssh.indraarianggi.xyz`.
+3. Give it a policy with Action `Service Auth` and Include `Service Token` equal to the token from step 1. Use `Service Auth`, not `Allow`: `Allow` sends the runner to an interactive login page and the deploy hangs.
 
 Do not create an Access application for `indraarianggi.xyz` itself unless you want the public site gated too.
 
-The service token authenticates the runner to Cloudflare. SSH authentication still happens on top of it, with the key from the next step.
+The service token authenticates the runner to Cloudflare. SSH authentication still happens on top of it, with the deploy key.
 
-## 4. Deploy user and directory
-
-```bash
-sudo useradd --create-home --shell /bin/bash deploy
-sudo install -d -m 0755 -o deploy -g deploy /srv/indraarianggi.xyz
-sudo install -d -m 0755 -o deploy -g deploy /srv/indraarianggi.xyz/site
-sudo install -d -m 0700 -o deploy -g deploy /home/deploy/.ssh
-```
-
-Generate the deploy key on your workstation and install its public half with a forced command, so the key can only push files into the site directory:
+### Deploy user, directory, and key
 
 ```bash
-ssh-keygen -t ed25519 -C deploy@github-actions -f /tmp/deploy_key -N ''
-
-line="command=\"/usr/bin/rrsync -wo /srv/indraarianggi.xyz/site\",no-agent-forwarding,no-port-forwarding,no-pty,no-user-rc,no-X11-forwarding $(cat /tmp/deploy_key.pub)"
-printf '%s\n' "$line" | sudo -u deploy tee /home/deploy/.ssh/authorized_keys
-sudo chmod 0600 /home/deploy/.ssh/authorized_keys
+# on the server
+sudo install -d -m 0755 -o deploy -g deploy /srv/indraarianggi.xyz /srv/indraarianggi.xyz/site
+command -v rrsync      # must print /usr/bin/rrsync
 ```
 
-`DEPLOY_SSH_KEY` is `/tmp/deploy_key`; `DEPLOY_KNOWN_HOSTS` is the server's pinned host key:
+Generate the key on your workstation, so the private half never touches the server:
 
 ```bash
-ssh-keyscan -t ed25519 localhost 2>/dev/null | sed 's/^localhost/ssh.indraarianggi.xyz/'
+ssh-keygen -t ed25519 -C deploy@indraarianggi.xyz -f ~/.ssh/deploy_indraarianggi_xyz -N ''
+scp ~/.ssh/deploy_indraarianggi_xyz.pub <admin>@<server>:/tmp/
 ```
 
-Confirm the restriction took effect. This should fail with an rrsync error rather than printing a shell:
+Append the public half on the server with a forced command, so the key can only push files into the site directory. Append, never overwrite: other projects keep their own lines in the same file.
 
 ```bash
-ssh -i /tmp/deploy_key deploy@ssh.indraarianggi.xyz true
+# on the server
+line="command=\"/usr/bin/rrsync -wo /srv/indraarianggi.xyz/site\",no-agent-forwarding,no-port-forwarding,no-pty,no-user-rc,no-X11-forwarding $(cat /tmp/deploy_indraarianggi_xyz.pub)"
+printf '%s\n' "$line" | sudo tee -a /home/deploy/.ssh/authorized_keys > /dev/null
+rm /tmp/deploy_indraarianggi_xyz.pub
 ```
 
-Leave sshd bound where it is and do not forward port 22 from the router. The tunnel is the only intended path in.
-
-## 5. Start Caddy
-
-Copy `deploy/` to the server, for example `/opt/indraarianggi/`, then:
+Confirm the restriction took effect from your workstation. This should fail with an rrsync error rather than printing a shell:
 
 ```bash
-cd /opt/indraarianggi
-sudo docker compose up -d
-curl -sS -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8080/
+export TUNNEL_SERVICE_TOKEN_ID='<Client ID>' TUNNEL_SERVICE_TOKEN_SECRET='<Client Secret>'
+ssh -i ~/.ssh/deploy_indraarianggi_xyz \
+  -o ProxyCommand='cloudflared access ssh --hostname %h' \
+  deploy@ssh.indraarianggi.xyz true
+unset TUNNEL_SERVICE_TOKEN_ID TUNNEL_SERVICE_TOKEN_SECRET
 ```
 
-The port returns 404 until the first deploy puts files in `/srv/indraarianggi.xyz/site`. Caddy serves that directory read-only and needs no reload when the files change.
+The first connection asks you to trust the host key. Compare it with `ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub` on the server before answering `yes`.
 
-## 6. GitHub configuration
+Do not forward port 22 from the router. The tunnel is the only intended path in.
+
+### Serving the directory
+
+The reverse proxy must serve `/srv/indraarianggi.xyz/site` read-only with these behaviors, all of which the workflow's verification step depends on:
+
+- Unknown paths return status `404` with the body of `404.html`.
+- Content-hashed files under `/_astro/` are cached as immutable; everything else (HTML, feed, sitemap) revalidates after every deploy.
+- `www.indraarianggi.xyz` redirects permanently to the apex.
+- No reload is needed when files change.
+
+A Caddy site block that satisfies this, for a proxy that terminates plain HTTP behind the tunnel:
+
+```caddyfile
+http://indraarianggi.xyz {
+	root * /srv/indraarianggi.xyz/site
+	encode zstd gzip
+
+	# The two matchers are mutually exclusive on purpose: Caddy evaluates
+	# matcher-scoped header routes before matcher-free ones, so a bare default
+	# would overwrite whichever rule it happened to run after.
+	@hashed path /_astro/*
+	@revalidate not path /_astro/*
+	header @hashed Cache-Control "public, max-age=31536000, immutable"
+	header @revalidate Cache-Control "public, max-age=0, must-revalidate"
+
+	file_server
+
+	# Astro emits dist/404.html; keep the error status while serving that body.
+	handle_errors {
+		rewrite * /404.html
+		file_server
+	}
+}
+
+http://www.indraarianggi.xyz {
+	redir https://indraarianggi.xyz{uri} permanent
+}
+```
+
+## 2. GitHub configuration
 
 Repository secrets, Settings, Secrets and variables, Actions:
 
 | Secret | Value |
 |---|---|
-| `DEPLOY_SSH_KEY` | Private key from `ssh-keygen` (full PEM/OpenSSH text, including the header and footer lines) |
-| `DEPLOY_KNOWN_HOSTS` | Output of the `ssh-keyscan` command above, one line |
+| `DEPLOY_SSH_KEY` | Private key from `ssh-keygen` (full OpenSSH text, including the header and footer lines) |
+| `DEPLOY_KNOWN_HOSTS` | The server's pinned host key, one line (command below) |
 | `CF_ACCESS_CLIENT_ID` | Access service token Client ID |
 | `CF_ACCESS_CLIENT_SECRET` | Access service token Client Secret |
+
+Take `DEPLOY_KNOWN_HOSTS` from the server itself over loopback, so the pinned key never crosses a network you would have to trust:
+
+```bash
+# on the server
+ssh-keyscan -t ed25519 localhost 2>/dev/null | sed 's/^localhost/ssh.indraarianggi.xyz/'
+```
+
+Once the secrets are saved and the first deploy succeeds, delete the private key from your workstation. A lost key is replaced by generating a new pair and swapping the `authorized_keys` line.
 
 Repository variables (optional; the workflow defaults shown apply when unset):
 
@@ -141,24 +160,36 @@ Repository variables (optional; the workflow defaults shown apply when unset):
 | `SITE_URL` | `https://indraarianggi.xyz` | Origin baked into canonical URLs, `sitemap-index.xml`, `robots.txt`, and the feed |
 | `DEPLOY_HOST` | `ssh.indraarianggi.xyz` | Tunnel hostname routed to sshd |
 
-## 7. Deploy
+Keep Cloudflare's Bot Fight Mode off for this zone. It challenges the runner's `curl` calls in the verification step, and the Free plan cannot exempt them.
 
-Push to `main`, or run the workflow manually from the Actions tab. The workflow:
+## 3. Deploy
+
+Push to `main`, or run the workflow manually from the Actions tab (or `gh workflow run deploy.yml --ref main`). The workflow:
 
 1. Installs with `--frozen-lockfile`, runs `pnpm test`, then `pnpm build`.
 2. Fails the job if `dist/` is missing expected files, if the sitemap does not use `SITE_URL`, or if the `.invalid` placeholder origin leaked into the output.
 3. Uploads `dist/` as an artifact, then rsyncs it to the restricted directory over the tunnel with `--delete`, so the served tree mirrors the build exactly.
 4. Verifies the deployed site: home page 200 with expected content, unknown path 404, and `robots.txt`, `rss.xml`, `sitemap-index.xml`, `favicon.svg` all 200.
 
+When a run fails, the failing step usually names the cause:
+
+| Failing step | Likely cause |
+|---|---|
+| Configure SSH | Malformed `DEPLOY_SSH_KEY` or `DEPLOY_KNOWN_HOSTS` (for example, a truncated line) |
+| Deploy: Access error or `websocket: bad handshake` | Wrong service token, or the token is missing from the Access policy |
+| Deploy: `Host key verification failed` | `DEPLOY_KNOWN_HOSTS` does not match the server's host key |
+| Deploy: `Permission denied (publickey)` | The `authorized_keys` line does not match `DEPLOY_SSH_KEY` |
+| Verify the live site | The reverse proxy is down or misconfigured, or Bot Fight Mode is on |
+
 Useful commands on the server:
 
 ```bash
-sudo docker compose logs -f web                     # access and error output
 sudo journalctl -u cloudflared -f                   # tunnel status
+sudo journalctl -u ssh -n 20 --no-pager             # deploy connections and rejections
 ls -la /srv/indraarianggi.xyz/site                  # what the last deploy wrote
 ```
 
-## 8. Rollback
+## 4. Rollback
 
 Re-run any earlier successful run from the Actions tab: the build job checks out that run's commit and rebuilds it, so the server ends up serving that revision. Push a revert commit if you would rather fix it forward in history.
 
@@ -175,7 +206,8 @@ Because `--delay-updates` is unavailable, the transfer is a plain mirror rather 
 
 ## Operational notes
 
-- **Client IPs.** Caddy runs behind the tunnel, so its access log records the tunnel address. Cloudflare sends the real address in `CF-Connecting-IP`.
+- **Client IPs.** The reverse proxy sits behind the tunnel, so it sees the tunnel's address unless it trusts Cloudflare's `CF-Connecting-IP` header, which carries the real visitor address.
 - **Host key changes.** If you reinstall the server and its SSH host key changes, the deploy fails closed until `DEPLOY_KNOWN_HOSTS` is updated. That is intended.
+- **Token expiry.** Access service tokens expire on the duration chosen at creation. Refresh the token before then, or deploys start failing at the Access step.
 - **Artifact retention.** Uploaded artifacts expire after 7 days, which bounds how far back a re-run can redeploy.
 - **If the repository becomes private**, a self-hosted runner on the server becomes viable and removes the tunnel step for deploys. Keep it public and use this setup if you want fork PRs to stay harmless.

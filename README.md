@@ -70,6 +70,8 @@ When `SITE_URL` is unset, the site falls back to `http://localhost:4321`.
 │   └── styles/               # font imports and the design system
 ├── tests/                    # Vitest specs for src/lib
 ├── public/favicon.svg
+├── .github/workflows/        # deploy.yml: test, build, push to the home server
+├── deploy/                   # deployment runbook and restricted deploy-key example
 ├── DESIGN_REPORT.md          # approved 22-frame design specification
 ├── docs/plans/               # design and implementation plans
 ├── portfolio-swiss-poster.pen # approved design artifact
@@ -224,10 +226,13 @@ Markdown config changes do not invalidate Astro's cached rendering of content. A
 
 ## Deployment
 
-`pnpm build` writes a static site to `dist/`. Deploy that directory to any static host and set `SITE_URL` to the real origin so canonical URLs, the sitemap, `robots.txt`, and the feed are correct.
+`pnpm build` writes a static site to `dist/`. Any static host can serve it, as long as `SITE_URL` is set to the real origin so canonical URLs, the sitemap, `robots.txt`, and the feed are correct.
+
+Production runs on a home server at `https://indraarianggi.xyz`. Every push to `main` triggers `.github/workflows/deploy.yml`, which tests and builds on a GitHub-hosted runner, then pushes `dist/` to the server through a Cloudflare Tunnel and verifies the live site. `deploy/README.md` documents what the server must provide, the required repository secrets, rollback, and troubleshooting.
 
 ## Documentation
 
 - `DESIGN_REPORT.md` enumerates the approved 22-frame design system, components, and variables.
 - `docs/plans/2026-09-20-portfolio-design.md` and `docs/plans/2026-09-20-portfolio-implementation.md` record the design decisions and the implementation tasks.
+- `deploy/README.md` is the deployment runbook: server contract, GitHub secrets, deploy behavior, and rollback.
 - `portfolio-swiss-poster.pen` is the implementation source of truth; `portfolio.pen` is a preserved earlier exploration and is not an implementation input.
