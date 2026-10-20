@@ -17,19 +17,6 @@ export const site = {
     { href: 'https://www.linkedin.com/in/indraarianggi', label: 'LinkedIn', external: true },
     { href: '/rss.xml', label: 'RSS', external: false },
   ],
-  /** @deprecated Removed with SiteHeader in Task 11. */
-  primaryNav: [
-    { href: '/', label: 'Home' },
-    { href: '/work/', label: 'Work' },
-    { href: '/blog/', label: 'Blog' },
-  ],
-  /** @deprecated Removed with SiteFooter in Task 11. */
-  secondaryNav: [
-    { href: '/about/', label: 'About' },
-    { href: '/read/', label: 'Read' },
-  ],
-  /** @deprecated Removed with SiteFooter in Task 11. */
-  socialLinks: [] as ReadonlyArray<{ href: string; label: string }>,
 } as const;
 
 /** Oldest first. */
