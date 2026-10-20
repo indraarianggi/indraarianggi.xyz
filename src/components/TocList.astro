@@ -15,14 +15,14 @@ const { tree, variant } = Astro.props;
     tree.map((item) => (
       <li>
         <a class="toc-link" href={`#${item.slug}`} data-toc-link>
-          {item.text}
+          <span class="toc-text">{item.text}</span>
         </a>
         {item.children.length > 0 && (
           <ol>
             {item.children.map((child) => (
               <li>
                 <a class="toc-link" href={`#${child.slug}`} data-toc-link>
-                  {child.text}
+                  <span class="toc-text">{child.text}</span>
                 </a>
               </li>
             ))}
@@ -86,15 +86,41 @@ const { tree, variant } = Astro.props;
     font-size: 0.75rem;
   }
 
+  /* The ink sweep, as the background variant: entries wrap, so the wash follows
+     each line of text (not the hit area) and clones across the break. */
+  .toc-text {
+    margin-inline: -3px;
+    padding-inline: 3px;
+    border-radius: 7px 3px 6px 3px;
+    background: linear-gradient(var(--accent-wash), var(--accent-wash)) left 60% / 0% 85% no-repeat;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+    transition: background-size 160ms var(--ease-out);
+  }
+
+  /* Pastel wash behind the text: ink keeps the contrast the deep orange would lose. */
+  .toc-list .toc-link:focus-visible,
   .toc-list .toc-link[aria-current='location'] {
-    color: var(--accent);
+    color: var(--ink);
+  }
+
+  .toc-link:focus-visible .toc-text,
+  .toc-link[aria-current='location'] .toc-text {
+    background-size: 100% 85%;
+  }
+
+  .toc-list .toc-link[aria-current='location'] {
     font-weight: 500;
   }
 
   @media (hover: hover) {
-    .toc-link:hover {
-      text-decoration: underline;
-      text-underline-offset: 0.2em;
+    .toc-list .toc-link:hover {
+      color: var(--ink);
+    }
+
+    .toc-link:hover .toc-text {
+      background-size: 100% 85%;
+      transition-duration: 240ms;
     }
   }
 
