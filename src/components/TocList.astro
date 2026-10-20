@@ -98,6 +98,27 @@ const { tree, variant } = Astro.props;
     }
   }
 
+  /* Rail: 24px hit areas (WCAG target size) that do not overlap, laid out near the canvas's 24px pitch. */
+  .toc-rail,
+  .toc-rail ol {
+    gap: 0.5rem;
+  }
+
+  .toc-rail .toc-link {
+    padding-block: 0.25rem;
+    margin-block: -0.25rem;
+  }
+
+  .toc-rail ol {
+    gap: 0.625rem;
+    margin-block-start: 0.75rem;
+  }
+
+  .toc-rail ol .toc-link {
+    padding-block: 0.3125rem;
+    margin-block: -0.3125rem;
+  }
+
   /* Sheet: 44px targets, H3s indented, a rust marker on the current section. */
   .toc-sheet,
   .toc-sheet ol {
