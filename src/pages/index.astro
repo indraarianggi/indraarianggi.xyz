@@ -1,373 +1,228 @@
 ---
 import { getCollection } from 'astro:content';
-import { visibleNewestFirst } from '../lib/content';
-import { site } from '../config/site';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import EmptyState from '../components/EmptyState.astro';
-import KineticText from '../components/KineticText.astro';
-import SceneSlate from '../components/SceneSlate.astro';
-import WorkDeck from '../components/WorkDeck.astro';
-import ArticleRow from '../components/ArticleRow.astro';
-import ReadingDesk from '../components/ReadingDesk.astro';
+import WorkTile from '../components/WorkTile.astro';
+import IndexList from '../components/IndexList.astro';
+import { site } from '../config/site';
+import { arrangeWork, bookDate, groupByYear, visibleNewestFirst, type IndexRow } from '../lib/content';
+import { latest, timeAgo } from '../lib/time-ago';
 
 const production = import.meta.env.PROD;
-
 const work = visibleNewestFirst(await getCollection('work'), production);
-const articles = visibleNewestFirst(await getCollection('blog'), production);
+const notes = visibleNewestFirst(await getCollection('blog'), production);
 const books = visibleNewestFirst(await getCollection('books'), production);
 
-const featuredWork = work.filter((entry) => entry.data.featured).slice(0, 3);
-const recentArticles = articles.slice(0, 3);
-const currentBooks = books.filter((entry) => entry.data.status === 'reading').slice(0, 1);
-const finishedBooks = books.filter((entry) => entry.data.status === 'finished').slice(0, 2);
+const { featured, rest } = arrangeWork(work);
+const companions = rest.slice(0, 2);
+const reading = books.find(({ data }) => data.status === 'reading');
 
-const note = 'I build to understand. I write to remember. I read because useful ideas rarely stay inside one field.';
-const noteWords = note.split(' ');
+const tended = latest([
+  ...work.map(({ data }) => data.endDate ?? data.date),
+  ...notes.map(({ data }) => data.updatedDate ?? data.date),
+  ...books.map(({ data }) => bookDate(data)),
+]);
 
-const credits = [
-  { role: 'Written and built by', value: site.name },
-  { role: 'Framework', value: 'Astro' },
-  { role: 'Type', value: 'Archivo, Literata, IBM Plex Mono' },
-  { role: 'Motion', value: 'CSS scroll timelines, Web Animations API' },
+// Work already has the bento; the index is writing and reading.
+const rows: IndexRow[] = [
+  ...notes.map((entry) => ({ href: `/blog/${entry.id}/`, title: entry.data.title, kind: 'note' as const, date: entry.data.date })),
+  ...books
+    .filter(({ data }) => data.status === 'reading' || data.status === 'finished')
+    .map((entry) => ({ href: `/read/#${entry.id}`, title: entry.data.title, kind: 'book' as const, date: bookDate(entry.data) })),
 ];
+const index = groupByYear(rows, (row) => row.date);
 ---
 
 <BaseLayout title={site.title} path="/">
-  <!-- SC 00: title sequence -->
-  <section class="hero shell" data-scene="Title" aria-labelledby="home-headline">
-    <p class="hero-meta label">
-      <span>SC 00</span>
-      <span class="keyframe" aria-hidden="true"></span>
-      <span>{site.name}, software engineer</span>
-    </p>
-    <KineticText
-      as="h1"
-      id="home-headline"
-      split="chars"
-      delay={120}
-      text={['Making', 'software.', 'Learning', 'as I go.']}
-      class="hero-title display"
-    />
-    <p class="hero-foot label dim">
-      <span>Work, notes, and books.</span>
-      <span>Scroll to play</span>
-    </p>
-  </section>
+  <div class="home">
+    <h1 class="sentence">
+      <span class="part" style="--d: 0; --m: 0">I <a class="verb ink" href="/work/">build</a> to understand.</span><br />
+      <span class="part" style="--d: 1; --m: 1">I <a class="verb ink" href="/blog/">write</a> to remember.</span><br />
+      <span class="part" style="--d: 2; --m: 2">I <a class="verb ink" href="/read/">read</a> because useful</span><br class="br-m" />
+      {' '}<span class="part" style="--d: 2; --m: 3">ideas</span><br class="br-d" />
+      {' '}<span class="part" style="--d: 3; --m: 3">rarely stay</span><br class="br-m" />
+      {' '}<span class="part" style="--d: 3; --m: 4">inside one field.</span>
+    </h1>
 
-  <!-- SC 01: the note, lit word by word as it is read -->
-  <section class="note shell" data-scene="Note" aria-label="A note on how I work">
-    <p class="note-line label dim">SC 01 / Note</p>
-    <p class="note-text serif">
-      {noteWords.map((word) => <span class="w">{word}</span>)}
-    </p>
-  </section>
-
-  <!-- SC 02: selected work -->
-  <section class="work shell" data-scene="Selected work" aria-labelledby="selected-work-title">
-    <SceneSlate
-      scene={2}
-      label="Selected work"
-      title="Clips from the bench"
-      id="selected-work-title"
-      aside={`${String(featuredWork.length).padStart(2, '0')} clips`}
-    >
-      <a class="slate-link label" href="/work/">Full work index</a>
-    </SceneSlate>
     {
-      featuredWork.length > 0 ? (
-        <WorkDeck entries={featuredWork} />
-      ) : (
-        <EmptyState message="Nothing published here yet. I'm still building." />
+      tended && (
+        <p class="tended">
+          last tended{' '}
+          <time datetime={tended.toISOString()} data-tended>
+            {timeAgo(tended, new Date())}
+          </time>
+          {reading && (
+            <>
+              {' · reading — '}
+              <a href={`/read/#${reading.id}`}>{reading.data.title}</a>
+            </>
+          )}
+        </p>
       )
     }
-  </section>
 
-  <!-- SC 03: writing and reading, on paper -->
-  <section class="band paper" data-scene="Writing" data-frame aria-labelledby="writing-title">
-    <div class="shell band-grid">
-      <div class="writing">
-        <SceneSlate scene={3} label="Recent writing" title="Notes from the work" id="writing-title">
-          <a class="slate-link label" href="/blog/">All field notes</a>
-        </SceneSlate>
-        {
-          recentArticles.length > 0 ? (
-            <ul class="takes" data-play>
-              {recentArticles.map((entry, i) => (
-                <ArticleRow entry={entry} index={i} showTopic={false} />
-              ))}
-            </ul>
-          ) : (
-            <EmptyState message="No articles yet. Notes are being shaped." />
-          )
-        }
-      </div>
-      <ReadingDesk current={currentBooks} finished={finishedBooks} />
-    </div>
-  </section>
-
-  <!-- SC 04: end credits -->
-  <section class="credits shell" data-scene="Credits" aria-labelledby="credits-title">
-    <KineticText
-      as="h2"
-      id="credits-title"
-      split="words"
-      play="view"
-      text={['Still learning.', 'Still making.']}
-      class="credits-title display"
-    />
-    <dl class="roll" data-play>
-      {
-        credits.map((credit, i) => (
-          <div class="roll-row" data-rise style={`--rd: ${i}`}>
-            <dt class="label dim">{credit.role}</dt>
-            <dd>{credit.value}</dd>
+    {
+      featured && (
+        <section class="selected" aria-labelledby="selected-title">
+          <div class="section-head">
+            <h2 class="label" id="selected-title">Selected work</h2>
+            <a class="more" href="/work/">
+              All work <span aria-hidden="true">→</span>
+            </a>
           </div>
-        ))
-      }
-    </dl>
-    <p class="credits-links label">
-      <a class="text-link" href="/about/">About</a>
-      <a class="text-link" href="/read/">Read</a>
-      <a class="text-link" href="/rss.xml">RSS</a>
-    </p>
-  </section>
+          <div class="bento">
+            <WorkTile entry={featured} size="feature" eager sizes="(min-width: 48rem) 416px, 100vw" />
+            {companions.map((entry) => (
+              <WorkTile entry={entry} size="stack" sizes="(min-width: 48rem) 288px, 50vw" />
+            ))}
+          </div>
+        </section>
+      )
+    }
+
+    {
+      index.length > 0 && (
+        <section class="garden" aria-label="Writing and reading">
+          <IndexList groups={index} />
+        </section>
+      )
+    }
+  </div>
 </BaseLayout>
 
+<script>
+  import { timeAgo } from '../lib/time-ago';
+
+  // The page is static: refresh the build-time age so it stays true between deploys.
+  for (const time of document.querySelectorAll<HTMLTimeElement>('[data-tended]')) {
+    time.textContent = timeAgo(new Date(time.dateTime), new Date());
+  }
+</script>
+
 <style>
-  /* ---- SC 00 ---- */
-
-  .hero {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 2rem;
-    min-height: calc(100svh - 4.5rem - var(--hud-h));
-    padding-block: 1rem 1.5rem;
-    container-type: inline-size;
-    view-timeline: --hero block;
-  }
-
-  .hero-meta,
-  .hero-foot {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin: 0;
-  }
-
-  .hero-foot {
-    justify-content: space-between;
-  }
-
-  .hero :global(.hero-title) {
-    margin: 0;
-    font-size: min(14.4cqi, 17.5svh);
-    font-weight: 850;
-    line-height: 0.86;
-    letter-spacing: -0.035em;
-  }
-
-  /* Even lines sit right: the title reads as a composition, not a stack. */
-  .hero :global(.hero-title .k-line:nth-child(even)) {
-    text-align: end;
-  }
-
-  /* Leaving the title: odd lines push left, even lines push right. */
-  @supports (animation-timeline: view()) {
-    @media (prefers-reduced-motion: no-preference) {
-      .hero :global(.hero-title .k-line) {
-        animation: push-left linear both;
-        animation-timeline: --hero;
-        animation-range: exit 0% exit 90%;
-      }
-
-      .hero :global(.hero-title .k-line:nth-child(even)) {
-        animation-name: push-right;
-      }
-    }
-  }
-
-  @keyframes push-left {
-    to {
-      transform: translateX(-18cqi);
-      opacity: 0.15;
-    }
-  }
-
-  @keyframes push-right {
-    to {
-      transform: translateX(18cqi);
-      opacity: 0.15;
-    }
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    .hero-meta,
-    .hero-foot {
-      animation: rise var(--dur-std) var(--ease-out) backwards;
-      animation-delay: 700ms;
-    }
-  }
-
-  /* ---- SC 01 ---- */
-
-  .note {
+  .home {
     display: grid;
-    gap: 2rem;
-    padding-block: clamp(5rem, 16svh, 10rem);
+    gap: 1.75rem;
   }
 
-  .note-line {
-    margin: 0;
-  }
-
-  .note-text {
-    max-width: 22ch;
-    margin: 0;
-    font-size: clamp(2rem, 5.2vw, 5rem);
-    font-weight: 400;
-    line-height: 1.08;
-    letter-spacing: -0.02em;
-  }
-
-  .note-text .w + .w::before {
-    content: ' ';
-  }
-
-  /* Each word lights as it crosses the reading line. */
-  @supports (animation-timeline: view()) {
-    @media (prefers-reduced-motion: no-preference) {
-      .note-text .w {
-        animation: light linear both;
-        animation-timeline: view();
-        animation-range: cover 18% cover 42%;
-      }
-    }
-  }
-
-  @keyframes light {
-    from {
-      opacity: 0.2;
-    }
-  }
-
-  /* ---- SC 02 ---- */
-
-  .work {
-    padding-block-end: clamp(4rem, 12svh, 8rem);
-  }
-
-  .slate-link {
-    justify-self: start;
-    color: inherit;
-    text-decoration: underline;
-    text-decoration-color: var(--signal);
-    text-underline-offset: 0.35em;
-    display: inline-flex;
-    align-items: center;
-    min-height: 2.75rem;
-  }
-
-  :global(.paper) .slate-link {
-    text-decoration-color: var(--red-text);
-  }
-
-  /* ---- SC 03 ---- */
-
-  .band {
-    padding-block: clamp(3rem, 8svh, 5rem);
-  }
-
-  .band-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
-    gap: 2.5rem;
-    align-items: start;
-  }
-
-  .takes {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  /* ---- SC 04 ---- */
-
-  .credits {
-    display: grid;
-    gap: 3rem;
-    padding-block: clamp(5rem, 16svh, 10rem) 4rem;
-  }
-
-  .credits :global(.credits-title) {
-    margin: 0;
-    font-size: clamp(3rem, 9vw, 8.5rem);
-  }
-
-  .roll {
-    display: grid;
-    gap: 0;
-    max-width: 44rem;
-    margin: 0;
-  }
-
-  .roll-row {
-    display: grid;
-    grid-template-columns: 12rem minmax(0, 1fr);
-    gap: 1.5rem;
-    align-items: baseline;
-    padding-block: 0.75rem;
-    border-top: 1px solid var(--line);
-  }
-
-  .roll-row dd {
-    margin: 0;
+  .sentence {
     font-family: var(--font-serif);
-    font-size: 1.125rem;
+    font-size: 2.5rem;
+    line-height: 1.18;
+    letter-spacing: -0.05rem;
+    text-wrap: initial;
   }
 
-  .credits-links {
+  .part {
+    display: inline-block;
+  }
+
+  .br-m {
+    display: none;
+  }
+
+  /* Canvas: on 40px type the wash starts 8px down and runs 6px past the baseline box. */
+  .verb {
+    --wash-bottom: -0.15em;
+    /* A 1:1 box so the wash measures against the 40px text box, as on the canvas. */
+    display: inline-block;
+    line-height: 1;
+    text-decoration: underline;
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 0.16em;
+  }
+
+  /* The signature moment: each line rises in turn, on every visit. */
+  @media (prefers-reduced-motion: no-preference) {
+    .part {
+      animation: rise 420ms var(--ease-out) both;
+      animation-delay: calc(var(--d) * 90ms);
+    }
+  }
+
+  .tended {
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+  }
+
+  .tended a {
+    text-underline-offset: 0.2em;
+  }
+
+  /* Canvas: a 28px block gap plus 44px section padding puts 72px between sections. */
+  .selected,
+  .garden {
+    padding-block-start: 2.75rem;
+  }
+
+  .section-head {
     display: flex;
-    gap: 1.5rem;
-    margin: 0;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-block-end: 1rem;
   }
 
-  .credits-links a {
+  .more {
     display: inline-flex;
     align-items: center;
     min-height: 2.75rem;
+    margin-block: -0.875rem;
+    color: var(--muted);
+    font-size: 0.8125rem;
+    text-decoration: none;
   }
 
-  @media (max-width: 63.9375rem) {
-    .band-grid {
-      grid-template-columns: 1fr;
+  @media (hover: hover) {
+    .more:hover {
+      color: var(--ink);
     }
+  }
+
+  .bento {
+    display: grid;
+    grid-template-columns: 416fr 288fr;
+    gap: 1rem;
   }
 
   @media (max-width: 47.9375rem) {
-    /* Narrow screens: the title block sits low, poster-style, and the open
-       stage above it gives the rise somewhere to come from. */
-    .hero {
-      justify-content: flex-end;
+    .home {
       gap: 1.5rem;
-      min-height: calc(100svh - 3.75rem);
     }
 
-    .hero-meta {
-      margin-block-end: auto;
+    .sentence {
+      font-size: 1.875rem;
+      letter-spacing: -0.04rem;
     }
 
-    .hero :global(.hero-title) {
-      font-size: 14.4cqi;
+    .br-m {
+      display: inline;
     }
 
-    .hero-foot span:last-child {
+    .br-d {
       display: none;
     }
 
-    .roll-row {
-      grid-template-columns: 1fr;
-      gap: 0.25rem;
+    .part {
+      animation-delay: calc(var(--m) * 90ms);
+    }
+
+    .tended {
+      font-size: 0.6875rem;
+    }
+
+    .section-head {
+      margin-block-end: 0.875rem;
+    }
+
+    /* Canvas: 24 gap plus 24 padding on mobile. */
+    .selected,
+    .garden {
+      padding-block-start: 1.5rem;
+    }
+
+    .bento {
+      grid-template-columns: 1fr 1fr;
+      gap: 0.875rem 0.75rem;
     }
   }
 </style>

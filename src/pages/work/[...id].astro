@@ -1,56 +1,53 @@
 ---
 import { getCollection, render } from 'astro:content';
-import { buildTocTree } from '../../lib/toc';
-import { visibleNewestFirst, workStatusLabels } from '../../lib/content';
-import { readingMinutes } from '../../lib/timecode';
 import DetailLayout from '../../layouts/DetailLayout.astro';
-import Clapper from '../../components/Clapper.astro';
-import UpNext from '../../components/UpNext.astro';
+import { visibleNewestFirst, workStatusLine } from '../../lib/content';
+import { buildTocTree } from '../../lib/toc';
 
 export async function getStaticPaths() {
   const entries = visibleNewestFirst(await getCollection('work'), import.meta.env.PROD);
-  return entries.map((entry, i) => ({
-    params: { id: entry.id },
-    props: { entry, next: entries.length > 1 ? entries[(i + 1) % entries.length] : undefined },
-  }));
+  return entries.map((entry) => ({ params: { id: entry.id }, props: { entry } }));
 }
 
-const { entry, next } = Astro.props;
+const { entry } = Astro.props;
+const { data } = entry;
 const { Content, headings } = await render(entry);
-const tree = buildTocTree(headings);
-const toc = tree.length >= 2 ? tree : undefined;
-const runtime = readingMinutes(entry.body);
 
-const startYear = entry.data.date.getUTCFullYear();
-const years = entry.data.endDate ? `${startYear} / ${entry.data.endDate.getUTCFullYear()}` : String(startYear);
-const rows = [
-  { label: 'Role', value: entry.data.role },
-  { label: 'Status', value: workStatusLabels[entry.data.status] },
-  { label: 'Year', value: years },
-  { label: 'Runtime', value: `${runtime} min read` },
-  ...(entry.data.stack.length > 0 ? [{ label: 'Stack', value: entry.data.stack.join(', ') }] : []),
-];
 const links = [
-  ...(entry.data.website ? [{ href: entry.data.website, label: 'Live site' }] : []),
-  ...(entry.data.repository ? [{ href: entry.data.repository, label: 'Repository' }] : []),
+  ...(data.website ? [{ href: data.website, label: 'Live site' }] : []),
+  ...(data.repository ? [{ href: data.repository, label: 'Repository' }] : []),
 ];
 ---
 
 <DetailLayout
-  title={entry.data.title}
-  summary={entry.data.summary}
+  title={data.title}
+  summary={data.summary}
   path={`/work/${entry.id}/`}
-  variant="project"
-  toc={toc}
-  cover={entry.data.image}
-  coverAlt={entry.data.imageAlt}
-  runtimeMinutes={runtime}
+  back={{ href: '/work/', label: 'Work' }}
+  toc={buildTocTree(headings)}
+  showcase={data.image ? { src: data.image, alt: data.imageAlt ?? '' } : undefined}
 >
-  <Clapper slot="metadata" heading="Project slate" rows={rows} links={links} />
-
-  <article class="prose">
-    <Content />
-  </article>
-
-  {next && <UpNext slot="after-content" href={`/work/${next.id}/`} title={next.data.title} kicker="Next clip" />}
+  <dl slot="meta-table" class="meta-table">
+    <div><dt>Role</dt><dd>{data.role}</dd></div>
+    <div><dt>Status</dt><dd>{workStatusLine(data)}</dd></div>
+    {data.stack.length > 0 && <div><dt>Stack</dt><dd>{data.stack.join(' · ')}</dd></div>}
+    {
+      links.length > 0 && (
+        <div>
+          <dt>Links</dt>
+          <dd>
+            {links.map((link, i) => (
+              <>
+                {i > 0 && ' · '}
+                <a href={link.href} rel="noopener">
+                  {link.label} <span aria-hidden="true">↗</span>
+                </a>
+              </>
+            ))}
+          </dd>
+        </div>
+      )
+    }
+  </dl>
+  <Content />
 </DetailLayout>

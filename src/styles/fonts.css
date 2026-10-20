@@ -1,6 +1,6 @@
-/* standard.css carries both axes (wght 100-900, wdth 62-125%). The width
-   axis is what lets the kinetic headlines stretch for real. */
-@import '@fontsource-variable/archivo/standard.css';
-@import '@fontsource-variable/literata';
-@import '@fontsource/ibm-plex-mono/400.css';
-@import '@fontsource/ibm-plex-mono/500.css';
+/* Newsreader's optical-size axis gives the 300px 404 numeral and the 18px
+   prose their own cuts from one file. */
+@import '@fontsource-variable/newsreader/opsz.css';
+@import '@fontsource-variable/newsreader/opsz-italic.css';
+@import '@fontsource-variable/geist';
+@import '@fontsource-variable/geist-mono';

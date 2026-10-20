@@ -1,8 +1,6 @@
 # Indra Arianggi: Portfolio
 
-Personal portfolio built as a static Astro site in a Swiss Poster + Analog Notebook visual system. Work, articles, and books are authored as Markdown, validated by type-safe content collections, and rendered into static HTML with no client framework.
-
-Headline: "Making software. Learning as I go."
+Personal portfolio built as a static Astro site: a calm, typographic digital garden with a sidebar shell, one signature sentence on the home page, image-led project tiles, year-grouped indexes, a book cover grid, and a career timeline. Work, articles, and books are authored as Markdown, validated by type-safe content collections, and rendered into static HTML with no client framework. The approved design is `docs/plans/2026-10-20-redesign-v3-design.md`.
 
 ## Stack
 
@@ -13,10 +11,10 @@ Headline: "Making software. Learning as I go."
 | Content | Markdown via Astro content collections (`glob` loader, Zod schemas) |
 | Styling | Native CSS with custom properties in `src/styles/global.css` |
 | Images | `sharp` behind `astro:assets`, WebP output with responsive widths |
-| Type | Archivo Black, Archivo, Literata, IBM Plex Mono (local Fontsource packages) |
-| Icons | `astro-icon` with `@iconify-json/ph` |
+| Type | Newsreader, Geist, Geist Mono (Fontsource variable packages) |
+| Icons | `astro-icon` with `@iconify-json/ph` and `@iconify-json/simple-icons` |
 | Feeds | `@astrojs/rss`, `@astrojs/sitemap` |
-| Navigation | Astro `ClientRouter` plus one vanilla script for the table of contents |
+| Navigation | Static pages with cross-document View Transitions; small vanilla scripts for the TOC, Contents sheet, timeline, and code copy |
 | Tests | Vitest |
 | Package manager | pnpm 11 |
 
@@ -33,7 +31,7 @@ pnpm dev          # dev server on http://localhost:4321
 |---|---|---|
 | `pnpm dev` | `astro dev` | Local dev server with hot reload |
 | `pnpm check` | `astro check` | Type and template diagnostics |
-| `pnpm test` | `vitest run` | Unit tests for content and TOC helpers |
+| `pnpm test` | `vitest run` | Unit tests for content, date, timeline, cover, and nav helpers |
 | `pnpm test:watch` | `vitest` | Watch mode |
 | `pnpm build` | `pnpm check && astro build` | Type-check, then generate `dist/` |
 | `pnpm preview` | `astro preview` | Serve the built output |
@@ -58,12 +56,20 @@ When `SITE_URL` is unset, the site falls back to `http://localhost:4321`.
 .
 ├── astro.config.mjs          # site URL, sitemap, astro-icon include list, Shiki theme
 ├── src/
-│   ├── config/site.ts        # name, title, description, navigation, social links
+│   ├── config/site.ts        # name, nav, contact links, experience, toolkit
 │   ├── content.config.ts     # work/blog/books schemas
 │   ├── content/              # Markdown content (work/, blog/, books/)
-│   ├── components/           # masthead, footer, rows, TOC, empty state, analog note
-│   ├── layouts/              # BaseLayout (shell + SEO), DetailLayout (header + TOC grid)
-│   ├── lib/content.ts        # draft filtering, date ordering, book grouping, formatting
+│   ├── assets/               # avatar
+│   ├── components/           # Sidebar, SiteFooter, PageHeader, IndexList, WorkTile, BookCard,
+│   │                         #   CareerTimeline, Toolkit, TocList, ContentsSheet, EmptyState, SeoHead
+│   ├── layouts/              # BaseLayout (sidebar shell + SEO), DetailLayout (header, TOC rail, Contents sheet)
+│   ├── lib/content.ts        # draft filtering, grouping, bento order, captions, book shelves
+│   ├── lib/dates.ts          # 02 Sep / 02 Sep 2026 / Sep 2026 formatters
+│   ├── lib/reading-time.ts   # words-per-minute reading time
+│   ├── lib/time-ago.ts       # "last tended" age and newest-date helper
+│   ├── lib/nav.ts            # active-section matching
+│   ├── lib/timeline.ts       # career timeline geometry (desktop and vertical)
+│   ├── lib/cover.ts          # fallback book cover colours and contrast
 │   ├── lib/toc.ts            # h2/h3 heading tree for the contents rail
 │   ├── pages/                # routes, RSS, robots
 │   ├── icons/                # local astro-icon source directory
@@ -72,9 +78,10 @@ When `SITE_URL` is unset, the site falls back to `http://localhost:4321`.
 ├── public/favicon.svg
 ├── .github/workflows/        # deploy.yml: test, build, push to the home server
 ├── deploy/                   # deployment runbook and restricted deploy-key example
-├── DESIGN_REPORT.md          # approved 22-frame design specification
+├── DESIGN_REPORT.md          # earlier (v2) design specification
 ├── docs/plans/               # design and implementation plans
-├── portfolio-swiss-poster.pen # approved design artifact
+├── portfolio-v3.pen          # approved v3 design canvas
+├── portfolio-swiss-poster.pen # earlier v2 design artifact
 └── portfolio.pen             # preserved Technical Broadsheet exploration
 ```
 
@@ -84,19 +91,19 @@ When `SITE_URL` is unset, the site falls back to `http://localhost:4321`.
 
 | Route | Surface |
 |---|---|
-| `/` | Poster hero, selected work (up to 3 featured), recent writing (up to 4), reading desk (1 current, 2 finished) |
-| `/work/` | Work index: numbered rows paired with a feature stage |
-| `/work/<id>/` | Project detail: status/role/stack metadata field, prose, contents rail |
-| `/blog/` | Field notes: latest article lead plus a ruled archive |
-| `/blog/<id>/` | Article detail: published/topics metadata field, prose, contents rail |
-| `/about/` | Learning poster and practice statement with analog notes |
-| `/read/` | Book shelves, grouped by reading state |
-| `/404` | Misprint poster with direct recovery links |
+| `/` | Signature sentence, "last tended" line, selected work bento, year-grouped writing and reading index |
+| `/work/` | Work index: featured tile plus two-up bento with summaries |
+| `/work/<id>/` | Project detail: meta table, showcase image, prose, TOC rail (Contents sheet below 1100px) |
+| `/blog/` | Writing index grouped by year |
+| `/blog/<id>/` | Article detail: meta line, prose, TOC rail |
+| `/about/` | Intro, career timeline, and toolkit |
+| `/read/` | Cover grid: Reading now, Finished, Paused / Want to read |
+| `/404` | Centred numeral and one line; the sidebar is the way out |
 | `/rss.xml` | Blog feed, empty but valid when no articles are published |
 | `/robots.txt` | Crawl policy pointing at the sitemap |
 | `/sitemap-index.xml` | Generated by `@astrojs/sitemap` |
 
-Detail routes render the contents rail only when the document has at least two `h2` sections. Collapsing the desktop rail does not change the reading measure.
+Detail routes render the contents rail only when the document has at least two `h2` sections. The rail hangs in the right gutter and does not change the reading measure.
 
 ## Writing content
 
@@ -173,42 +180,36 @@ Both come from Astro 7 using Sätteri as the default Markdown processor. The leg
 
 ### Sample entries
 
-The repository ships six placeholder entries so the layouts can be reviewed with real content: `atlas-index`, `beacon-monitor`, and `cairn-notes` under `work`, and `reading-code-slowly`, `keeping-a-field-log`, and `small-tools-that-stick` under `blog`. Each one says so at the top and bottom of its body. Replace them with real material before publishing, and keep the `books` collection empty until there are books to list.
+The repository ships six placeholder entries so the layouts can be reviewed with real content: `atlas-index`, `beacon-monitor`, and `cairn-notes` under `work`, and `reading-code-slowly`, `keeping-a-field-log`, and `small-tools-that-stick` under `blog`. Each one says so at the top and bottom of its body. Replace them with real material before publishing, and the `books` collection ships five draft samples (`sample-*.md`, `draft: true`): they show in `pnpm dev` and never in production. Delete them before adding real books.
 
 ## Design system
 
-Tokens live in `src/styles/global.css` and match `DESIGN_REPORT.md`.
+Tokens live in `src/styles/global.css`; the design is `docs/plans/2026-10-20-redesign-v3-design.md` and the canvas `portfolio-v3.pen`.
 
 | Token | Value | Use |
 |---|---|---|
-| `--paper` | `#f1efe8` | Page background |
-| `--surface` | `#fffdf8` | Raised paper fields, text on ink |
-| `--ink` | `#0a0a0a` | Body text, ink fields |
-| `--ink-on-red` | `#000000` | Normal-size text on signal-red fields |
-| `--muted` | `#6b6861` | Secondary metadata |
-| `--rule` | `#b9b4aa` | Structural rules and borders |
-| `--red` | `#e33122` | Signal red: fields, rules, decorations, qualifying large text |
-| `--red-soft` | `#f5d8d2` | Active contents background |
-| `--focus-ring` | `#e33122` | Focus outline |
+| `--bg` | `#fbfbf9` | Page background |
+| `--ink` | `#141414` | Text, section rules |
+| `--muted` | `#6e6a62` | Secondary text (never lighter) |
+| `--rule` | `#e7e5e0` | Row and sidebar hairlines |
+| `--tile` | `#f0efea` | Fallback image slots |
+| `--accent` | `#a4502f` | Rust: marks only what is active or current |
 
-Type roles: Archivo Black (`--font-poster`) for poster headlines, Archivo (`--font-sans`) for interface text, Literata (`--font-serif`) for prose, IBM Plex Mono (`--font-mono`) for metadata and field-note labels.
+Type: Newsreader (`--font-serif`) for the voice and prose, Geist (`--font-ui`) for interface text, Geist Mono (`--font-mono`) for dates and labels.
 
-Content and design invariants:
+Invariants:
 
-- Light theme only, with one signal-red accent.
-- Primary navigation is Home, Work, Blog. About and Read appear on the homepage and in the footer only.
-- No gradients, glass effects, heavy shadows, decorative dots, or rounded card grids.
-- Hover effects are gated behind `(hover: hover) and (pointer: fine)`; spatial animation has a reduced-motion alternative.
-- Empty collections must render an intentional empty state, never a broken layout.
-- No visible em dash characters in page copy.
-- Do not invent projects, employment history, metrics, articles, books, or contact details. `src/config/site.ts` keeps `socialLinks` empty until real destinations exist.
+- Light theme only. Animate only `opacity`, `transform`, and `background-size`; never `transition: all`. `prefers-reduced-motion` removes movement.
+- The ink sweep (`.ink`) is the one hover and focus interaction; the wash hugs the text line, not the hit area. Hit targets stay at least 44px.
+- Empty collections render an intentional empty state.
+- Do not invent projects, employment history, metrics, articles, books, or contact details.
 
-To use additional icons, add them to the `include` map for `ph` in `astro.config.mjs`; only `list-bold` and `x-bold` are bundled today.
+To use additional icons, add them to the `include` map in `astro.config.mjs`; `ph` icons are listed there and `simple-icons` are derived from `src/config/site.ts`.
 
 ## Verification
 
 ```bash
-pnpm test     # 11 tests covering src/lib/content.ts and src/lib/toc.ts
+pnpm test     # unit tests for src/lib and the site data
 pnpm check    # 0 errors, 0 warnings, 0 hints
 pnpm build    # type-check plus static build of every route
 ```
@@ -232,7 +233,7 @@ Production runs on a home server at `https://indraarianggi.xyz`. Every push to `
 
 ## Documentation
 
-- `DESIGN_REPORT.md` enumerates the approved 22-frame design system, components, and variables.
+- `docs/plans/2026-10-20-redesign-v3-design.md` and `-implementation.md` are the v3 design and its build plan. `DESIGN_REPORT.md` is the earlier v2 specification.
 - `docs/plans/2026-09-20-portfolio-design.md` and `docs/plans/2026-09-20-portfolio-implementation.md` record the design decisions and the implementation tasks.
 - `deploy/README.md` is the deployment runbook: server contract, GitHub secrets, deploy behavior, and rollback.
-- `portfolio-swiss-poster.pen` is the implementation source of truth; `portfolio.pen` is a preserved earlier exploration and is not an implementation input.
+- `portfolio-v3.pen` is the implementation source of truth; `portfolio-swiss-poster.pen` and `portfolio.pen` are earlier explorations and not implementation inputs.

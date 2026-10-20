@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatDate, groupBooks, visibleNewestFirst, workStatusLabels } from '../src/lib/content';
+import { arrangeWork, articleMeta, bookDate, bookMeta, bookShelves, groupBooks, groupByYear, visibleNewestFirst, workCaption, workStatusLine } from '../src/lib/content';
 
 type ContentEntry<Data> = {
   id: string;
@@ -49,21 +49,100 @@ describe('groupBooks', () => {
   });
 });
 
-describe('formatDate', () => {
-  it('formats dates as uppercase mono meta like 14 SEP 2026', () => {
-    expect(formatDate(new Date('2026-09-14'))).toBe('14 SEP 2026');
-  });
-
-  it('pads single-digit days with a leading zero', () => {
-    expect(formatDate(new Date('2026-08-05'))).toBe('05 AUG 2026');
+describe('groupByYear', () => {
+  it('groups newest first and keeps each year newest first', () => {
+    const items = [
+      { id: 'a', date: new Date('2025-03-01') },
+      { id: 'b', date: new Date('2026-09-02') },
+      { id: 'c', date: new Date('2026-05-30') },
+    ];
+    expect(groupByYear(items, (item) => item.date)).toEqual([
+      { year: 2026, items: [items[1], items[2]] },
+      { year: 2025, items: [items[0]] },
+    ]);
   });
 });
 
-describe('workStatusLabels', () => {
-  it('provides a non-empty text label for every work status', () => {
-    for (const status of ['building', 'shipped', 'paused', 'archived'] as const) {
-      expect(workStatusLabels[status]).toBeTypeOf('string');
-      expect(workStatusLabels[status].length).toBeGreaterThan(0);
-    }
+describe('arrangeWork', () => {
+  it('leads with the first featured entry and keeps the rest in order', () => {
+    const entries = [
+      { id: 'new', data: { featured: false } },
+      { id: 'star', data: { featured: true } },
+      { id: 'old', data: { featured: true } },
+    ];
+    const { featured, rest } = arrangeWork(entries);
+    expect(featured?.id).toBe('star');
+    expect(rest.map(({ id }) => id)).toEqual(['new', 'old']);
+  });
+
+  it('falls back to the newest entry when nothing is featured', () => {
+    const entries = [{ id: 'a', data: { featured: false } }, { id: 'b', data: { featured: false } }];
+    expect(arrangeWork(entries).featured?.id).toBe('a');
+  });
+
+  it('handles an empty collection', () => {
+    expect(arrangeWork([])).toEqual({ featured: undefined, rest: [] });
+  });
+});
+
+describe('work captions', () => {
+  it('captions a tile with status and start year', () => {
+    expect(workCaption({ status: 'building', date: new Date('2026-08-14') })).toBe('building · 2026');
+  });
+
+  it('describes an open project from its start month', () => {
+    expect(workStatusLine({ status: 'building', date: new Date('2026-08-14') })).toBe('building · since Aug 2026');
+  });
+
+  it('describes a closed project as a month range', () => {
+    expect(
+      workStatusLine({ status: 'shipped', date: new Date('2026-03-02'), endDate: new Date('2026-06-30') }),
+    ).toBe('shipped · Mar 2026 – Jun 2026');
+  });
+});
+
+describe('books', () => {
+  const base = { date: new Date('2026-01-01') };
+
+  it('dates a book by when it was finished, else started, else added', () => {
+    expect(bookDate({ ...base, status: 'finished', finishedDate: new Date('2026-09-01') })).toEqual(new Date('2026-09-01'));
+    expect(bookDate({ ...base, status: 'reading', startedDate: new Date('2026-10-01') })).toEqual(new Date('2026-10-01'));
+    expect(bookDate({ ...base, status: 'want-to-read' })).toEqual(base.date);
+  });
+
+  it('labels each state the way the cover grid shows it', () => {
+    expect(bookMeta({ ...base, status: 'reading', startedDate: new Date('2026-10-03') })).toBe('since Oct 2026');
+    expect(bookMeta({ ...base, status: 'finished', finishedDate: new Date('2026-09-20') })).toBe('Sep 2026');
+    expect(bookMeta({ ...base, status: 'paused' })).toBe('paused');
+    expect(bookMeta({ ...base, status: 'want-to-read' })).toBe('want to read');
+  });
+
+  it('shelves paused and want-to-read together, paused first', () => {
+    const books = [
+      { id: 'later', data: { status: 'want-to-read' as const } },
+      { id: 'now', data: { status: 'reading' as const } },
+      { id: 'stalled', data: { status: 'paused' as const } },
+    ];
+    expect(bookShelves(books).map(({ label, entries }) => [label, entries.map(({ id }) => id)])).toEqual([
+      ['Reading now', ['now']],
+      ['Paused / Want to read', ['stalled', 'later']],
+    ]);
+  });
+});
+
+describe('articleMeta', () => {
+  it('joins date, same-year update, reading time, and topics', () => {
+    expect(
+      articleMeta(
+        { date: new Date('2026-09-02'), updatedDate: new Date('2026-09-11'), topics: ['Practice', 'Reading'] },
+        4,
+      ),
+    ).toBe('02 Sep 2026 · updated 11 Sep · 4 min read · Practice, Reading');
+  });
+
+  it('keeps the year on an update from a later year and skips empty parts', () => {
+    expect(articleMeta({ date: new Date('2025-12-30'), updatedDate: new Date('2026-01-04'), topics: [] }, 1)).toBe(
+      '30 Dec 2025 · updated 04 Jan 2026 · 1 min read',
+    );
   });
 });

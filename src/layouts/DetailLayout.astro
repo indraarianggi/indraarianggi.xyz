@@ -2,274 +2,250 @@
 import type { ImageMetadata } from 'astro';
 import { Image } from 'astro:assets';
 import BaseLayout from './BaseLayout.astro';
-import KineticText from '../components/KineticText.astro';
-import TableOfContents from '../components/TableOfContents.astro';
+import TocList from '../components/TocList.astro';
+import ContentsSheet from '../components/ContentsSheet.astro';
 import { site } from '../config/site';
 import type { TocItem } from '../lib/toc';
 
-/*
-  Detail pages in two acts. The title plays on the stage; then a paper
-  sheet rolls up over it for the reading. Where the title card fits on
-  screen it stays pinned while the sheet covers it, receding as it goes.
-*/
 type Props = {
   title: string;
   summary: string;
   path: string;
-  variant?: 'project' | 'article';
-  toc?: TocItem[];
-  cover?: ImageMetadata;
-  coverAlt?: string;
-  runtimeMinutes?: number;
+  back: { href: string; label: string };
+  toc: TocItem[];
+  /** Work only: the 720px image between the header and the prose. */
+  showcase?: { src: ImageMetadata; alt: string };
+  /** Social preview when there is no showcase image. */
+  ogImage?: { src: string; alt: string };
+  article?: { publishedTime?: Date; modifiedTime?: Date; tags?: string[] };
 };
 
-const { title, summary, path, variant = 'project', toc, cover, coverAlt, runtimeMinutes } = Astro.props;
-const hasToc = toc !== undefined && toc.length >= 2;
-const back = variant === 'article'
-  ? { href: '/blog/', label: 'Field notes' }
-  : { href: '/work/', label: 'Work index' };
+const { title, summary, path, back, toc, showcase, ogImage, article } = Astro.props;
+const hasToc = toc.length >= 2;
+const image = showcase ? { src: showcase.src.src, alt: showcase.alt } : ogImage;
 ---
 
-<BaseLayout
-  title={`${title} | ${site.name}`}
-  description={summary}
-  path={path}
-  image={cover ? { src: cover.src, alt: coverAlt ?? '' } : undefined}
-  runtimeMinutes={runtimeMinutes}
->
-  <div class="detail">
-    <header class="stage-head shell" data-scene="Title">
-      <div class="head-copy">
-        <p class="head-line label">
-          <a class="back text-link" href={back.href}>{back.label}</a>
-          <span class="keyframe" aria-hidden="true"></span>
-          <span class="dim">{variant === 'article' ? 'Field note' : 'Case study'}</span>
-        </p>
-        <KineticText as="h1" split="words" text={title} delay={60} class="detail-title display" />
-        <p class="head-summary serif">{summary}</p>
-      </div>
-      <slot name="metadata" />
+<BaseLayout title={`${title} | ${site.name}`} description={summary} path={path} image={image} article={article} mainClass="is-detail">
+  <article class="detail">
+    <a class="back" href={back.href}><span aria-hidden="true">←</span> <span class="sr-only">Back to </span>{back.label}</a>
+    <header class="detail-head">
+      <h1 class="detail-title">{title}</h1>
+      <p class="detail-summary">{summary}</p>
+      <slot name="meta" />
     </header>
-
-    <div class="sheet paper">
-      {
-        cover && (
-          <div class="shell">
-            <figure class="cover">
-              <Image src={cover} alt={coverAlt ?? ''} widths={[720, 1200, 1800]} sizes="(min-width: 90rem) 84rem, 100vw" loading="eager" data-drift />
-            </figure>
-          </div>
-        )
-      }
-      <div class="shell">
-        {
-          hasToc ? (
-            <div class="detail-grid">
-              <div class="detail-reading">
-                <div class="toc-sentinel" data-toc-sentinel aria-hidden="true" />
-                <slot />
-              </div>
-              <div class="detail-rail">
-                <TableOfContents tree={toc} />
-              </div>
-            </div>
-          ) : (
-            <div class="detail-reading detail-reading-solo">
-              <slot />
-            </div>
-          )
-        }
-      </div>
-      <slot name="after-content" />
+    <slot name="meta-table" />
+    <hr class="detail-rule" />
+    <div data-toc-sentinel aria-hidden="true"></div>
+    {
+      showcase && (
+        <Image class="showcase" src={showcase.src} alt={showcase.alt} widths={[720, 1080, 1440]} sizes="(min-width: 48rem) 720px, 100vw" loading="eager" />
+      )
+    }
+    <div class="prose">
+      <slot />
     </div>
-  </div>
+  </article>
+
+  {
+    hasToc && (
+      <nav slot="rail" class="toc" aria-labelledby="toc-title">
+        <p class="toc-label" id="toc-title">On this page</p>
+        <TocList tree={toc} variant="rail" />
+      </nav>
+    )
+  }
+  {hasToc && <ContentsSheet tree={toc} />}
 </BaseLayout>
 
+<script>
+  // Copy buttons on code blocks (added at build time by the Shiki transformer).
+  const copyResets = new WeakMap<HTMLElement, number>();
+
+  document.addEventListener('click', async (event) => {
+    const button = (event.target as Element | null)?.closest<HTMLButtonElement>('[data-code-copy]');
+    const block = button?.closest('.code-block');
+    const code = block?.querySelector('pre code');
+    if (!button || !code) return;
+    const status = block!.querySelector<HTMLElement>('[data-code-status]');
+
+    let state: 'copied' | 'selected';
+    try {
+      await navigator.clipboard.writeText(code.textContent ?? '');
+      state = 'copied';
+    } catch {
+      // No clipboard access (plain http, denied permission): select the code
+      // so a keyboard copy still works, and say so.
+      const range = document.createRange();
+      range.selectNodeContents(code);
+      const selection = window.getSelection();
+      selection?.removeAllRanges();
+      selection?.addRange(range);
+      state = 'selected';
+    }
+
+    button.dataset.state = state;
+    if (status) {
+      status.textContent =
+        state === 'copied' ? 'Code copied' : 'Could not copy. The code is selected; press Control C or Command C.';
+    }
+    window.clearTimeout(copyResets.get(button));
+    copyResets.set(
+      button,
+      window.setTimeout(() => {
+        delete button.dataset.state;
+        if (status) status.textContent = '';
+      }, 2000),
+    );
+  });
+</script>
+
 <style>
-  .detail {
-    timeline-scope: --sheet;
-  }
-
-  .stage-head {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem);
-    gap: 2rem 3rem;
-    align-items: end;
-    padding-block: 2rem clamp(3rem, 8vw, 5rem);
-    transform-origin: 50% 0;
-  }
-
-  .head-copy {
-    display: grid;
-    gap: 1.5rem;
-    min-width: 0;
-  }
-
-  .head-line {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin: 0;
-  }
-
   .back {
     display: inline-flex;
     align-items: center;
     min-height: 2.75rem;
+    margin-block: -0.875rem;
+    color: var(--muted);
+    font-size: 0.8125rem;
+    text-decoration: none;
   }
 
-  .stage-head :global(.detail-title) {
-    margin: 0;
-    font-size: clamp(2.75rem, 7.2vw, 7rem);
-    overflow-wrap: anywhere;
-  }
-
-  .head-summary {
-    max-width: 40ch;
-    margin: 0;
-    color: var(--dim);
-    font-size: clamp(1.125rem, 1.6vw, 1.4375rem);
-    line-height: 1.4;
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    .head-summary,
-    .stage-head > :global(.clapper) {
-      animation: rise var(--dur-std) var(--ease-out) backwards;
-      animation-delay: 380ms;
+  @media (hover: hover) {
+    .back:hover {
+      color: var(--ink);
     }
   }
 
-  .sheet {
-    position: relative;
-    z-index: 1;
-    padding-block: clamp(1.5rem, 4vw, 3rem) 0;
-    view-timeline: --sheet block;
-  }
-
-  .cover {
-    margin: 0 0 clamp(2rem, 5vw, 3.5rem);
-    aspect-ratio: 21 / 9;
-    overflow: clip;
-    background: var(--ink);
-  }
-
-  .cover :global(img) {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    outline: none;
-  }
-
-  .detail-grid {
+  .detail-head {
     display: grid;
-    grid-template-columns: minmax(0, 56.25rem) 17.5rem;
-    gap: 2.125rem;
-    align-items: stretch;
-    padding-block-end: 4rem;
+    gap: 0.75rem;
+    padding-block: 2.25rem 2rem;
   }
 
-  .detail-reading {
-    min-width: 0;
+  .detail-title {
+    font-family: var(--font-serif);
+    font-size: 2.5rem;
+    line-height: 1;
+    letter-spacing: -0.05rem;
   }
 
-  .detail-reading-solo {
-    max-width: 56.25rem;
-    padding-block-end: 4rem;
-  }
-
-  .detail-reading :global(.prose) {
-    max-width: none;
+  .detail-summary {
+    max-width: 37.5rem;
+    color: var(--muted);
+    font-family: var(--font-serif);
     font-size: 1.25rem;
-    line-height: 1.6;
+    line-height: 1.45;
   }
 
-  .detail-reading :global(.prose > p),
-  .detail-reading :global(.prose > ul),
-  .detail-reading :global(.prose > ol),
-  .detail-reading :global(.prose > blockquote) {
-    max-width: 47.5rem;
+  .detail-rule {
+    margin: 2.5rem 0 0;
+    border: 0;
+    border-top: 1px solid var(--rule);
   }
 
-  .detail-reading :global(.prose > :first-child) {
+  .detail-head + .detail-rule {
     margin-block-start: 0;
   }
 
-  .detail-reading :global(.prose h2) {
-    font-size: clamp(1.75rem, 3vw, 2.625rem);
+  .showcase {
+    width: 100%;
+    margin-block-start: 2.5rem;
+    aspect-ratio: 720 / 400;
+    object-fit: cover;
+    border-radius: 16px;
   }
 
-  .toc-sentinel {
-    height: 0;
+  .prose {
+    margin-block-start: 2.5rem;
   }
 
-  .detail-rail {
+  .showcase + .prose {
+    margin-block-start: 3rem;
+  }
+
+  /* Slotted from the pages. */
+  :global(.meta-table) {
     display: grid;
-    min-width: 0;
+    gap: 0.5rem;
   }
 
-  /* Pin the title card while the sheet rolls over it: wide, tall screens only. */
-  @media (min-width: 64rem) and (min-height: 46rem) {
-    .stage-head {
-      position: sticky;
-      top: 0;
-      min-height: calc(100svh - 4.5rem - var(--hud-h));
-    }
+  :global(.meta-table > div) {
+    display: grid;
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+    align-items: baseline;
+    gap: 1rem;
   }
 
-  @supports (animation-timeline: view()) {
-    @media (min-width: 64rem) and (min-height: 46rem) and (prefers-reduced-motion: no-preference) {
-      .stage-head {
-        animation: stage-recede linear both;
-        animation-timeline: --sheet;
-        animation-range: entry 0% entry 100%;
-      }
-    }
+  :global(.meta-table dt) {
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
   }
 
-  @keyframes stage-recede {
-    to {
-      transform: scale(0.94);
-      opacity: 0.25;
-    }
+  :global(.meta-table dd) {
+    font-size: 0.8125rem;
   }
 
-  @media (min-width: 48rem) and (max-width: 63.9375rem) {
-    .detail-grid {
-      grid-template-columns: minmax(0, 1fr) 13rem;
-      gap: 1.5rem;
-    }
+  :global(.meta-table a) {
+    text-underline-offset: 0.2em;
   }
 
-  @media (max-width: 63.9375rem) {
-    .stage-head {
-      grid-template-columns: 1fr;
-    }
+  :global(.meta-line) {
+    /* Canvas: 20 below the summary and 40 above the rule. */
+    margin-block: 0.5rem;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+  }
+
+  .toc-label {
+    margin-block-end: 0.875rem;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
   }
 
   @media (max-width: 47.9375rem) {
-    .stage-head {
-      padding-block: 1rem 2.5rem;
+    .detail-head {
+      gap: 0.625rem;
+      padding-block: 1.5rem 1.25rem;
     }
 
-    .cover {
-      aspect-ratio: 4 / 3;
+    .detail-title {
+      font-size: 2rem;
     }
 
-    .detail-grid {
-      grid-template-columns: 1fr;
-      gap: 0;
-      padding-block-end: 2.5rem;
+    .detail-summary {
+      font-size: 1.0625rem;
+      line-height: 1.5;
     }
 
-    .detail-reading-solo {
-      padding-block-end: 2.5rem;
+    .detail-rule {
+      margin-block-start: 1.5rem;
     }
 
-    .detail-reading :global(.prose) {
-      font-size: 1.125rem;
-      line-height: 1.55;
+    .showcase {
+      margin-block-start: 1.5rem;
+      aspect-ratio: 350 / 220;
+      border-radius: 12px;
+    }
+
+    .showcase + .prose,
+    .prose {
+      margin-block-start: 1.75rem;
+    }
+
+    :global(.meta-table) {
+      gap: 0.375rem;
+    }
+
+    :global(.meta-table > div) {
+      grid-template-columns: 3.5rem minmax(0, 1fr);
+      gap: 0.75rem;
+    }
+
+    :global(.meta-table dt) {
+      font-size: 0.625rem;
     }
   }
 </style>

@@ -1,0 +1,133 @@
+---
+import type { IndexRow } from '../lib/content';
+import { formatDay } from '../lib/dates';
+
+type Props = {
+  groups: Array<{ year: number; items: IndexRow[] }>;
+  /** `compact`: home garden index. `roomy`: writing index with descriptions. */
+  size?: 'compact' | 'roomy';
+};
+
+const { groups, size = 'compact' } = Astro.props;
+---
+
+<div class:list={['index', `index-${size}`]}>
+  {
+    groups.map(({ year, items }) => (
+      <section aria-labelledby={`year-${year}`}>
+        <h2 class="section-label" id={`year-${year}`}>
+          {year}
+        </h2>
+        <ul class="rows">
+          {items.map((row) => (
+            <li>
+              <a class="row" href={row.href} data-ink-row>
+                <span class="row-text">
+                  <span class="row-title ink">{row.title}</span>
+                  {row.description && <span class="row-description">{row.description}</span>}
+                </span>
+                {row.kind && <span class="row-kind">{row.kind}</span>}
+                <time class="row-date" datetime={row.date.toISOString().slice(0, 10)}>
+                  {formatDay(row.date)}
+                </time>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))
+  }
+</div>
+
+<style>
+  .index {
+    display: grid;
+    gap: 2.5rem;
+  }
+
+  .rows {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .row {
+    display: flex;
+    align-items: baseline;
+    gap: 1.5rem;
+    padding-block: 0.6875rem;
+    border-block-end: 1px solid var(--rule);
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .row-text {
+    display: grid;
+    flex: 1;
+    gap: 0.25rem;
+    min-width: 0;
+  }
+
+  .row-title {
+    justify-self: start;
+    font-family: var(--font-serif);
+    font-size: 1.125rem;
+    line-height: 1.2;
+  }
+
+  .row-description {
+    color: var(--muted);
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  .row-kind,
+  .row-date {
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .row-date {
+    min-width: 2.5rem;
+    text-align: end;
+  }
+
+  .index-roomy .row {
+    align-items: start;
+    gap: 2rem;
+    padding-block: 1.25rem;
+  }
+
+  .index-roomy .row-title {
+    font-size: 1.25rem;
+    line-height: 1.1;
+  }
+
+  /* Canvas: the date's text box starts level with the title's. */
+  .index-roomy .row-date {
+    padding-block-start: 0.125rem;
+  }
+
+  @media (max-width: 47.9375rem) {
+    .row {
+      gap: 1rem;
+      padding-block: 0.625rem;
+    }
+
+    .row-title,
+    .index-roomy .row-title {
+      font-size: 1.0625rem;
+      line-height: 1.15;
+    }
+
+    .row-kind {
+      display: none;
+    }
+
+    .row-date {
+      font-size: 0.625rem;
+    }
+  }
+</style>

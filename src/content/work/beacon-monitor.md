@@ -9,8 +9,9 @@ stack: [Go, Postgres, Grafana]
 website: https://example.com/beacon
 featured: true
 draft: false
-image: ./beacon-monitor-cover.png
-imageAlt: Poster-style cover with stacked rules in black and one thick red rule
+# AI stand-in until a real screenshot exists (design doc, open items).
+image: ./beacon-monitor-showcase.png
+imageAlt: A monitoring dashboard with system load, latency, and service health panels, on a screen beside potted succulents
 ---
 
 *Placeholder project. Replace this entry with real material before publishing.*

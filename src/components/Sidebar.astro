@@ -1,0 +1,217 @@
+---
+import { Image } from 'astro:assets';
+import avatar from '../assets/avatar.png';
+import { site } from '../config/site';
+import { isActive } from '../lib/nav';
+
+const { pathname } = Astro.url;
+---
+
+<header class="sidebar">
+  <div class="sidebar-inner">
+    <div class="identity">
+      <Image class="avatar" src={avatar} alt="" width={56} height={56} densities={[1, 2]} loading="eager" />
+      <p class="identity-text">
+        <span class="name">{site.name}</span>
+        <span class="role">{site.role}</span>
+      </p>
+    </div>
+
+    <nav aria-label="Primary">
+      <ul class="nav">
+        {
+          site.nav.map((item) => (
+            <li>
+              <a class="nav-link ink" href={item.href} aria-current={isActive(item.href, pathname) ? 'page' : undefined}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <ul class="contact" aria-label="Elsewhere">
+      {
+        site.contact.map((link) => (
+          <li>
+            <a class="contact-link ink" href={link.href} rel={link.external ? 'me noopener' : undefined}>
+              {link.label} <span aria-hidden="true">↗</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</header>
+
+<style>
+  /* Desktop: hangs in the left gutter, right-aligned 56px from the content. */
+  .sidebar {
+    display: flex;
+    justify-content: flex-end;
+    padding-inline: 1.5rem 3.5rem;
+  }
+
+  .sidebar-inner {
+    position: sticky;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1.25rem;
+    width: min(10rem, 100%);
+    height: 100dvh;
+    view-transition-name: sidebar;
+  }
+
+  .identity {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .avatar {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 10px;
+    object-fit: cover;
+    outline: 1px solid var(--rule);
+    outline-offset: -1px;
+  }
+
+  .identity-text {
+    display: grid;
+    gap: 0.125rem;
+  }
+
+  .name {
+    font-family: var(--font-serif);
+    font-size: 1rem;
+    line-height: 1.2;
+  }
+
+  .role {
+    color: var(--muted);
+    font-size: 0.75rem;
+  }
+
+  .nav {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* A flex item has no line-box strut, so the link alone sets each row's height. */
+  .nav li {
+    display: flex;
+  }
+
+  .nav-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.5rem;
+    color: var(--muted);
+    font-size: 0.8125rem;
+    line-height: 1.4;
+  }
+
+  .nav-link[aria-current='page'] {
+    color: var(--ink);
+  }
+
+  .contact {
+    display: grid;
+    /* 24px pitch (canvas 22) so the 24px hit areas do not overlap. */
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0.875rem 0 0;
+    border-top: 1px solid var(--rule);
+    list-style: none;
+    font-size: 0.75rem;
+  }
+
+  /* A 24px hit area (WCAG target size) laid out at the text's 16px, as the canvas has it. */
+  .contact-link {
+    display: inline-block;
+    padding-block: 0.25rem;
+    margin-block: -0.25rem;
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  @media (hover: hover) {
+    .nav-link:hover,
+    .contact-link:hover {
+      color: var(--ink);
+    }
+  }
+
+  /* Tablet: one row, identity left, nav right. Contacts move to the footer. */
+  @media (max-width: 68.6875rem) {
+    .sidebar {
+      display: block;
+      padding-block: 1rem;
+      padding-inline: var(--gutter);
+    }
+
+    .sidebar-inner {
+      position: static;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      width: auto;
+      height: auto;
+    }
+
+    .identity {
+      grid-auto-flow: column;
+      align-items: center;
+      gap: 0.625rem;
+    }
+
+    .avatar {
+      width: 1.875rem;
+      height: 1.875rem;
+      border-radius: 7px;
+    }
+
+    .role,
+    .contact {
+      display: none;
+    }
+
+    .nav {
+      grid-auto-flow: column;
+      gap: 1.125rem;
+    }
+
+    .nav-link {
+      min-height: 2.75rem;
+    }
+  }
+
+  /* Mobile: identity, then the always-visible nav row. No hamburger. */
+  @media (max-width: 47.9375rem) {
+    .sidebar {
+      padding-block: 0.875rem 0.75rem;
+    }
+
+    .sidebar-inner {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.75rem;
+    }
+
+    /* Keep the 44px hit area but lay out at the text's 17px, as the canvas does. */
+    .nav-link {
+      margin-block: -0.84375rem;
+    }
+
+    /* A stretched column would spread the identity and nav tracks across the row. */
+    .identity,
+    .nav {
+      justify-content: start;
+    }
+  }
+</style>

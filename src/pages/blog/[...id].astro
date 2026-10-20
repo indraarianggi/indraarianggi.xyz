@@ -1,49 +1,29 @@
 ---
 import { getCollection, render } from 'astro:content';
-import { buildTocTree } from '../../lib/toc';
-import { formatDate, visibleNewestFirst } from '../../lib/content';
-import { readingMinutes } from '../../lib/timecode';
 import DetailLayout from '../../layouts/DetailLayout.astro';
-import Clapper from '../../components/Clapper.astro';
-import UpNext from '../../components/UpNext.astro';
+import { articleMeta, visibleNewestFirst } from '../../lib/content';
+import { readingTime } from '../../lib/reading-time';
+import { buildTocTree } from '../../lib/toc';
 
 export async function getStaticPaths() {
   const entries = visibleNewestFirst(await getCollection('blog'), import.meta.env.PROD);
-  return entries.map((entry, i) => ({
-    params: { id: entry.id },
-    props: { entry, next: entries.length > 1 ? entries[(i + 1) % entries.length] : undefined },
-  }));
+  return entries.map((entry) => ({ params: { id: entry.id }, props: { entry } }));
 }
 
-const { entry, next } = Astro.props;
+const { entry } = Astro.props;
+const { data } = entry;
 const { Content, headings } = await render(entry);
-const tree = buildTocTree(headings);
-const toc = tree.length >= 2 ? tree : undefined;
-const runtime = readingMinutes(entry.body);
-
-const rows = [
-  { label: 'Published', value: formatDate(entry.data.date) },
-  ...(entry.data.updatedDate ? [{ label: 'Updated', value: formatDate(entry.data.updatedDate) }] : []),
-  { label: 'Runtime', value: `${runtime} min read` },
-  ...(entry.data.topics.length > 0 ? [{ label: 'Topics', value: entry.data.topics.join(' / ') }] : []),
-];
 ---
 
 <DetailLayout
-  title={entry.data.title}
-  summary={entry.data.description}
+  title={data.title}
+  summary={data.description}
   path={`/blog/${entry.id}/`}
-  variant="article"
-  toc={toc}
-  cover={entry.data.image}
-  coverAlt={entry.data.imageAlt}
-  runtimeMinutes={runtime}
+  back={{ href: '/blog/', label: 'Writing' }}
+  toc={buildTocTree(headings)}
+  ogImage={data.image ? { src: data.image.src, alt: data.imageAlt ?? '' } : undefined}
+  article={{ publishedTime: data.date, modifiedTime: data.updatedDate, tags: data.topics }}
 >
-  <Clapper slot="metadata" heading="Note slate" rows={rows} />
-
-  <article class="prose">
-    <Content />
-  </article>
-
-  {next && <UpNext slot="after-content" href={`/blog/${next.id}/`} title={next.data.title} kicker="Next note" />}
+  <p slot="meta" class="meta-line">{articleMeta(data, readingTime(entry.body))}</p>
+  <Content />
 </DetailLayout>
