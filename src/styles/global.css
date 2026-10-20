@@ -511,6 +511,11 @@ img {
   background: var(--code-bg);
 }
 
+/* The theme's comment grey is 4.45:1 on --code-bg; nudge it over AA (inline style, so !important). */
+.prose .code-block span[style*='color:#66707B'] {
+  color: #5c6670 !important;
+}
+
 .code-head {
   display: flex;
   align-items: center;
