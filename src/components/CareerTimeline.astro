@@ -163,7 +163,7 @@ const whenSuffix = (bar: (typeof timeline.bars)[number]) =>
   }
 
   .current .bar-fill {
-    background: var(--accent);
+    background: var(--accent-soft);
   }
 
   .bar[aria-pressed='true']:not(.current .bar) .bar-fill {
@@ -183,13 +183,8 @@ const whenSuffix = (bar: (typeof timeline.bars)[number]) =>
     color: var(--muted);
   }
 
-  /* The label carries its own rust plate (same colour and shape as the fill) so its
-     contrast does not depend on the decorative fill underneath. */
   .current .bar-label {
-    margin-inline: -0.625rem;
-    padding-inline: 0.625rem;
-    background: var(--accent);
-    color: #fff;
+    color: var(--ink);
   }
 
   .bar-details {

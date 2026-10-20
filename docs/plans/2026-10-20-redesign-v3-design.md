@@ -38,8 +38,9 @@ Labels change ("Blog" → Writing, "Read" → Reading) but **URLs stay**, preser
   --muted:       #6E6A62;  /* secondary text, metadata */
   --rule:        #E7E5E0;  /* hairlines, dividers */
   --tile:        #F0EFEA;  /* fallback tiles and covers */
-  --accent:      #A4502F;  /* muted rust — state colour only */
-  --accent-wash: #A4502F2E;/* ~18% rust — link sweep background */
+  --accent:      #C2410C;  /* deep orange — text, lines, outlines, markers, focus rings */
+  --accent-soft: #F9B98A;  /* pastel orange — fills behind ink text */
+  --accent-wash: #F9B98AB3;/* ~70% pastel orange — link sweep background */
 
   --font-serif: "Newsreader", serif;  /* voice, titles, prose */
   --font-ui:    "Geist", sans-serif;  /* navigation, UI, descriptions */
@@ -150,7 +151,7 @@ Motion level: **functional plus one signature moment.** Animate only `opacity` a
 ## Accessibility
 
 - One `<h1>` per page; semantic landmarks; skip link; visible focus rings.
-- Text contrast meets WCAG AA on `--bg`: ink 17.8:1, muted 5.2:1, rust 5.4:1. No text lighter than `--muted` (hints and captions included); the pale 404 numeral is decorative and `aria-hidden`.
+- Text contrast meets WCAG AA on `--bg`: ink 17.8:1, muted 5.2:1, deep orange 5.0:1; ink on the wash 12.6:1 and on the pastel bar 10.8:1. No text lighter than `--muted` (hints and captions included); the pale 404 numeral is decorative and `aria-hidden`.
 - Timeline is an `<ol>` of roles; bars are `<button>`s with `aria-controls` on the detail panel.
 - Contents sheet uses `<dialog>` with `showModal()`; focus returns to the pill on close.
 - Decorative numerals and stand-in visuals are `aria-hidden`; images keep the existing `imageAlt` / `coverAlt` requirement.

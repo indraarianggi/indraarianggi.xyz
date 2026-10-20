@@ -1,5 +1,5 @@
 /*
-  v3: a digital garden. Ink on near-white; rust only marks what is active or
+  v3: a digital garden. Ink on near-white; orange only marks what is active or
   current. Type does the work: Newsreader for the voice, Geist for UI, Geist
   Mono for dates and labels.
 */
@@ -10,8 +10,9 @@
   --muted: #6e6a62;
   --rule: #e7e5e0;
   --tile: #f0efea;
-  --accent: #a4502f;
-  --accent-wash: #a4502f2e;
+  --accent: #c2410c; /* deep orange: text, lines, outlines, markers, focus rings (5.0:1 on --bg) */
+  --accent-soft: #f9b98a; /* pastel orange: fills that sit behind ink text */
+  --accent-wash: #f9b98ab3; /* --accent-soft at 70%: the ink-sweep highlighter */
 
   /* Supporting surfaces, all taken from the canvas. */
   --code-bg: #f2f1ed;
@@ -311,7 +312,7 @@ img {
 }
 
 /* ---- Ink sweep ----
-   A rust wash grows under the text from the left, tilted with an uneven
+   An orange wash grows under the text from the left, tilted with an uneven
    radius so it reads as a highlighter. Text stays ink. Single-line targets
    only; prose links (which wrap) use the background version below. */
 
