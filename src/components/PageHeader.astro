@@ -2,12 +2,14 @@
 type Props = {
   title: string;
   intro: string;
+  /** About: the canvas sets its longer intro on a 1.6 line box, 14px under the title. */
+  relaxed?: boolean;
 };
 
-const { title, intro } = Astro.props;
+const { title, intro, relaxed = false } = Astro.props;
 ---
 
-<header class="page-header">
+<header class:list={['page-header', { relaxed }]}>
   <h1 class="page-title">{title}</h1>
   <p class="page-intro">{intro}</p>
 </header>
@@ -16,6 +18,14 @@ const { title, intro } = Astro.props;
   .page-header {
     display: grid;
     gap: 0.625rem;
+  }
+
+  .relaxed {
+    gap: 0.875rem;
+  }
+
+  .relaxed .page-intro {
+    line-height: 1.6;
   }
 
   .page-title {
@@ -34,6 +44,14 @@ const { title, intro } = Astro.props;
   }
 
   @media (max-width: 47.9375rem) {
+    .relaxed {
+      gap: 0.625rem;
+    }
+
+    .relaxed .page-intro {
+      line-height: 1.55;
+    }
+
     .page-title {
       font-size: 2rem;
     }

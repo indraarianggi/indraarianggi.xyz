@@ -1,228 +1,43 @@
 ---
-import { site } from '../config/site';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import KineticText from '../components/KineticText.astro';
-import SceneSlate from '../components/SceneSlate.astro';
-
-const principles = ['Make the question smaller.', 'Keep failure visible.', 'Write down what changed.'];
+import PageHeader from '../components/PageHeader.astro';
+import CareerTimeline from '../components/CareerTimeline.astro';
+import Toolkit from '../components/Toolkit.astro';
+import { site } from '../config/site';
 ---
 
 <BaseLayout title={`About | ${site.name}`} path="/about/">
-  <section class="title-card shell" data-scene="Title" aria-labelledby="about-title">
-    <p class="card-line label dim">
-      <span>About / Statement</span>
-      <span class="keyframe" aria-hidden="true"></span>
-      <span>{site.name}</span>
-    </p>
-    <KineticText
-      as="h1"
-      id="about-title"
-      split="chars"
-      delay={80}
-      text={['I learn', 'by making', 'things.']}
-      class="card-title display"
+  <div class="stack about">
+    <PageHeader
+      title="Hi, I'm Indra."
+      intro="A software engineer in Yogyakarta, Indonesia, building web applications for 7+ years."
+      relaxed
     />
-    <p class="card-lede serif">Software engineer. Learning through projects, questions, writing, and books from many fields.</p>
-  </section>
-
-  <section class="practice paper" data-scene="Practice" data-frame aria-labelledby="practice-title">
-    <div class="shell practice-grid">
-      <SceneSlate scene={1} label="Practice" title="The practice" id="practice-title" />
-      <div class="practice-copy serif" data-play>
-        <p data-rise>
-          Indra is a software engineer. He learns by making things and reflecting through projects, questions,
-          writing, and books from many fields.
-        </p>
-        <p data-rise style="--rd: 1">This site records work in progress and the lessons kept near the work.</p>
-      </div>
+    <div class="prose">
+      <p>
+        I mostly work on the frontend with React, Next.js and TypeScript, and I own features end to end: planning with
+        product stakeholders, building, releasing, and maintaining them afterwards — across internal tools and
+        user-facing products.
+      </p>
+      <p>
+        Along the way I've migrated legacy codebases, built real-time dashboards, and turned manual workflows into
+        internal tools. These days I'm expanding into full-stack work with Node.js, Hono, NestJS and PostgreSQL.
+      </p>
     </div>
-  </section>
-
-  <section class="principles shell" data-scene="Principles" aria-labelledby="principles-title">
-    <SceneSlate scene={2} label="Principles" title="Three keyframes" id="principles-title" />
-    <ol class="track">
-      {
-        principles.map((principle, i) => (
-          <li class="key" style={`--k: ${i}`}>
-            <span class="key-mark" aria-hidden="true"></span>
-            <span class="key-number label dim">Principle {String(i + 1).padStart(2, '0')}</span>
-            <span class="key-text display">{principle}</span>
-          </li>
-        ))
-      }
-    </ol>
-  </section>
+    <CareerTimeline />
+    <Toolkit />
+  </div>
 </BaseLayout>
 
 <style>
-  .title-card {
-    display: grid;
-    gap: 1.5rem;
-    padding-block: 2rem clamp(3rem, 8vw, 6rem);
-    container-type: inline-size;
-  }
-
-  .card-line {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.75rem;
-    margin: 0;
-  }
-
-  .title-card :global(.card-title) {
-    margin: 0;
-    font-size: min(15cqi, 22svh);
-    line-height: 0.84;
-    letter-spacing: -0.04em;
-  }
-
-  .title-card :global(.card-title .k-line:nth-child(2)) {
-    text-align: center;
-  }
-
-  .title-card :global(.card-title .k-line:nth-child(3)) {
-    text-align: end;
-  }
-
-  .card-lede {
-    max-width: 30ch;
-    margin: 0;
-    font-size: clamp(1.25rem, 2.2vw, 1.875rem);
-    line-height: 1.25;
-  }
-
-  .practice {
-    padding-block: clamp(3rem, 8vw, 6rem);
-  }
-
-  .practice-grid {
-    display: grid;
-    gap: 1rem;
-  }
-
-  .practice-copy {
-    max-width: 38ch;
-    font-size: clamp(1.25rem, 2vw, 1.75rem);
-    line-height: 1.4;
-  }
-
-  .principles {
-    padding-block: clamp(4rem, 12vw, 8rem);
-    view-timeline: --track block;
-  }
-
-  /* The track: a line with three keyframes on it. On wide screens it runs
-     across; on narrow ones it runs down. */
-  .track {
-    position: relative;
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 2rem;
-    margin: 2rem 0 0;
-    padding: 2.5rem 0 0;
-    list-style: none;
-  }
-
-  .track::before {
-    content: '';
-    position: absolute;
-    inset: 0.5rem 0 auto;
-    height: 1px;
-    background: var(--chalk);
-    transform-origin: left;
-  }
-
-  .key {
-    position: relative;
-    display: grid;
-    gap: 1rem;
-    align-content: start;
-  }
-
-  .key-mark {
-    position: absolute;
-    top: calc(-2.5rem + 0.5rem - 0.4375rem);
-    left: 0;
-    width: 0.875rem;
-    height: 0.875rem;
-    rotate: 45deg;
-    background: var(--signal);
-  }
-
-  .key-text {
-    font-size: clamp(1.75rem, 3.2vw, 3rem);
-    line-height: 0.95;
-  }
-
-  /* As the section crosses the screen the line draws and each keyframe
-     lands in turn, at its own third of the scroll. */
-  @supports (animation-timeline: view()) {
-    @media (prefers-reduced-motion: no-preference) {
-      .track::before {
-        animation: draw linear both;
-        animation-timeline: --track;
-        animation-range: entry 40% cover 55%;
-      }
-
-      .key-mark {
-        animation: land var(--ease-out) both;
-        animation-timeline: --track;
-        animation-range: entry calc(40% + var(--k) * 18%) entry calc(55% + var(--k) * 18%);
-      }
-
-      .key-number,
-      .key-text {
-        animation: settle var(--ease-out) both;
-        animation-timeline: --track;
-        animation-range: entry calc(45% + var(--k) * 18%) entry calc(70% + var(--k) * 18%);
-      }
-    }
-  }
-
-  @keyframes draw {
-    from {
-      transform: scaleX(0);
-    }
-  }
-
-  @keyframes land {
-    from {
-      scale: 0.4;
-      opacity: 0;
-    }
-  }
-
-  @keyframes settle {
-    from {
-      opacity: 0;
-      transform: translateY(1.5rem);
-    }
+  /* Canvas: 56px between sections on desktop, 40px on mobile. */
+  .about {
+    --stack-gap: 3.5rem;
   }
 
   @media (max-width: 47.9375rem) {
-    .track {
-      grid-template-columns: 1fr;
-      gap: 2.5rem;
-      padding: 0 0 0 2rem;
-    }
-
-    .track::before {
-      inset: 0 auto 0 0.375rem;
-      width: 1px;
-      height: auto;
-      transform-origin: top;
-    }
-
-    .key-mark {
-      top: 0.25rem;
-      left: calc(-2rem + 0.375rem - 0.4375rem);
-    }
-
-    @keyframes draw {
-      from {
-        transform: scaleY(0);
-      }
+    .about {
+      --stack-gap: 2.5rem;
     }
   }
 </style>
