@@ -24,13 +24,6 @@ export function groupBooks<
   });
 }
 
-export const workStatusLabels = {
-  building: 'Building',
-  shipped: 'Shipped',
-  paused: 'Paused',
-  archived: 'Archived',
-} as const;
-
 export type WorkStatus = 'building' | 'shipped' | 'paused' | 'archived';
 
 /** One row in a year-grouped index (home garden index, writing index). */

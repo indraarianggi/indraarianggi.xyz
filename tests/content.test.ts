@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { arrangeWork, articleMeta, bookDate, bookMeta, bookShelves, groupBooks, groupByYear, visibleNewestFirst, workCaption, workStatusLine, workStatusLabels } from '../src/lib/content';
+import { arrangeWork, articleMeta, bookDate, bookMeta, bookShelves, groupBooks, groupByYear, visibleNewestFirst, workCaption, workStatusLine } from '../src/lib/content';
 
 type ContentEntry<Data> = {
   id: string;
@@ -46,15 +46,6 @@ describe('groupBooks', () => {
     ];
 
     expect(groupBooks(books)[0]?.entries.map(({ id }) => id)).toEqual(['first', 'second', 'unordered']);
-  });
-});
-
-describe('workStatusLabels', () => {
-  it('provides a non-empty text label for every work status', () => {
-    for (const status of ['building', 'shipped', 'paused', 'archived'] as const) {
-      expect(workStatusLabels[status]).toBeTypeOf('string');
-      expect(workStatusLabels[status].length).toBeGreaterThan(0);
-    }
   });
 });
 
