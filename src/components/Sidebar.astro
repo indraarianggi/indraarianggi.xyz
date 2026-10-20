@@ -35,7 +35,7 @@ const { pathname } = Astro.url;
       {
         site.contact.map((link) => (
           <li>
-            <a class="contact-link" href={link.href} rel={link.external ? 'me noopener' : undefined}>
+            <a class="contact-link ink" href={link.href} rel={link.external ? 'me noopener' : undefined}>
               {link.label} <span aria-hidden="true">↗</span>
             </a>
           </li>

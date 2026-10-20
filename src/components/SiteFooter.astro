@@ -7,7 +7,7 @@ import { site } from '../config/site';
     {
       site.contact.map((link) => (
         <li>
-          <a href={link.href} rel={link.external ? 'me noopener' : undefined}>
+          <a class="ink" href={link.href} rel={link.external ? 'me noopener' : undefined}>
             {link.label} <span aria-hidden="true">↗</span>
           </a>
         </li>
@@ -47,5 +47,11 @@ import { site } from '../config/site';
     margin-block: -0.84375rem;
     color: var(--muted);
     text-decoration: none;
+  }
+
+  @media (hover: hover) {
+    a:hover {
+      color: var(--ink);
+    }
   }
 </style>

@@ -452,22 +452,29 @@ img {
   border-block-end-color: var(--ink);
 }
 
-/* Prose links wrap, so the wash is a background that follows each line. */
-.prose a {
+/* Prose links wrap, so the wash is a background that follows each line. The
+   work metadata links share it and keep their own underline. */
+.prose a,
+.meta-table a {
   background: linear-gradient(var(--accent-wash), var(--accent-wash)) left 60% / 0% 85% no-repeat;
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
-  text-decoration: underline 1px var(--muted);
-  text-underline-offset: 0.2em;
   transition: background-size 160ms var(--ease-out);
 }
 
-.prose a:focus-visible {
+.prose a {
+  text-decoration: underline 1px var(--muted);
+  text-underline-offset: 0.2em;
+}
+
+.prose a:focus-visible,
+.meta-table a:focus-visible {
   background-size: 100% 85%;
 }
 
 @media (hover: hover) {
-  .prose a:hover {
+  .prose a:hover,
+  .meta-table a:hover {
     background-size: 100% 85%;
     transition-duration: 240ms;
   }
