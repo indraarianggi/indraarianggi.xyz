@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatDate, groupBooks, visibleNewestFirst, workStatusLabels } from '../src/lib/content';
+import { groupBooks, visibleNewestFirst, workStatusLabels } from '../src/lib/content';
 
 type ContentEntry<Data> = {
   id: string;
@@ -46,16 +46,6 @@ describe('groupBooks', () => {
     ];
 
     expect(groupBooks(books)[0]?.entries.map(({ id }) => id)).toEqual(['first', 'second', 'unordered']);
-  });
-});
-
-describe('formatDate', () => {
-  it('formats dates as uppercase mono meta like 14 SEP 2026', () => {
-    expect(formatDate(new Date('2026-09-14'))).toBe('14 SEP 2026');
-  });
-
-  it('pads single-digit days with a leading zero', () => {
-    expect(formatDate(new Date('2026-08-05'))).toBe('05 AUG 2026');
   });
 });
 

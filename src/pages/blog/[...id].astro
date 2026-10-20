@@ -1,7 +1,8 @@
 ---
 import { getCollection, render } from 'astro:content';
 import { buildTocTree } from '../../lib/toc';
-import { formatDate, visibleNewestFirst } from '../../lib/content';
+import { visibleNewestFirst } from '../../lib/content';
+import { formatDate } from '../../lib/dates';
 import { readingMinutes } from '../../lib/timecode';
 import DetailLayout from '../../layouts/DetailLayout.astro';
 import Clapper from '../../components/Clapper.astro';
