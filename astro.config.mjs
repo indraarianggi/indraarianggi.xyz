@@ -13,7 +13,7 @@ export default defineConfig({
     sitemap(),
     icon({
       include: {
-        ph: ['list', 'x', 'list-bold', 'x-bold'],
+        ph: ['list', 'x'],
         'simple-icons': [...new Set(toolkit.flatMap((tool) => (tool.icon ? [tool.icon] : [])))],
       },
     }),

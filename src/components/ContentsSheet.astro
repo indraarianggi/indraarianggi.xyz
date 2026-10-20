@@ -1,0 +1,191 @@
+---
+import { Icon } from 'astro-icon/components';
+import TocList from './TocList.astro';
+import type { TocItem } from '../lib/toc';
+
+type Props = {
+  tree: TocItem[];
+};
+
+const { tree } = Astro.props;
+---
+
+<button class="pill" type="button" aria-haspopup="dialog" data-contents-pill data-visible="false">
+  <Icon name="ph:list" size={16} aria-hidden="true" />
+  Contents
+</button>
+
+<dialog class="sheet" aria-labelledby="sheet-title" data-contents-sheet>
+  <div class="sheet-body">
+    <div class="grabber" aria-hidden="true"></div>
+    <div class="sheet-head">
+      <h2 class="sheet-title" id="sheet-title">On this page</h2>
+      <button class="sheet-close" type="button" data-contents-close>
+        Close <Icon name="ph:x" size={14} aria-hidden="true" />
+      </button>
+    </div>
+    <TocList tree={tree} variant="sheet" />
+  </div>
+</dialog>
+
+<script>
+  const pill = document.querySelector<HTMLButtonElement>('[data-contents-pill]');
+  const sheet = document.querySelector<HTMLDialogElement>('[data-contents-sheet]');
+  const sentinel = document.querySelector('[data-toc-sentinel]');
+
+  if (pill && sheet) {
+    // The pill appears once the article header has scrolled away.
+    if (sentinel) {
+      new IntersectionObserver(([entry]) => {
+        pill.dataset.visible = String(!entry.isIntersecting && entry.boundingClientRect.top < 0);
+      }).observe(sentinel);
+    }
+
+    let jumped = false;
+    pill.addEventListener('click', () => sheet.showModal());
+    sheet.querySelector('[data-contents-close]')?.addEventListener('click', () => sheet.close());
+
+    sheet.addEventListener('click', (event) => {
+      const target = event.target as Element;
+      // The body fills the dialog, so a click on the dialog itself is the backdrop.
+      if (target === sheet) sheet.close();
+      if (target.closest('a')) {
+        jumped = true;
+        sheet.close();
+      }
+    });
+
+    // Focus goes back to the pill, unless the reader jumped to a section.
+    sheet.addEventListener('close', () => {
+      if (!jumped) pill.focus({ preventScroll: true });
+      jumped = false;
+    });
+  }
+</script>
+
+<style>
+  .pill {
+    position: fixed;
+    inset-block-end: calc(1.25rem + env(safe-area-inset-bottom));
+    inset-inline-end: calc(1.25rem + env(safe-area-inset-right));
+    z-index: 30;
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    padding: 0 1rem;
+    border: 0;
+    border-radius: 999px;
+    background: var(--ink);
+    color: var(--bg);
+    font-size: 0.8125rem;
+    cursor: pointer;
+    transition:
+      opacity 200ms var(--ease-out),
+      transform 200ms var(--ease-out),
+      visibility 200ms;
+  }
+
+  .pill[data-visible='false'] {
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  .pill:active {
+    transform: scale(0.96);
+  }
+
+  @media (max-width: 68.6875rem) {
+    .pill {
+      display: inline-flex;
+    }
+  }
+
+  .sheet {
+    position: fixed;
+    inset: auto 0 0;
+    width: 100%;
+    max-width: none;
+    max-height: 70dvh;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 18px 18px 0 0;
+    background: var(--bg);
+    color: var(--ink);
+    transform: translateY(100%);
+    transition:
+      transform 200ms var(--ease-in),
+      overlay 200ms allow-discrete,
+      display 200ms allow-discrete;
+  }
+
+  .sheet[open] {
+    transform: none;
+    transition-duration: 260ms;
+    transition-timing-function: var(--ease-out);
+  }
+
+  @starting-style {
+    .sheet[open] {
+      transform: translateY(100%);
+    }
+  }
+
+  .sheet::backdrop {
+    background: var(--scrim);
+    opacity: 0;
+    transition:
+      opacity 200ms ease-out,
+      overlay 200ms allow-discrete,
+      display 200ms allow-discrete;
+  }
+
+  .sheet[open]::backdrop {
+    opacity: 1;
+  }
+
+  @starting-style {
+    .sheet[open]::backdrop {
+      opacity: 0;
+    }
+  }
+
+  .sheet-body {
+    padding: 0.625rem 1.25rem 1.75rem;
+  }
+
+  .grabber {
+    width: 2.25rem;
+    height: 0.25rem;
+    margin: 0 auto 0.875rem;
+    border-radius: 2px;
+    background: #d6d2c9;
+  }
+
+  .sheet-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-block-end: 0.625rem;
+  }
+
+  .sheet-title {
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+  }
+
+  .sheet-close {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    min-height: 2.75rem;
+    padding: 0 0 0 0.5rem;
+    border: 0;
+    background: none;
+    font-size: 0.8125rem;
+    cursor: pointer;
+  }
+</style>
