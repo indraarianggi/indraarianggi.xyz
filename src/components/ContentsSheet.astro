@@ -10,9 +10,8 @@ type Props = {
 const { tree } = Astro.props;
 ---
 
-<button class="pill" type="button" aria-haspopup="dialog" data-contents-pill data-visible="false">
-  <Icon name="ph:list" size={16} aria-hidden="true" />
-  Contents
+<button class="pill" type="button" aria-label="Contents" aria-haspopup="dialog" data-contents-pill data-visible="false">
+  <Icon name="ph:list" size={20} aria-hidden="true" />
 </button>
 
 <dialog class="sheet" aria-labelledby="sheet-title" data-contents-sheet>
@@ -85,14 +84,14 @@ const { tree } = Astro.props;
     z-index: 30;
     display: none;
     align-items: center;
-    gap: 0.5rem;
-    min-height: 2.75rem;
-    padding: 0 1rem;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    padding: 0;
     border: 0;
-    border-radius: 999px;
+    border-radius: 50%;
     background: var(--ink);
     color: var(--bg);
-    font-size: 0.8125rem;
     cursor: pointer;
     transition:
       opacity 200ms var(--ease-out),
