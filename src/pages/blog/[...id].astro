@@ -3,7 +3,7 @@ import { getCollection, render } from 'astro:content';
 import { buildTocTree } from '../../lib/toc';
 import { visibleNewestFirst } from '../../lib/content';
 import { formatDate } from '../../lib/dates';
-import { readingMinutes } from '../../lib/timecode';
+import { readingTime } from '../../lib/reading-time';
 import DetailLayout from '../../layouts/DetailLayout.astro';
 import Clapper from '../../components/Clapper.astro';
 import UpNext from '../../components/UpNext.astro';
@@ -20,7 +20,7 @@ const { entry, next } = Astro.props;
 const { Content, headings } = await render(entry);
 const tree = buildTocTree(headings);
 const toc = tree.length >= 2 ? tree : undefined;
-const runtime = readingMinutes(entry.body);
+const runtime = readingTime(entry.body);
 
 const rows = [
   { label: 'Published', value: formatDate(entry.data.date) },

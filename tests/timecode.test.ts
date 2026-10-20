@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatTimecode, framesForScroll, labelForPath, readingMinutes } from '../src/lib/timecode';
+import { formatTimecode, framesForScroll, labelForPath } from '../src/lib/timecode';
 
 describe('formatTimecode', () => {
   it('formats zero as an empty reel', () => {
@@ -48,16 +48,5 @@ describe('labelForPath', () => {
 
   it('falls back for unknown routes', () => {
     expect(labelForPath('/missing/page/')).toBe('Index');
-  });
-});
-
-describe('readingMinutes', () => {
-  it('never reports less than one minute', () => {
-    expect(readingMinutes('')).toBe(1);
-    expect(readingMinutes(undefined)).toBe(1);
-  });
-
-  it('rounds to the nearest minute', () => {
-    expect(readingMinutes(Array(660).fill('word').join(' '))).toBe(3);
   });
 });
