@@ -315,7 +315,13 @@ img {
 .ink::before {
   content: '';
   position: absolute;
-  inset: 0.15em -0.2em 0.05em;
+  /* Hugs the text line, not the link's hit area: a highlighter that starts
+     just under the top of the glyphs and overhangs 3px each side. A 44px touch
+     target therefore keeps the same wash. Verbs set --wash-bottom below zero. */
+  top: calc(50% - 0.5lh + var(--wash-top, 0.2em));
+  left: -3px;
+  width: calc(100% + 6px);
+  height: calc(1lh - var(--wash-top, 0.2em) - var(--wash-bottom, 0em));
   z-index: -1;
   border-radius: 7px 3px 6px 3px;
   background: var(--accent-wash);
