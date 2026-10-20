@@ -1,95 +1,27 @@
 ---
 import { getCollection } from 'astro:content';
-import { visibleNewestFirst } from '../../lib/content';
-import { site } from '../../config/site';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import IndexList from '../../components/IndexList.astro';
 import EmptyState from '../../components/EmptyState.astro';
-import KineticText from '../../components/KineticText.astro';
-import SceneSlate from '../../components/SceneSlate.astro';
-import ArticleLead from '../../components/ArticleLead.astro';
-import ArticleRow from '../../components/ArticleRow.astro';
+import { site } from '../../config/site';
+import { groupByYear, visibleNewestFirst } from '../../lib/content';
 
-const production = import.meta.env.PROD;
-const articles = visibleNewestFirst(await getCollection('blog'), production);
-
-const [lead, ...older] = articles;
+const notes = visibleNewestFirst(await getCollection('blog'), import.meta.env.PROD);
+const groups = groupByYear(
+  notes.map((entry) => ({
+    href: `/blog/${entry.id}/`,
+    title: entry.data.title,
+    description: entry.data.description,
+    date: entry.data.date,
+  })),
+  (row) => row.date,
+);
 ---
 
-<BaseLayout title={`Blog | ${site.name}`} path="/blog/">
-  <section class="title-card shell" data-scene="Title" aria-labelledby="blog-title">
-    <p class="card-line label dim">
-      <span>Archive / open</span>
-      <span class="keyframe" aria-hidden="true"></span>
-      <span>{String(articles.length).padStart(2, '0')} notes</span>
-    </p>
-    <KineticText as="h1" id="blog-title" split="chars" text={['Field', 'notes.']} delay={80} class="card-title display" />
-    <p class="card-lede serif">Making software. Learning as I go. Written down so it stays learned.</p>
-  </section>
-
-  <div class="sheet paper" data-frame>
-    <section class="shell lead-band" data-scene="Latest" aria-label="Latest note">
-      {lead ? <ArticleLead entry={lead} /> : <EmptyState message="No articles yet. Notes are being shaped." />}
-    </section>
-
-    {
-      older.length > 0 && (
-        <section class="shell archive" data-scene="Archive" aria-labelledby="archive-title">
-          <SceneSlate scene={2} label="Archive" title="Older notes, still useful" id="archive-title" />
-          <ul class="takes" data-play>
-            {older.map((entry, i) => (
-              <ArticleRow entry={entry} index={i} />
-            ))}
-          </ul>
-        </section>
-      )
-    }
+<BaseLayout title={`Writing | ${site.name}`} path="/blog/">
+  <div class="stack">
+    <PageHeader title="Writing" intro="Notes from building, reading, and figuring things out." />
+    {groups.length > 0 ? <IndexList groups={groups} size="roomy" /> : <EmptyState message="No notes yet." />}
   </div>
 </BaseLayout>
-
-<style>
-  .title-card {
-    display: grid;
-    gap: 1.5rem;
-    padding-block: 2rem clamp(3rem, 8vw, 6rem);
-    container-type: inline-size;
-  }
-
-  .card-line {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin: 0;
-  }
-
-  .title-card :global(.card-title) {
-    margin: 0;
-    font-size: min(22cqi, 30svh);
-    line-height: 0.82;
-    letter-spacing: -0.045em;
-  }
-
-  .title-card :global(.card-title .k-line:nth-child(even)) {
-    text-align: end;
-  }
-
-  .card-lede {
-    max-width: 30ch;
-    margin: 0;
-    font-size: clamp(1.25rem, 2.2vw, 1.875rem);
-    line-height: 1.25;
-  }
-
-  .sheet {
-    padding-block: clamp(2.5rem, 6vw, 4.5rem);
-  }
-
-  .archive {
-    padding-block-start: clamp(3rem, 8vw, 6rem);
-  }
-
-  .takes {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-</style>

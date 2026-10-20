@@ -102,10 +102,12 @@ const { groups, size = 'compact' } = Astro.props;
 
   .index-roomy .row-title {
     font-size: 1.25rem;
+    line-height: 1.1;
   }
 
+  /* Canvas: the date's text box starts level with the title's. */
   .index-roomy .row-date {
-    padding-block-start: 0.3rem;
+    padding-block-start: 0.125rem;
   }
 
   @media (max-width: 47.9375rem) {
