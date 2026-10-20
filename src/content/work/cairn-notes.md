@@ -8,8 +8,9 @@ endDate: 2026-02-19
 stack: [Figma, Astro, Playwright]
 featured: false
 draft: false
-image: ./cairn-notes-cover.png
-imageAlt: Poster-style cover with a red field, a black diagonal band, and a rule
+# AI stand-in until a real screenshot exists (design doc, open items).
+image: ./cairn-notes-showcase.png
+imageAlt: A tablet on a linen tablecloth showing a mind map branching from one project, next to a cup of coffee and a pencil
 ---
 
 *Placeholder project. Replace this entry with real material before publishing.*

@@ -1,0 +1,196 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+import { workCaption } from '../lib/content';
+
+type Props = {
+  entry: CollectionEntry<'work'>;
+  size: 'feature' | 'stack' | 'full' | 'half';
+  /** `sizes` attribute for the responsive image. */
+  sizes: string;
+  summary?: boolean;
+  eager?: boolean;
+};
+
+const { entry, size, sizes, summary = false, eager = false } = Astro.props;
+const { title, image, imageAlt } = entry.data;
+---
+
+<a class:list={['tile', `tile-${size}`]} href={`/work/${entry.id}/`}>
+  <div class="tile-media">
+    {
+      image ? (
+        <Image src={image} alt={imageAlt ?? ''} widths={[400, 720, 1080, 1440]} sizes={sizes} loading={eager ? 'eager' : 'lazy'} />
+      ) : (
+        <div class="tile-fallback" aria-hidden="true">
+          <span>{title}</span>
+        </div>
+      )
+    }
+  </div>
+  <span class="tile-caption">
+    <span class="tile-title">{title}</span>
+    <span class="tile-meta">{workCaption(entry.data)}</span>
+    {summary && <span class="tile-summary">{entry.data.summary}</span>}
+  </span>
+</a>
+
+<style>
+  .tile {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    min-width: 0;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .tile-media {
+    position: relative;
+    overflow: clip;
+    border-radius: 16px;
+    background: var(--tile);
+    container-type: inline-size;
+  }
+
+  .tile-stack .tile-media {
+    aspect-ratio: 288 / 187;
+  }
+
+  .tile-full .tile-media {
+    aspect-ratio: 720 / 400;
+  }
+
+  .tile-half .tile-media {
+    aspect-ratio: 352 / 260;
+  }
+
+  /* Home: the featured tile spans both rows and its image fills the height. */
+  .tile-feature {
+    grid-row: span 2;
+  }
+
+  .tile-feature .tile-media {
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* Canvas: the featured image is a fixed 420 tall and the stacked images
+     split whatever height that leaves, so the stack never drives the row. */
+  @media (min-width: 48rem) {
+    .tile-feature .tile-media {
+      flex: none;
+      height: 420px;
+    }
+
+    .tile-stack .tile-media {
+      flex: 1;
+      min-height: 0;
+      aspect-ratio: auto;
+    }
+  }
+
+  .tile-full {
+    grid-column: 1 / -1;
+  }
+
+  .tile-media img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 240ms var(--ease-out);
+  }
+
+  @media (hover: hover) {
+    .tile:hover img {
+      transform: scale(1.02);
+    }
+  }
+
+  .tile-fallback {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-end;
+    padding: 1.75rem;
+  }
+
+  /* 72px across 720, 44px across 352. */
+  .tile-fallback span {
+    font-family: var(--font-serif);
+    font-size: clamp(1.5rem, 7.6cqi + 1.075rem, 4.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+  }
+
+  .tile-caption {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 0.25rem 1rem;
+  }
+
+  .tile-title {
+    font-family: var(--font-serif);
+    font-size: 1.125rem;
+    line-height: 1.3;
+  }
+
+  .tile-full .tile-title,
+  .tile-half .tile-title {
+    font-size: 1.25rem;
+  }
+
+  .tile-meta {
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tile-summary {
+    grid-column: 1 / -1;
+    color: var(--muted);
+    font-size: 0.8125rem;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 47.9375rem) {
+    .tile {
+      gap: 0.5rem;
+    }
+
+    .tile-media {
+      border-radius: 12px;
+    }
+
+    .tile-feature {
+      grid-row: auto;
+      grid-column: 1 / -1;
+    }
+
+    .tile-feature .tile-media {
+      flex: none;
+      aspect-ratio: 350 / 240;
+    }
+
+    .tile-stack .tile-media {
+      aspect-ratio: 169 / 130;
+    }
+
+    .tile-caption {
+      grid-template-columns: 1fr;
+      gap: 0.125rem;
+    }
+
+    .tile-title {
+      font-size: 1rem;
+    }
+
+    .tile-meta {
+      font-size: 0.625rem;
+    }
+  }
+</style>

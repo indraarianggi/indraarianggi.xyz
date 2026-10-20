@@ -8,8 +8,9 @@ stack: [TypeScript, SQLite, Astro]
 repository: https://example.com/atlas-index
 featured: true
 draft: false
-image: ./atlas-index-cover.png
-imageAlt: Poster-style cover with a black column, a red field, and two rules on warm paper
+# AI stand-in until a real screenshot exists (design doc, open items).
+image: ./atlas-index-showcase.png
+imageAlt: A laptop on a linen-covered table showing a document search window, beside a mug and a potted plant in window light
 ---
 
 *Placeholder project. Replace this entry with real material before publishing.*
