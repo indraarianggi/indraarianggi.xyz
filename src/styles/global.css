@@ -70,8 +70,9 @@ html {
   scroll-padding-top: 2rem;
 }
 
+/* Contents links scroll smoothly; reduced motion keeps the instant jump. */
 @media (prefers-reduced-motion: no-preference) {
-  html:focus-within {
+  html {
     scroll-behavior: smooth;
   }
 }

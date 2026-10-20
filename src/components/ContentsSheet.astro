@@ -41,7 +41,7 @@ const { tree } = Astro.props;
       }).observe(sentinel);
     }
 
-    let jumped = false;
+    let jumpTo: string | undefined;
     pill.addEventListener('click', () => sheet.showModal());
     sheet.querySelector('[data-contents-close]')?.addEventListener('click', () => sheet.close());
 
@@ -49,16 +49,30 @@ const { tree } = Astro.props;
       const target = event.target as Element;
       // The body fills the dialog, so a click on the dialog itself is the backdrop.
       if (target === sheet) sheet.close();
-      if (target.closest('a')) {
-        jumped = true;
+      const link = target.closest('a');
+      if (link) {
+        // Hold the jump until the sheet has slid away, so the scroll is not fighting it.
+        event.preventDefault();
+        jumpTo = link.hash;
         sheet.close();
       }
     });
 
     // Focus goes back to the pill, unless the reader jumped to a section.
-    sheet.addEventListener('close', () => {
-      if (!jumped) pill.focus({ preventScroll: true });
-      jumped = false;
+    sheet.addEventListener('close', async () => {
+      const hash = jumpTo;
+      jumpTo = undefined;
+      if (!hash) {
+        pill.focus({ preventScroll: true });
+        return;
+      }
+      await Promise.race([
+        Promise.allSettled(sheet.getAnimations().map((animation) => animation.finished)),
+        new Promise((resolve) => setTimeout(resolve, 400)),
+      ]);
+      // A real fragment navigation: updates the URL, moves the focus starting
+      // point to the heading, and follows the page's scroll-behavior.
+      location.hash = hash;
     });
   }
 </script>
@@ -90,6 +104,11 @@ const { tree } = Astro.props;
     visibility: hidden;
     opacity: 0;
     transform: translateY(8px);
+  }
+
+  /* The bg halo fills the offset gap, so the ring reads over dark content as well as the page. */
+  .pill:focus-visible {
+    box-shadow: 0 0 0 3px var(--bg);
   }
 
   .pill:active {
