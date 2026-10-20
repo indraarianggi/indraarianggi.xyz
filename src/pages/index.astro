@@ -149,9 +149,10 @@ const index = groupByYear(rows, (row) => row.date);
     text-underline-offset: 0.2em;
   }
 
+  /* Canvas: a 28px block gap plus 44px section padding puts 72px between sections. */
   .selected,
   .garden {
-    padding-block-start: 1rem;
+    padding-block-start: 2.75rem;
   }
 
   .section-head {
@@ -207,6 +208,16 @@ const index = groupByYear(rows, (row) => row.date);
 
     .tended {
       font-size: 0.6875rem;
+    }
+
+    .section-head {
+      margin-block-end: 0.875rem;
+    }
+
+    /* Canvas: 24 gap plus 24 padding on mobile. */
+    .selected,
+    .garden {
+      padding-block-start: 1.5rem;
     }
 
     .bento {

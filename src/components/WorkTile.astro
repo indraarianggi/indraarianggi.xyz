@@ -132,10 +132,11 @@ const { title, image, imageAlt } = entry.data;
     gap: 0.25rem 1rem;
   }
 
+  /* The canvas sets serif captions on a ~1.0 line box; 1.1 stays safe if one wraps. */
   .tile-title {
     font-family: var(--font-serif);
     font-size: 1.125rem;
-    line-height: 1.3;
+    line-height: 1.1;
   }
 
   .tile-full .tile-title,
@@ -187,10 +188,12 @@ const { title, image, imageAlt } = entry.data;
 
     .tile-title {
       font-size: 1rem;
+      line-height: 1.05;
     }
 
     .tile-meta {
       font-size: 0.625rem;
+      line-height: 1.3;
     }
   }
 </style>

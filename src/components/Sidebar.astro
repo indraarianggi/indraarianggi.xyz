@@ -102,6 +102,11 @@ const { pathname } = Astro.url;
     list-style: none;
   }
 
+  /* A flex item has no line-box strut, so the link alone sets each row's height. */
+  .nav li {
+    display: flex;
+  }
+
   .nav-link {
     display: inline-flex;
     align-items: center;
@@ -184,13 +189,18 @@ const { pathname } = Astro.url;
   /* Mobile: identity, then the always-visible nav row. No hamburger. */
   @media (max-width: 47.9375rem) {
     .sidebar {
-      padding-block: 0.875rem 0;
+      padding-block: 0.875rem 0.75rem;
     }
 
     .sidebar-inner {
       flex-direction: column;
       align-items: stretch;
-      gap: 0.25rem;
+      gap: 0.75rem;
+    }
+
+    /* Keep the 44px hit area but lay out at the text's 17px, as the canvas does. */
+    .nav-link {
+      margin-block: -0.84375rem;
     }
 
     /* A stretched column would spread the identity and nav tracks across the row. */

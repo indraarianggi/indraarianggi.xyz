@@ -39,6 +39,15 @@
   :root {
     --gutter: 1.25rem;
   }
+
+  .label,
+  .section-label {
+    font-size: 0.6875rem;
+  }
+
+  .section-label {
+    padding-block-end: 0.5rem;
+  }
 }
 
 /* ---- Base ---- */
@@ -166,7 +175,7 @@ img {
   font-family: var(--font-mono);
   font-size: 0.75rem;
   font-weight: 400;
-  line-height: 1.4;
+  line-height: 1.33;
   font-variant-numeric: tabular-nums;
 }
 
@@ -174,7 +183,7 @@ img {
   font-family: var(--font-mono);
   font-size: 0.75rem;
   font-weight: 400;
-  line-height: 1.4;
+  line-height: 1.33;
   padding-block-end: 0.625rem;
   border-block-end: 1px solid var(--ink);
 }
@@ -479,6 +488,8 @@ img {
 /* ---- Code blocks (header added by src/lib/code-block.ts) ---- */
 
 .prose .code-block {
+  /* Canvas: the code block shares the 620 prose column; images keep 720. */
+  max-width: var(--measure);
   margin-block-start: 1.5rem;
   padding: 1.125rem 1.25rem;
   border-radius: 12px;
