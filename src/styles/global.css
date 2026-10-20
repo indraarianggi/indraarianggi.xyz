@@ -272,6 +272,7 @@ img {
   }
 
   .page > main {
+    grid-column: 1;
     grid-row: 2;
     padding-block: 3rem 5rem;
   }
@@ -281,6 +282,7 @@ img {
   }
 
   .page > .site-footer {
+    grid-column: 1;
     grid-row: 3;
   }
 

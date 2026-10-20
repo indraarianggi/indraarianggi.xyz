@@ -191,5 +191,11 @@ const { pathname } = Astro.url;
       align-items: stretch;
       gap: 0.25rem;
     }
+
+    /* A stretched column would spread the identity and nav tracks across the row. */
+    .identity,
+    .nav {
+      justify-content: start;
+    }
   }
 </style>
