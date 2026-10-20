@@ -1,0 +1,45 @@
+---
+type Props = {
+  title: string;
+  intro: string;
+};
+
+const { title, intro } = Astro.props;
+---
+
+<header class="page-header">
+  <h1 class="page-title">{title}</h1>
+  <p class="page-intro">{intro}</p>
+</header>
+
+<style>
+  .page-header {
+    display: grid;
+    gap: 0.625rem;
+  }
+
+  .page-title {
+    font-family: var(--font-serif);
+    font-size: 2.5rem;
+    line-height: 1.1;
+    letter-spacing: -0.05rem;
+  }
+
+  .page-intro {
+    max-width: var(--measure);
+    color: var(--muted);
+    font-family: var(--font-serif);
+    font-size: 1.125rem;
+    line-height: 1.45;
+  }
+
+  @media (max-width: 47.9375rem) {
+    .page-title {
+      font-size: 2rem;
+    }
+
+    .page-intro {
+      font-size: 1.0625rem;
+    }
+  }
+</style>
