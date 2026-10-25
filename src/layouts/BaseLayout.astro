@@ -1,4 +1,5 @@
 ---
+import CloudflareAnalytics from '../components/CloudflareAnalytics.astro';
 import SeoHead from '../components/SeoHead.astro';
 import Sidebar from '../components/Sidebar.astro';
 import SiteFooter from '../components/SiteFooter.astro';
@@ -36,6 +37,7 @@ const hasRail = Astro.slots.has('rail');
     <!-- Lets CSS hide play-on-view content only when a script will reveal it. -->
     <script is:inline>document.documentElement.classList.add('js');</script>
     <SeoHead title={title} description={description} path={path} image={image} article={article} />
+    <CloudflareAnalytics />
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to content</a>

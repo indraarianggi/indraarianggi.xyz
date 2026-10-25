@@ -14,6 +14,8 @@ name: Deploy
 # Optional repository variables:
 #   SITE_URL     public origin baked into canonical URLs, sitemap, and feed
 #   DEPLOY_HOST  tunnel hostname routed to sshd on the server
+#   CF_WEB_ANALYTICS_TOKEN  Cloudflare Web Analytics site token; analytics stay
+#                           off when unset
 #
 # See deploy/README.md for the full runbook.
 
@@ -32,6 +34,7 @@ permissions:
 
 env:
   SITE_URL: ${{ vars.SITE_URL || 'https://indraarianggi.xyz' }}
+  PUBLIC_CF_WEB_ANALYTICS_TOKEN: ${{ vars.CF_WEB_ANALYTICS_TOKEN }}
   DEPLOY_HOST: ${{ vars.DEPLOY_HOST || 'ssh.indraarianggi.xyz' }}
   DEPLOY_USER: deploy
   CLOUDFLARED_VERSION: '2026.9.1'
